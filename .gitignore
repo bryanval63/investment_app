@@ -1,0 +1,23 @@
+# global
+node_modules
+.env
+*.log
+
+# frontend
+investment-dashboard/node_modules
+investment-dashboard/build
+investment-dashboard/dist
+
+# backend
+investments-app/node_modules
+investments-app/dist
+
+shared/dist
+
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store

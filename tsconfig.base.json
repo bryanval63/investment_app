@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@investments/shared": ["shared/src/index.ts"],
+      "@investments/shared/*": ["shared/src/*"]
+    }
+  }
+}

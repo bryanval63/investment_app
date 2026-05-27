@@ -1,0 +1,15 @@
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 8px solid transparent;
+  border-right-color: var(--foreground);
+  border-left-color: var(--foreground);
+  animation: l1 1s infinite;
+  height: fit-content;
+}
+@keyframes l1 {
+  to {
+    transform: rotate(0.5turn);
+  }
+}

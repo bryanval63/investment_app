@@ -1,0 +1,6 @@
+-- CreateTable
+CREATE TABLE "Taxe" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "amount" DECIMAL NOT NULL DEFAULT 0,
+    "year" INTEGER NOT NULL
+);

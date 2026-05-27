@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum IncomeType {
+  SALARY
+  PEE
+  RESTAURANT_TICKETS
+  BONUS
+  APL
+  PARKING_RENT
+  SCPI
+}
+
+model IncomeTypeRef {
+  id Int @default(autoincrement()) @id
+  code IncomeType @unique
+  label String 
+  incomes Income[]
+}
+
+model Income {
+  id Int @default(autoincrement()) @id
+  type IncomeTypeRef @relation(fields: [typeId], references: [id])
+  typeId  Int
+  amount Decimal @default(0)
+  date DateTime
+}
+
+model Tax {
+  id Int @default(autoincrement()) @id
+  amount Decimal @default(0)
+  year Int
+}
+
+enum InvestmentType {
+  LIFE_INSURANCE
+  PEA
+  CRYPTO
+  SCPI
+  PEE
+}
+
+enum InvestmentCategory {
+  STOCK
+  SCPI
+  CRYPTO
+  OTHER
+  ALL
+}
+
+model InvestmentTypeRef {
+  id Int @default(autoincrement()) @id
+  code InvestmentType @unique
+  label String 
+  accounts Account[]
+}
+
+model Account {
+  id Int @default(autoincrement()) @id
+  type InvestmentTypeRef @relation(fields: [typeId], references: [id])
+  typeId Int
+  name String
+  investments Investment[]
+  category InvestmentCategory @default(STOCK)
+}
+
+model Investment {
+  id Int @default(autoincrement()) @id
+  account Account @relation(fields: [accountId], references: [id])
+  accountId Int
+  totalAmount Decimal @default(0)
+  capitalGain Decimal @default(0)
+  transactionAmount Decimal @default(0)
+  date DateTime
+}
+
+model NetWorth {
+  id Int @default(autoincrement()) @id
+  amount Decimal @default(0)
+  date DateTime
+}
