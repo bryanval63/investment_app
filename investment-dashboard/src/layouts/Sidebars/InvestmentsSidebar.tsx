@@ -25,6 +25,11 @@ export const InvestmentsSidebar = () => {
       icon: <PiggyBank />,
     },
     {
+      title: "Ajouter un compte",
+      link: "/investments/add-account",
+      icon: <Plus />,
+    },
+    {
       title: "Ajouter un investissement",
       link: "/investments/add",
       icon: <Plus />,

@@ -8,6 +8,7 @@ import { IncomesOverview } from "./pages/incomes/IncomesOverview";
 import { IncomesData } from "./pages/incomes/IncomesData";
 import { InvestmentsOverview } from "./pages/investments/InvestmentsOverview";
 import { InvestmentsAdd } from "./pages/investments/InvestmentsAdd";
+import { InvestmentsAddAccount } from "./pages/investments/InvestmentsAddAccount";
 import { InvestmentsTotalGains } from "./pages/investments/InvestmentsTotalGains";
 import { InvestmentsPerformances } from "./pages/investments/InvestmentsPerformances";
 import { InvestmentsAccounts } from "./pages/investments/InvestmentsAccounts";
@@ -62,6 +63,10 @@ export const router = createBrowserRouter([
           {
             Component: InvestmentsAdd,
             path: "add",
+          },
+          {
+            Component: InvestmentsAddAccount,
+            path: "add-account",
           },
           {
             Component: InvestmentsTotalGains,
