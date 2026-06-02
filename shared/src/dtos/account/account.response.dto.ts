@@ -6,4 +6,5 @@ export interface AccountResponseDto {
   category: InvestmentCategory;
   name: string;
   type: InvestmentType;
+  isClosed: boolean;
 }

@@ -73,6 +73,7 @@ model Account {
   name String
   investments Investment[]
   category InvestmentCategory @default(STOCK)
+  isClosed Boolean @default(false)
 }
 
 model Investment {

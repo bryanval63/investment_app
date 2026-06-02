@@ -8,9 +8,6 @@ import { InvestmentsBarChartAccountProps } from "@/features/investments/charts/a
 import { InvestmentsYearlyBarChartAccount } from "@/features/investments/charts/accounts/InvestmentsYearlyBarChartAccount";
 import { InvestmentsAccountsCards } from "@/features/investments/InvestmentsAccountsCards/InvestmentsAccountsCards";
 
-const BOURSO_CODE = "10";
-const HSBC_CODE = "11";
-
 export const InvestmentsAccounts = () => {
   const [accountId, setAccountId] = useState<number>(1);
 
@@ -20,9 +17,10 @@ export const InvestmentsAccounts = () => {
   });
 
   const mappedAccounts =
-    accounts?.map(({ id, name }) => ({
+    accounts?.map(({ id, name, isClosed }) => ({
       code: id.toString(),
       label: name,
+      isClosed,
     })) || [];
 
   return (
@@ -31,9 +29,7 @@ export const InvestmentsAccounts = () => {
         <CustomSelect
           value={accountId.toString()}
           onValueChange={(accountId) => setAccountId(Number(accountId))}
-          options={mappedAccounts.filter(
-            (acc) => acc.code !== BOURSO_CODE && acc.code !== HSBC_CODE,
-          )}
+          options={mappedAccounts.filter((acc) => !acc.isClosed)}
         />
       </div>
 

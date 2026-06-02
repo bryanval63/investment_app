@@ -6,10 +6,8 @@ import {
   formatToReadableDate,
 } from "@/utils/format.utils";
 import { type InvestmentOverviewResponseDto } from "@investments/shared";
-import { Card } from "@/components/ui/card";
 import chartImg from "@/assets/img/chart_v2.png";
-import { getColorAndBgColor } from "@/utils/style.utils";
-import { Separator } from "@/components/ui/separator";
+import { SummaryCard } from "@/components/custom/SummaryCard/SummaryCard";
 
 type InvestmentsOverviewCardsProps = {
   investmentsOverview: InvestmentOverviewResponseDto | undefined;
@@ -37,11 +35,6 @@ export const InvestmentsOverviewCards = ({
     ? new Date(investmentsOverview?.bestMonth.date)
     : new Date();
 
-  const formattedTotalAmount = formatToEuro(totalAmount);
-  const formattedTotalCapitalGain = formatToEuro(totalCapitalGain, {
-    signDisplay: "always",
-  });
-  const formattedTotalPerf = formatToPercentage(totalPerf);
   const formattedTotalMonthAvg = formatToEuro(totalMonthAvg);
   const formattedAvgYearlyPerf = formatToPercentage(avgYearlyPerf);
   const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
@@ -62,37 +55,14 @@ export const InvestmentsOverviewCards = ({
   return (
     <div className="flex items-center gap-8">
       <div className="w-1/2">
-        <Card className="w-fit m-auto px-16">
-          <div className="flex items-center">
-            <img src={chartImg} alt="chart" width="250" height="250" />
-
-            <div className="flex flex-col gap-4 p-6">
-              <span className="text-md text-slate-500">
-                Valeur totale du portefeuille
-              </span>
-
-              <Separator />
-
-              <div className="text-4xl font-semibold text-slate-900">
-                {formattedTotalAmount}
-              </div>
-
-              <div className="flex items-center gap-8 flex-wrap">
-                <span
-                  className={`text-xl font-normal text-white py-1 px-2 rounded-2xl ${getColorAndBgColor(totalCapitalGain, true, true)}`}
-                >
-                  {formattedTotalCapitalGain}
-                </span>
-
-                <StatValue
-                  value={totalPerf}
-                  formatted={formattedTotalPerf}
-                  style="text-md"
-                />
-              </div>
-            </div>
-          </div>
-        </Card>
+        <SummaryCard
+          totalAmount={totalAmount}
+          totalCapitalGain={totalCapitalGain}
+          totalPerf={totalPerf}
+          img={chartImg}
+          cardStyle="w-fit m-auto "
+          title="Valeur totale du portefeuille"
+        />
       </div>
 
       <div className="w-1/2 grid grid-cols-3 gap-8">

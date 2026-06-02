@@ -5,7 +5,7 @@ import { AccountModule } from './modules/account/account.module';
 import { InvestmentModule } from './modules/investment/investment.module';
 import { TaxModule } from './modules/tax/tax.module';
 import { IncomeTypeRefModule } from './modules/income-type-ref/income-type-ref.module';
-import { NetWorthModule } from './net-worth/net-worth.module';
+import { NetWorthModule } from './modules/net-worth/net-worth.module';
 
 @Module({
   imports: [

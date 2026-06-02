@@ -18,12 +18,16 @@ export const PerfByAccountsChart = ({
     queryFn: getAccountsApi,
   });
 
+  const accountsById = new Map(
+    accounts?.map((account) => [account.id, account]) ?? [],
+  );
+
   const chartData =
     perfByAccounts
-      ?.filter((account) => ![10, 11].includes(account.id))
+      ?.filter((account) => !accountsById.get(account.id)?.isClosed)
       .map(({ id, value }) => {
         return {
-          yAxis: accounts?.find((account) => account.id === id)?.name || 0,
+          yAxis: accountsById.get(id)?.name || 0,
           xAxis: value,
         };
       }) ?? [];
