@@ -1,4 +1,4 @@
-import { InvestmentType } from ".prisma/client";
+import type { InvestmentType } from ".prisma/client";
 
 export interface InvestmentTypeRefResponseDto {
   id: number;

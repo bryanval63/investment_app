@@ -1,4 +1,4 @@
-import { IncomeType } from "../../types/income.type";
+import type { IncomeType } from "../../types/income.type";
 
 type IncomeTypeWithLabel = {
   code: IncomeType;

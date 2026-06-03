@@ -1,4 +1,4 @@
-import { InvestmentCategory } from "../../types/investments.type";
+import type { InvestmentCategory } from "../../types/investments.type";
 
 interface InvestmentTotalByMonthResponseDto {
   amount: number;

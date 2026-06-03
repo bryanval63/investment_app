@@ -1,5 +1,5 @@
-import { InvestmentCategory } from "../../types/investments.type";
-import { InvestmentType } from ".prisma/client";
+import type { InvestmentCategory } from "../../types/investments.type";
+import type { InvestmentType } from ".prisma/client";
 
 export interface CreateAccountRequestDto {
   name: string;
