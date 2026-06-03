@@ -3,7 +3,9 @@ export async function api<T>(
   url: string,
   body?: unknown,
 ): Promise<T> {
-  const res = await fetch(`http://localhost:3000/${url}`, {
+  const baseUrl = import.meta.env?.VITE_API_URL || "";
+
+  const res = await fetch(`${baseUrl}/${url}`, {
     headers: { "Content-Type": "application/json" },
     method,
     body: body ? JSON.stringify(body) : undefined,
