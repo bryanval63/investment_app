@@ -9,5 +9,5 @@ export const MainContainer = ({
   children,
   columns = 2,
 }: MainContainerProps) => {
-  return <div className={`grid grid-cols-${columns} gap-8`}>{children}</div>;
+  return <div className={`flex flex-col md:grid md:grid-cols-${columns} gap-2 md:gap-8`}>{children}</div>;
 };

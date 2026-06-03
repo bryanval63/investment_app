@@ -23,7 +23,7 @@ export const InvestmentsOverview = () => {
   });
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-2 md:gap-8">
       <InvestmentsOverviewCards investmentsOverview={investmentsOverview} />
       <Separator />
 
@@ -50,9 +50,9 @@ export const InvestmentsOverview = () => {
         />
       </MainContainer>
 
-      <Separator />
+      <Separator className="hidden md:block" />
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-2 md:gap-8">
         <PerfByAccountsChart
           perfByAccounts={investmentsOverview?.perfByAccount}
         />

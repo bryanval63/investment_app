@@ -1,27 +1,21 @@
 export const findLastItemByDate = <T extends { date: Date }>(items: T[]): T => {
-  return items.reduce(
-    (latest, current) => {
-      const currentDate = new Date(current.date).getTime();
-      const latestDate = new Date(latest.date).getTime();
+  return items.reduce((latest, current) => {
+    const currentDate = new Date(current.date).getTime();
+    const latestDate = new Date(latest.date).getTime();
 
-      return currentDate > latestDate ? current : latest;
-    },
-    new Date(0) as unknown as T,
-  );
+    return currentDate > latestDate ? current : latest;
+  });
 };
 
 export const findFirstItemByDate = <T extends { date: Date }>(
   items: T[],
 ): T => {
-  return items.reduce(
-    (first, current) => {
-      const currentDate = new Date(current.date).getTime();
-      const firstDate = new Date(first.date).getTime();
+  return items.reduce((first, current) => {
+    const currentDate = new Date(current.date).getTime();
+    const firstDate = new Date(first.date).getTime();
 
-      return currentDate < firstDate ? current : first;
-    },
-    new Date(0) as unknown as T,
-  );
+    return currentDate < firstDate ? current : first;
+  });
 };
 
 export const findSecondLastItemByDate = <T extends { date: Date }>(

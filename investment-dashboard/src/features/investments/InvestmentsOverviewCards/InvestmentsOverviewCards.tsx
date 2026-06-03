@@ -53,19 +53,19 @@ export const InvestmentsOverviewCards = ({
   );
 
   return (
-    <div className="flex items-center gap-8">
-      <div className="w-1/2">
+    <div className="flex flex-col md:flex-row items-center gap-2 md:gap-8">
+      <div className="w-full md:w-1/2">
         <SummaryCard
           totalAmount={totalAmount}
           totalCapitalGain={totalCapitalGain}
           totalPerf={totalPerf}
           img={chartImg}
-          cardStyle="w-fit m-auto "
+          cardStyle="md:w-fit md:m-auto"
           title="Valeur totale du portefeuille"
         />
       </div>
 
-      <div className="w-1/2 grid grid-cols-3 gap-8">
+      <div className="w-full md:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-8">
         <CardContainer
           title="Moyenne annuelle des performances"
           cardStyle="justify-evenly "
@@ -88,7 +88,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Meilleure performance mensuelle"
-          cardStyle="justify-evenly"
+          cardStyle="justify-evenly order-5 md:order-none"
         >
           <div className="flex flex-col gap-4 items-center capitalize">
             {formattedBestMonthDate}
