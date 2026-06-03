@@ -1,7 +1,7 @@
 import type { IncomeType } from "../../types/income.type";
 
 type IncomeTypeWithLabel = {
-  code: IncomeType;
+  code: keyof typeof IncomeType;
   label: string;
 };
 

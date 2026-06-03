@@ -14,4 +14,8 @@ export default defineConfig({
       "@investments/shared/*": path.resolve(__dirname, "../shared/src/*"),
     },
   },
+  optimizeDeps: {
+    // On interdit à Vite d'essayer d'analyser ou d'embarquer Prisma dans le navigateur
+    exclude: ["@prisma/client", ".prisma/client"],
+  },
 });
