@@ -1,6 +1,5 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { MainLayout } from "./layouts/MainLayout";
-import { Dashboard } from "./pages/Dashboard";
 import { IncomesSidebar } from "./layouts/Sidebars/IncomesSidebar";
 import { InvestmentsSidebar } from "./layouts/Sidebars/InvestmentsSidebar";
 import { IncomesAdd } from "./pages/incomes/IncomesAdd";
@@ -21,10 +20,13 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: MainLayout,
+    handle: {
+      sidebar: InvestmentsSidebar,
+    },
     children: [
       {
         index: true,
-        Component: Dashboard,
+        Component: () => <Navigate to="/investments" replace />,
       },
       {
         path: "incomes",

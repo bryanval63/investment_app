@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: investments-app/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - sqlite_data:/app/data
+    environment:
+      - DATABASE_URL="file:/app/data/dev.db"
+      - NODE_ENV=production
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: investment-dashboard/Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - backend
+
+volumes:
+  sqlite_data:
