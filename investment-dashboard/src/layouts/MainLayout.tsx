@@ -13,8 +13,8 @@ export const MainLayout = () => {
     <div className="h-screen bg-linear-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 from-slate-50 via-slate-200 to-slate-50 flex flex-col overflow-hidden">
       <Header />
 
-      <div className="flex flex-1 p-8 gap-8 justify-between overflow-hidden">
-        <aside className="w-80">
+      <div className="flex flex-1 p-4 gap-4 md:p-8 md:gap-8 justify-between overflow-hidden flex-col md:flex-row">
+        <aside className="md:w-80">
           <Card className="h-full futuristic-card futuristic-border p-8">
             {Sidebar && <Sidebar />}
           </Card>
