@@ -1,4 +1,4 @@
-import { InvestmentCategory } from "@investments/shared/types/investments.type";
+import { InvestmentCategory } from "../../types/investments.type";
 import { InvestmentType } from ".prisma/client";
 
 export interface CreateAccountRequestDto {
