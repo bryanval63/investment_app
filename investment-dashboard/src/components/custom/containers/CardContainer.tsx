@@ -17,8 +17,8 @@ export const CardContainer = ({
     <Card className={cardStyle}>
       <CardHeader>
         <div className="flex flex-col gap-4">
-          <CardTitle>{title}</CardTitle>
-          <Separator />
+          <CardTitle className="text-sm md:text-base">{title}</CardTitle>
+          <Separator className="hidden md:block" />
         </div>
       </CardHeader>
       <CardContent>{children}</CardContent>

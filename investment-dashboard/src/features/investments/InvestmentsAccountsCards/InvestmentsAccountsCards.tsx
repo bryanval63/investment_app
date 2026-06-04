@@ -38,7 +38,7 @@ export const InvestmentsAccountsCards = ({
   const formattedPerformance = formatToPercentage(performance);
 
   return (
-    <div className="flex flex-col md:flex-row gap-2 md:gap-8 md:justify-center md:items-center">
+    <div className="flex flex-col md:flex-row gap-3 md:gap-8 md:justify-center md:items-center">
       <SummaryCard
         totalAmount={amount}
         totalCapitalGain={capitalGain}
@@ -47,7 +47,7 @@ export const InvestmentsAccountsCards = ({
         title="Valeur totale du compte"
       />
 
-      <div className="flex flex-col md:flex-row gap-2 md:gap-8">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-8">
         <CardContainer title="Performance du mois">
           <div className="flex flex-col flex-wrap">
             <StatValue

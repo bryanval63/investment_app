@@ -52,8 +52,10 @@ export const InvestmentsOverviewCards = ({
     bestMonthDate || new Date(),
   );
 
+  const cardContainerStyle = "justify-between md:justify-evenly";
+
   return (
-    <div className="flex flex-col md:flex-row items-center gap-2 md:gap-8">
+    <div className="flex flex-col md:flex-row items-center gap-3 md:gap-8">
       <div className="w-full md:w-1/2">
         <SummaryCard
           totalAmount={totalAmount}
@@ -65,10 +67,10 @@ export const InvestmentsOverviewCards = ({
         />
       </div>
 
-      <div className="w-full md:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-8">
+      <div className="w-full md:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
         <CardContainer
           title="Moyenne annuelle des performances"
-          cardStyle="justify-evenly "
+          cardStyle={cardContainerStyle}
         >
           <StatValue
             value={avgYearlyPerf}
@@ -78,7 +80,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Performance de l'année en cours"
-          cardStyle="justify-evenly"
+          cardStyle={cardContainerStyle}
         >
           <StatValue
             value={currentYearPerf}
@@ -88,7 +90,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Meilleure performance mensuelle"
-          cardStyle="justify-evenly order-5 md:order-none"
+          cardStyle={`${cardContainerStyle} order-5 md:order-none`}
         >
           <div className="flex flex-col gap-4 items-center capitalize">
             {formattedBestMonthDate}
@@ -108,7 +110,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Moyenne mensuelle des revenus"
-          cardStyle="justify-evenly"
+          cardStyle={cardContainerStyle}
         >
           <StatValue
             value={totalMonthAvg}
@@ -118,7 +120,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Gain de l'année en cours"
-          cardStyle="justify-evenly"
+          cardStyle={cardContainerStyle}
         >
           <StatValue
             value={currentYearCapitalGain}
@@ -129,7 +131,7 @@ export const InvestmentsOverviewCards = ({
 
         <CardContainer
           title="Pire performance mensuelle"
-          cardStyle="justify-evenly"
+          cardStyle={cardContainerStyle}
         >
           <div className="flex flex-col gap-4 items-center capitalize">
             {formattedWorstMonthDate}

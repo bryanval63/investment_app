@@ -47,7 +47,7 @@ export const SummaryCard = ({
             {formattedTotalAmount}
           </div>
 
-          <div className="flex items-center gap-2 md:gap-8 flex-wrap">
+          <div className="flex items-center gap-3 md:gap-8 flex-wrap">
             <span
               className={`text-xl font-normal text-white py-1 px-2 rounded-2xl ${getColorAndBgColor(totalCapitalGain, true, true)}`}
             >
