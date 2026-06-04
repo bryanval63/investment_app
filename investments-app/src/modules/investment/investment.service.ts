@@ -506,8 +506,37 @@ export class InvestmentService {
   }
 
   async createAll(investments: InvestmentRequestDto[]): Promise<void> {
-    await this.prisma.investment.createMany({
-      data: investments,
-    });
+    for (const {
+      accountId,
+      date,
+      capitalGain,
+      totalAmount,
+      transactionAmount,
+    } of investments) {
+      const existing = await this.prisma.investment.findFirst({
+        where: {
+          accountId: accountId,
+          date: date,
+        },
+      });
+
+      const investment = {
+        capitalGain,
+        totalAmount,
+        transactionAmount,
+        date,
+      };
+
+      if (existing) {
+        await this.prisma.investment.update({
+          where: { id: existing.id },
+          data: investment,
+        });
+      } else {
+        await this.prisma.investment.create({
+          data: { ...investment, accountId },
+        });
+      }
+    }
   }
 }
