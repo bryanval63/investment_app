@@ -9,10 +9,14 @@ export const formatToEuro = (
   }).format(amount);
 };
 
-export const formatToPercentage = (value: number) => {
+export const formatToPercentage = (
+  value: number,
+  options?: Intl.NumberFormatOptions,
+) => {
   return new Intl.NumberFormat("fr-FR", {
     style: "percent",
     minimumFractionDigits: 2,
+    ...options,
   }).format(value);
 };
 

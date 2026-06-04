@@ -10,6 +10,7 @@ import {
 import { CustomTooltip } from "../CustomTooltip/CustomTooltip";
 import type { CustomChartUnit } from "../custom-chart.type";
 import { getTickFormatterYAxis } from "../custom-chart.utils";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type CustomAreaChartProps<T> = {
   chartData: T[];
@@ -22,12 +23,19 @@ export function CustomAreaChart<T>({
   chartData,
   unit = "eur",
 }: CustomAreaChartProps<T>) {
+  const isMobile = useIsMobile();
+  const margin = isMobile ? 0 : 12;
+
   return (
     <ChartContainer config={chartConfig} className="h-70 w-full">
       <AreaChart
         accessibilityLayer
         data={chartData}
-        margin={{ left: 12, right: 12, top: 12 }}
+        margin={{
+          left: margin,
+          right: margin,
+          top: margin,
+        }}
       >
         <CartesianGrid vertical={false} />
         <XAxis
@@ -40,7 +48,8 @@ export function CustomAreaChart<T>({
           tickLine={false}
           tickCount={6}
           axisLine={false}
-          tickFormatter={getTickFormatterYAxis(unit)}
+          tickFormatter={getTickFormatterYAxis(unit, isMobile)}
+          width={45}
         />
         <Area dataKey="yAxis" type="natural" fillOpacity={0.4} stackId="a" />
         <Tooltip content={<CustomTooltip unit={unit} />} />

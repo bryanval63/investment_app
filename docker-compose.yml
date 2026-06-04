@@ -19,10 +19,15 @@ services:
       context: .
       dockerfile: investment-dashboard/Dockerfile
     ports:
-      - "80:80"
+      - "8443:8443"
     restart: always
     depends_on:
       - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      # 👈 On injecte les certificats générés par Tailscale sur ton mini-PC dans le conteneur :
+      - /home/bryan/certificates/bryannas.tail3a42eb.ts.net.crt:/etc/nginx/ssl/dashboard.crt
+      - /home/bryan/certificates/bryannas.tail3a42eb.ts.net.key:/etc/nginx/ssl/dashboard.key
 
 volumes:
   sqlite_data:

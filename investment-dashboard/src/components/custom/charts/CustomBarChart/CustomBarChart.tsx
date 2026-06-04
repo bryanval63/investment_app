@@ -13,7 +13,8 @@ import { CustomTooltip } from "../CustomTooltip/CustomTooltip";
 import type { CustomBarChartAxis } from "./custom-bar-chart.type";
 import type { CustomChartUnit } from "../custom-chart.type";
 import { getTickFormatterYAxis } from "../custom-chart.utils";
-import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { BarLabel } from "./BarLabel";
 
 type CustomBarChartProps<T> = {
   chartData: T[];
@@ -32,6 +33,8 @@ export function CustomBarChart<T>({
   unit = "eur",
   displayLabels = false,
 }: CustomBarChartProps<T>) {
+  const isMobile = useIsMobile();
+
   const isVertical = barLayout === "vertical";
 
   const typeXAxis = isVertical ? "number" : "category";
@@ -41,11 +44,13 @@ export function CustomBarChart<T>({
 
   const tickFormatterYAxis = isVertical
     ? undefined
-    : getTickFormatterYAxis(unit);
+    : getTickFormatterYAxis(unit, isMobile);
 
   const getBarColor = (value: number) => {
     return value < 0 ? "var(--destructive)" : "var(--chart-2)";
   };
+
+  const width = isMobile && isVertical ? 70 : !isMobile && isVertical ? 60 : 50;
 
   return (
     <ChartContainer config={chartConfig} className="h-70 w-full">
@@ -53,7 +58,10 @@ export function CustomBarChart<T>({
         accessibilityLayer
         data={chartData}
         layout={barLayout}
-        margin={{ left: isVertical ? 40 : 12, right: 12 }}
+        margin={{
+          left: isMobile ? 0 : isVertical ? 40 : 12,
+          right: isMobile ? 0 : 12,
+        }}
       >
         <CartesianGrid vertical={false} />
         <XAxis
@@ -70,6 +78,7 @@ export function CustomBarChart<T>({
           tickCount={6}
           axisLine={false}
           tickFormatter={tickFormatterYAxis}
+          width={width}
         />
         <Bar dataKey={dataKeyBar} radius={4}>
           {chartData.map((entry, index) => {
@@ -79,16 +88,7 @@ export function CustomBarChart<T>({
               <Cell key={`cell-${index}`} fill={getBarColor(Number(value))} />
             );
           })}
-          {displayLabels && (
-            <LabelList
-              fill={"#fff"}
-              dataKey={dataKeyBar}
-              position="center"
-              formatter={(value: number) =>
-                unit === "per" ? formatToPercentage(value) : formatToEuro(value)
-              }
-            />
-          )}
+          {displayLabels && <LabelList content={<BarLabel unit={unit} />} />}
         </Bar>
         <Tooltip content={<CustomTooltip unit={unit} />} />
       </BarChart>
