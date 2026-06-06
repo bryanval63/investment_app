@@ -52,22 +52,22 @@ export const InvestmentsOverviewCards = ({
     bestMonthDate || new Date(),
   );
 
-  const cardContainerStyle = "justify-between md:justify-evenly";
+  const cardContainerStyle = "justify-between lg:justify-evenly";
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-3 md:gap-8">
-      <div className="w-full md:w-1/2">
+    <div className="flex flex-col lg:flex-row items-center gap-3 lg:gap-8">
+      <div className="w-full lg:w-1/2">
         <SummaryCard
           totalAmount={totalAmount}
           totalCapitalGain={totalCapitalGain}
           totalPerf={totalPerf}
           img={chartImg}
-          cardStyle="md:w-fit md:m-auto"
+          cardStyle="lg:w-fit lg:m-auto"
           title="Valeur totale du portefeuille"
         />
       </div>
 
-      <div className="w-full md:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
+      <div className="w-full lg:w-1/2 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-8">
         <CardContainer
           title="Moyenne annuelle des performances"
           cardStyle={cardContainerStyle}
@@ -90,7 +90,7 @@ export const InvestmentsOverviewCards = ({
         </CardContainer>
         <CardContainer
           title="Meilleure performance mensuelle"
-          cardStyle={`${cardContainerStyle} order-5 md:order-none`}
+          cardStyle={`${cardContainerStyle} order-5 lg:order-none`}
         >
           <div className="flex flex-col gap-4 items-center capitalize">
             {formattedBestMonthDate}
@@ -153,3 +153,4 @@ export const InvestmentsOverviewCards = ({
     </div>
   );
 };
+

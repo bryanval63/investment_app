@@ -23,7 +23,7 @@ export const InvestmentsOverview = () => {
   });
 
   return (
-    <div className="flex flex-col gap-3 md:gap-8">
+    <div className="flex flex-col gap-3 lg:gap-8">
       <InvestmentsOverviewCards investmentsOverview={investmentsOverview} />
       <Separator />
 
@@ -50,9 +50,9 @@ export const InvestmentsOverview = () => {
         />
       </MainContainer>
 
-      <Separator className="hidden md:block" />
+      <Separator className="hidden lg:block" />
 
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-8">
         <PerfByAccountsChart
           perfByAccounts={investmentsOverview?.perfByAccount}
         />
@@ -63,3 +63,4 @@ export const InvestmentsOverview = () => {
     </div>
   );
 };
+

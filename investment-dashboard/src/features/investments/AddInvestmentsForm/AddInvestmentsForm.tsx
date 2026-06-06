@@ -28,12 +28,12 @@ export const AddInvestmentsForm = () => {
 
   return (
     <QueryBoundary query={{ error, fetchStatus }}>
-      <div className="max-w-5xl m-auto flex flex-col justify-between h-full gap-3 md:gap-8">
+      <div className="max-w-5xl m-auto flex flex-col justify-between h-full gap-3 lg:gap-8">
         <FormProvider {...form}>
           <form
             id="add-investments-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-3 md:gap-8"
+            className="flex flex-col gap-3 lg:gap-8"
           >
             <FormMonthYear />
 
@@ -42,7 +42,7 @@ export const AddInvestmentsForm = () => {
                 <CardContent className="flex flex-col gap-4">
                   {fields.map((field, index) => (
                     <Fragment key={field.id}>
-                      <div className="flex gap-3 md:gap-8 items-center flex-wrap md:flex-nowrap">
+                      <div className="flex gap-3 lg:gap-8 items-center flex-wrap lg:flex-nowrap">
                         <FormSelect
                           name={`investments.${index}.accountId`}
                           label="Compte"
@@ -79,7 +79,7 @@ export const AddInvestmentsForm = () => {
                           type="button"
                           variant="outline"
                           onClick={() => remove(index)}
-                          className="w-full md:w-auto"
+                          className="w-full lg:w-auto"
                         >
                           <Trash />
                           Supprimer
@@ -103,11 +103,11 @@ export const AddInvestmentsForm = () => {
           </form>
         </FormProvider>
 
-        <div className="flex md:justify-end gap-4">
+        <div className="flex lg:justify-end gap-4">
           <Button
             type="submit"
             form="add-investments-form"
-            className="w-full md:w-auto"
+            className="w-full lg:w-auto"
           >
             Valider
           </Button>
@@ -116,3 +116,4 @@ export const AddInvestmentsForm = () => {
     </QueryBoundary>
   );
 };
+

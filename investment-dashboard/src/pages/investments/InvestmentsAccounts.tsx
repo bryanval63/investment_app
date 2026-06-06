@@ -46,7 +46,7 @@ export const InvestmentsAccounts = () => {
         />
       </div>
 
-      <div className="col-span-3 flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-8">
+      <div className="col-span-3 flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-8">
         <InvestmentsYearlyBarChartAccount
           accountId={accountId}
           title="Performances par années"
@@ -106,3 +106,4 @@ export const InvestmentsAccounts = () => {
     </MainContainer>
   );
 };
+

@@ -28,10 +28,10 @@ export const SummaryCard = ({
   const formattedTotalPerf = formatToPercentage(totalPerf);
 
   return (
-    <Card className={`${cardStyle || "px-2 md:px-16"}`}>
+    <Card className={`${cardStyle || "px-2 lg:px-16"}`}>
       <div className="flex items-center">
         <img
-          className="hidden md:block"
+          className="hidden lg:block"
           src={img}
           alt="chart"
           width="250"
@@ -47,7 +47,7 @@ export const SummaryCard = ({
             {formattedTotalAmount}
           </div>
 
-          <div className="flex items-center gap-3 md:gap-8 flex-wrap">
+          <div className="flex items-center gap-3 lg:gap-8 flex-wrap">
             <span
               className={`text-xl font-normal text-white py-1 px-2 rounded-2xl ${getColorAndBgColor(totalCapitalGain, true, true)}`}
             >
@@ -65,3 +65,4 @@ export const SummaryCard = ({
     </Card>
   );
 };
+

@@ -19,7 +19,7 @@ export default defineConfig({
         theme_color: "#ffffff", // Adapte selon ton thème Tailwind
         background_color: "#ffffff",
         display: "standalone", // 👈 Permet de masquer la barre d'adresse du navigateur !
-        orientation: "portrait",
+        orientation: "any",
         icons: [
           {
             src: "icon_192.png",
