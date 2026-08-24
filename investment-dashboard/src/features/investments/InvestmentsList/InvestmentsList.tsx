@@ -21,14 +21,15 @@ export const InvestmentsList = () => {
   const patchMutation = useMutation({
     mutationFn: ({ id, payload }: any) => patchInvestmentApi(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(["investments"]);
-      queryClient.invalidateQueries(["investmentsOverview"]);
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
+      queryClient.invalidateQueries({ queryKey: ["investmentsOverview"] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteInvestmentApi(id),
-    onSuccess: () => queryClient.invalidateQueries(["investments"]),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["investments"] }),
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
