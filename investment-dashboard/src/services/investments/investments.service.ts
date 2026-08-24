@@ -11,3 +11,17 @@ export const postInvestmentsApi = (investments: InvestmentRequestDto[]) =>
 
 export const getInvestmentsOverviewApi = () =>
   api<InvestmentOverviewResponseDto>("GET", `${INVESTMENTS_URL}/overview`);
+
+export const getInvestmentsApi = (accountId?: number) =>
+  api<any>(
+    "GET",
+    `${INVESTMENTS_URL}${accountId ? `?accountId=${accountId}` : ""}`,
+  );
+
+export const patchInvestmentApi = (
+  id: number,
+  investment: InvestmentRequestDto,
+) => api<InvestmentRequestDto>("PATCH", `${INVESTMENTS_URL}/${id}`, investment);
+
+export const deleteInvestmentApi = (id: number) =>
+  api<void>("DELETE", `${INVESTMENTS_URL}/${id}`);

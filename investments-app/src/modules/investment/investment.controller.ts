@@ -1,9 +1,18 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { InvestmentService } from './investment.service';
 import {
   type InvestmentColumnKey,
   InvestmentOverviewResponseDto,
-  InvestmentRequestDto,
+  type InvestmentRequestDto,
   InvestmentTotalByMonthGroupByAccountResponseDto,
   InvestmentTotalByMonthGroupByCategoryResponseDto,
   InvestmentTotalByYearGroupByAccountResponseDto,
@@ -53,5 +62,21 @@ export class InvestmentController {
   ): Promise<{ success: boolean }> {
     await this.investmentService.createAll(incomes);
     return { success: true };
+  }
+
+  @Get()
+  findAll(@Query('accountId') accountId?: string) {
+    const accId = accountId ? Number(accountId) : undefined;
+    return this.investmentService.findAll(accId);
+  }
+
+  @Patch('/:id')
+  update(@Param('id') id: string, @Body() body: InvestmentRequestDto) {
+    return this.investmentService.update(Number(id), body);
+  }
+
+  @Delete('/:id')
+  remove(@Param('id') id: string) {
+    return this.investmentService.remove(Number(id));
   }
 }

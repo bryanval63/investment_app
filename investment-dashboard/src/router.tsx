@@ -11,6 +11,7 @@ import { InvestmentsAddAccount } from "./pages/investments/InvestmentsAddAccount
 import { InvestmentsTotalGains } from "./pages/investments/InvestmentsTotalGains";
 import { InvestmentsPerformances } from "./pages/investments/InvestmentsPerformances";
 import { InvestmentsAccounts } from "./pages/investments/InvestmentsAccounts";
+import { InvestmentsManage } from "./pages/investments/InvestmentsManage";
 import { NetWorthSidebar } from "./layouts/Sidebars/NetWorthSidebar";
 import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
@@ -73,6 +74,10 @@ export const router = createBrowserRouter([
           {
             Component: InvestmentsTotalGains,
             path: "total-gains",
+          },
+          {
+            Component: InvestmentsManage,
+            path: "manage",
           },
           {
             Component: InvestmentsPerformances,

@@ -539,4 +539,21 @@ export class InvestmentService {
       }
     }
   }
+
+  async findAll(accountId?: number) {
+    const where = accountId ? { accountId } : {};
+    return this.prisma.investment.findMany({
+      where,
+      orderBy: { date: 'desc' },
+      include: { account: true },
+    });
+  }
+
+  async update(id: number, dto: InvestmentRequestDto) {
+    return this.prisma.investment.update({ where: { id }, data: dto as any });
+  }
+
+  async remove(id: number) {
+    return this.prisma.investment.delete({ where: { id } });
+  }
 }
