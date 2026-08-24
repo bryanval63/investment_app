@@ -171,7 +171,7 @@ export const InvestmentsList = () => {
   ];
 
   return (
-    <MainContainer>
+    <MainContainer columns={1}>
       <div>
         <DataTable columns={columns} data={investments ?? []} />
       </div>
