@@ -24,6 +24,8 @@ export const AddInvestmentsForm = () => {
     onSubmit,
     remove,
     append,
+    isSubmitting,
+    submitError,
   } = useAddInvestmentsForm();
 
   return (
@@ -103,17 +105,26 @@ export const AddInvestmentsForm = () => {
           </form>
         </FormProvider>
 
+        {submitError && (
+          <div className="text-red-500 text-sm">
+            Erreur:{" "}
+            {submitError instanceof Error
+              ? submitError.message
+              : "Une erreur est survenue"}
+          </div>
+        )}
+
         <div className="flex lg:justify-end gap-4">
           <Button
             type="submit"
             form="add-investments-form"
             className="w-full lg:w-auto"
+            disabled={isSubmitting}
           >
-            Valider
+            {isSubmitting ? "Création..." : "Valider"}
           </Button>
         </div>
       </div>
     </QueryBoundary>
   );
 };
-

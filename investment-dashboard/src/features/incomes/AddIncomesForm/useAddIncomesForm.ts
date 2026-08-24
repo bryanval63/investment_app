@@ -14,6 +14,7 @@ import {
   type IncomeRequestDto,
 } from "@investments/shared";
 import { postIncomesApi } from "@/services/incomes/incomes.service";
+import useFormMutation from "@/hooks/useFormMutation";
 
 export const useAddIncomesForm = () => {
   const {
@@ -39,14 +40,19 @@ export const useAddIncomesForm = () => {
     name: "incomes",
   });
 
+  const {
+    mutate,
+    isSubmitting,
+    error: submitError,
+  } = useFormMutation(postIncomesApi, { redirectTo: "/incomes" });
+
   const onSubmit: SubmitHandler<IncomesFormOutput> = (data) => {
     const mapped: IncomeRequestDto[] = data.incomes.map((income) => ({
       type: income.type,
       amount: income.amount,
       date: createDateNormalizedByMonthAndYear(data.month, data.year),
     }));
-
-    postIncomesApi(mapped);
+    mutate(mapped);
   };
 
   return {
@@ -58,5 +64,7 @@ export const useAddIncomesForm = () => {
     append,
     remove,
     onSubmit,
+    isSubmitting,
+    submitError,
   };
 };

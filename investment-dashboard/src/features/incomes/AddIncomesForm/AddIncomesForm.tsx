@@ -21,6 +21,8 @@ export const AddIncomesForm = () => {
     append,
     onSubmit,
     remove,
+    isSubmitting,
+    submitError,
   } = useAddIncomesForm();
 
   return (
@@ -76,9 +78,18 @@ export const AddIncomesForm = () => {
           </form>
         </FormProvider>
 
+        {submitError && (
+          <div className="text-red-500 text-sm">
+            Erreur:{" "}
+            {submitError instanceof Error
+              ? submitError.message
+              : "Une erreur est survenue"}
+          </div>
+        )}
+
         <div className="flex justify-end gap-4">
-          <Button type="submit" form="add-incomes-form">
-            Valider
+          <Button type="submit" form="add-incomes-form" disabled={isSubmitting}>
+            {isSubmitting ? "Création..." : "Valider"}
           </Button>
         </div>
       </div>

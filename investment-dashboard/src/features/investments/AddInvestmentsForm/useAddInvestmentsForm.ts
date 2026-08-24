@@ -14,6 +14,7 @@ import {
   type InvestmentsFormOutput,
 } from "./investments-form.schema";
 import { postInvestmentsApi } from "@/services/investments/investments.service";
+import useFormMutation from "@/hooks/useFormMutation";
 
 export const TRANSACTION_AMOUNT_BY_ACCOUNT: Record<number, number> = {
   1: 100,
@@ -58,6 +59,12 @@ export const useAddInvestmentsForm = () => {
     });
   };
 
+  const {
+    mutate,
+    isSubmitting,
+    error: submitError,
+  } = useFormMutation(postInvestmentsApi, { redirectTo: "/investments" });
+
   const onSubmit: SubmitHandler<InvestmentsFormOutput> = (data) => {
     const mapped: InvestmentRequestDto[] = data.investments.map(
       (investment) => ({
@@ -69,7 +76,7 @@ export const useAddInvestmentsForm = () => {
       }),
     );
 
-    postInvestmentsApi(mapped);
+    mutate(mapped);
   };
 
   return {
@@ -82,5 +89,7 @@ export const useAddInvestmentsForm = () => {
     remove,
     handleAccountChange,
     onSubmit,
+    isSubmitting,
+    submitError,
   };
 };

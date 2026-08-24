@@ -21,3 +21,4 @@ shared/dist
 
 # OS
 .DS_Store
+investments-app/prisma/dev.db

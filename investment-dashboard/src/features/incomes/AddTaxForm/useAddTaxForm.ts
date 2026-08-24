@@ -7,6 +7,7 @@ import {
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postTaxApi } from "@/services/taxes/taxes.service";
+import useFormMutation from "@/hooks/useFormMutation";
 
 export const useAddTaxForm = () => {
   const form = useForm<TaxFormInput, unknown, TaxFormOutput>({
@@ -14,12 +15,18 @@ export const useAddTaxForm = () => {
     defaultValues: DEFAULT_TAX,
   });
 
+  const { mutate, isSubmitting, error } = useFormMutation(postTaxApi, {
+    redirectTo: "/incomes",
+  });
+
   const onSubmit: SubmitHandler<TaxFormOutput> = (data) => {
-    postTaxApi(data);
+    mutate(data);
   };
 
   return {
     form,
     onSubmit,
+    isSubmitting,
+    error,
   };
 };

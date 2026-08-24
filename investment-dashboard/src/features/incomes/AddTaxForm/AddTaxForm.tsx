@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAddTaxForm } from "./useAddTaxForm";
 
 export const AddTaxForm = () => {
-  const { form, onSubmit } = useAddTaxForm();
+  const { form, onSubmit, isSubmitting, error } = useAddTaxForm();
 
   return (
     <div className="max-w-5xl m-auto flex flex-col justify-between h-full">
@@ -22,12 +22,21 @@ export const AddTaxForm = () => {
               <FormInput name="amount" required label="Montant" />
             </CardContent>
           </Card>
+
+          {error && (
+            <div className="text-red-500 text-sm">
+              Erreur:{" "}
+              {error instanceof Error
+                ? error.message
+                : "Une erreur est survenue"}
+            </div>
+          )}
         </form>
       </FormProvider>
 
       <div className="flex justify-end gap-4">
-        <Button type="submit" form="add-tax-form">
-          Valider
+        <Button type="submit" form="add-tax-form" disabled={isSubmitting}>
+          {isSubmitting ? "Création..." : "Valider"}
         </Button>
       </div>
     </div>

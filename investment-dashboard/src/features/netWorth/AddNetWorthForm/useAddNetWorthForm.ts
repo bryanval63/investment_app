@@ -8,6 +8,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDateNormalizedByMonthAndYear } from "@investments/shared";
 import { postNetWorthApi } from "@/services/net-worthes/net-worthes.service";
+import useFormMutation from "@/hooks/useFormMutation";
 
 export const useAddNetWorthForm = () => {
   const form = useForm<NetWorthFormInput, unknown, NetWorthFormOutput>({
@@ -15,8 +16,12 @@ export const useAddNetWorthForm = () => {
     defaultValues: DEFAULT_NET_WORTH,
   });
 
+  const { mutate, isSubmitting, error } = useFormMutation(postNetWorthApi, {
+    redirectTo: "/net-worth",
+  });
+
   const onSubmit: SubmitHandler<NetWorthFormOutput> = (data) => {
-    postNetWorthApi({
+    mutate({
       date: createDateNormalizedByMonthAndYear(data.month, data.year),
       amount: data.amount,
     });
@@ -25,5 +30,7 @@ export const useAddNetWorthForm = () => {
   return {
     form,
     onSubmit,
+    isSubmitting,
+    error,
   };
 };
