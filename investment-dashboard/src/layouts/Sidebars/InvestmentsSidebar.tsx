@@ -5,8 +5,8 @@ import {
   Percent,
   Plus,
   LayoutDashboard,
-  PiggyBank,
   List,
+  PiggyBank,
 } from "lucide-react";
 
 export const InvestmentsSidebar = () => {
@@ -36,12 +36,6 @@ export const InvestmentsSidebar = () => {
       link: "/investments/manage",
       icon: <List />,
     },
-    {
-      title: "Ajouter un compte",
-      link: "/investments/add-account",
-      icon: <Plus />,
-    },
-
     {
       title: "Ajouter un investissement",
       link: "/investments/add",

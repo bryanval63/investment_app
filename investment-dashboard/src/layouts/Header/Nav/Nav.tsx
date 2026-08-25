@@ -14,6 +14,12 @@ export const Nav = () => {
     return `nav-link ${isActive ? "nav-link-active" : ""}`;
   };
 
+  const accountsLinkClass = () => {
+    const isActive = location.pathname.startsWith("/accounts");
+
+    return `nav-link ${isActive ? "nav-link-active" : ""}`;
+  };
+
   return (
     <nav className="nav">
       <NavLink to="/incomes" className={navLinkClass}>
@@ -24,6 +30,9 @@ export const Nav = () => {
       </NavLink>
       <NavLink to="/net-worth" className={navLinkClass}>
         Capital
+      </NavLink>
+      <NavLink to="/accounts" className={accountsLinkClass}>
+        Comptes
       </NavLink>
     </nav>
   );

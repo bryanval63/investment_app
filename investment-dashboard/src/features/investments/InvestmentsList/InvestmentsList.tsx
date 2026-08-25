@@ -1,6 +1,8 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { DataTable } from "@/components/custom/DataTable/DataTable";
+import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteInvestmentApi,
@@ -10,12 +12,17 @@ import {
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash2, Check, X } from "lucide-react";
+import { getAccountsApi } from "@/services/accounts/accounts.service";
 
 export const InvestmentsList = () => {
   const queryClient = useQueryClient();
   const { data: investments } = useQuery({
     queryKey: ["investments"],
     queryFn: () => getInvestmentsApi(),
+  });
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: getAccountsApi,
   });
 
   const patchMutation = useMutation({
@@ -66,11 +73,11 @@ export const InvestmentsList = () => {
       header: "Date",
       cell: ({ row }) =>
         editingId === row.original.id ? (
-          <input
+          <Input
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="input input-sm"
+            aria-label="Date de l’investissement"
           />
         ) : (
           new Date(row.original.date).toLocaleDateString()
@@ -80,17 +87,34 @@ export const InvestmentsList = () => {
       accessorFn: (row) => row.account?.name,
       id: "account",
       header: "Compte",
+      cell: ({ row }) =>
+        editingId === row.original.id ? (
+          <CustomSelect
+            value={form.accountId?.toString() ?? ""}
+            options={
+              accounts?.map(({ id, name }) => ({
+                code: id.toString(),
+                label: name,
+              })) ?? []
+            }
+            onValueChange={(value) =>
+              setForm({ ...form, accountId: Number(value) })
+            }
+          />
+        ) : (
+          row.original.account?.name
+        ),
     },
     {
       accessorKey: "totalAmount",
       header: "Montant total",
       cell: ({ row }) =>
         editingId === row.original.id ? (
-          <input
+          <Input
             type="number"
             value={form.totalAmount}
             onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
-            className="input input-sm"
+            aria-label="Montant total"
           />
         ) : (
           Number(row.original.totalAmount).toFixed(2)
@@ -101,11 +125,11 @@ export const InvestmentsList = () => {
       header: "Plus-value",
       cell: ({ row }) =>
         editingId === row.original.id ? (
-          <input
+          <Input
             type="number"
             value={form.capitalGain}
             onChange={(e) => setForm({ ...form, capitalGain: e.target.value })}
-            className="input input-sm"
+            aria-label="Plus-value"
           />
         ) : (
           Number(row.original.capitalGain).toFixed(2)
@@ -116,13 +140,13 @@ export const InvestmentsList = () => {
       header: "Transaction",
       cell: ({ row }) =>
         editingId === row.original.id ? (
-          <input
+          <Input
             type="number"
             value={form.transactionAmount}
             onChange={(e) =>
               setForm({ ...form, transactionAmount: e.target.value })
             }
-            className="input input-sm"
+            aria-label="Montant de la transaction"
           />
         ) : (
           Number(row.original.transactionAmount).toFixed(2)

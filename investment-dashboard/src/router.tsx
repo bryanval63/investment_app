@@ -12,7 +12,9 @@ import { InvestmentsTotalGains } from "./pages/investments/InvestmentsTotalGains
 import { InvestmentsPerformances } from "./pages/investments/InvestmentsPerformances";
 import { InvestmentsAccounts } from "./pages/investments/InvestmentsAccounts";
 import { InvestmentsManage } from "./pages/investments/InvestmentsManage";
+import { InvestmentsManageAccounts } from "./pages/investments/InvestmentsManageAccounts";
 import { NetWorthSidebar } from "./layouts/Sidebars/NetWorthSidebar";
+import { AccountsSidebar } from "./layouts/Sidebars/AccountsSidebar";
 import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
 import { TaxAdd } from "./pages/incomes/TaxAdd";
@@ -68,7 +70,7 @@ export const router = createBrowserRouter([
             path: "add",
           },
           {
-            Component: InvestmentsAddAccount,
+            Component: () => <Navigate to="/accounts/add" replace />,
             path: "add-account",
           },
           {
@@ -80,12 +82,36 @@ export const router = createBrowserRouter([
             path: "manage",
           },
           {
+            Component: () => <Navigate to="/accounts/manage" replace />,
+            path: "manage-accounts",
+          },
+          {
             Component: InvestmentsPerformances,
             path: "performances",
           },
           {
             Component: InvestmentsAccounts,
             path: "accounts",
+          },
+        ],
+      },
+      {
+        path: "accounts",
+        handle: {
+          sidebar: AccountsSidebar,
+        },
+        children: [
+          {
+            index: true,
+            Component: () => <Navigate to="/accounts/manage" replace />,
+          },
+          {
+            Component: InvestmentsAddAccount,
+            path: "add",
+          },
+          {
+            Component: InvestmentsManageAccounts,
+            path: "manage",
           },
         ],
       },
