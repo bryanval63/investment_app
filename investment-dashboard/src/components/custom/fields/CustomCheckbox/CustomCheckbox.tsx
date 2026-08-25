@@ -6,19 +6,21 @@ type CustomCheckboxProps = {
   label: string;
   checked: boolean;
   setChecked: (value: boolean) => void;
+  id?: string;
 };
 
 export const CustomCheckbox = ({
   label,
   checked,
   setChecked,
+  id = "with-taxes",
 }: CustomCheckboxProps) => {
   return (
     <Field orientation="horizontal" className="w-fit">
-      <Label htmlFor="with-taxes">{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       <Checkbox
-        id="with-taxes"
-        name="with-taxes"
+        id={id}
+        name={id}
         checked={checked}
         onCheckedChange={setChecked}
       />

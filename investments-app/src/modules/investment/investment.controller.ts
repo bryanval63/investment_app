@@ -52,8 +52,10 @@ export class InvestmentController {
   }
 
   @Get('/overview')
-  getOverview(): Promise<InvestmentOverviewResponseDto> {
-    return this.investmentService.getOverview();
+  getOverview(
+    @Query('period') period?: string,
+  ): Promise<InvestmentOverviewResponseDto> {
+    return this.investmentService.getOverview(period === 'previous-month');
   }
 
   @Post()

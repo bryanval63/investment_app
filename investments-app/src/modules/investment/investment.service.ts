@@ -25,7 +25,9 @@ import {
 export class InvestmentService {
   constructor(private prisma: PrismaService) {}
 
-  async getOverview(): Promise<InvestmentOverviewResponseDto> {
+  async getOverview(
+    previousMonth = false,
+  ): Promise<InvestmentOverviewResponseDto> {
     const resultTotalAmountCategory =
       await this.findTotalByMonthGroupedByCategory('totalAmount');
 
@@ -37,24 +39,79 @@ export class InvestmentService {
     const resultTotalAmountAccount =
       await this.findTotalByMonthGroupedByAccount('totalAmount');
 
-    const perfByAccount = performanceByAccount(resultTotalAmountAccount);
+    const latestAvailableDate = resultTotalAmountCategory
+      .filter((item) => item.category === 'ALL')
+      .reduce<Date | undefined>((latest, item) => {
+        const itemDate = new Date(item.date);
+        return !latest || itemDate > latest ? itemDate : latest;
+      }, undefined);
+    const cutoffDate =
+      previousMonth && latestAvailableDate
+        ? new Date(
+            latestAvailableDate.getFullYear(),
+            latestAvailableDate.getMonth(),
+            0,
+            23,
+            59,
+            59,
+            999,
+          )
+        : undefined;
+    const filterByCutoff = <T extends { date: Date }>(items: T[]) =>
+      cutoffDate
+        ? items.filter(
+            (item) => new Date(item.date).getTime() <= cutoffDate.getTime(),
+          )
+        : items;
 
-    const perfByCategory = performanceByCategory(resultTotalAmountCategory);
+    const filteredTotalAmountCategory = filterByCutoff(
+      resultTotalAmountCategory,
+    );
+    const filteredCapitalGainCategory = filterByCutoff(
+      resultCapitalGainCategory,
+    );
+    const filteredTotalAmountAccount = filterByCutoff(resultTotalAmountAccount);
+
+    const perfByAccount = performanceByAccount(filteredTotalAmountAccount);
+
+    const perfByCategory = performanceByCategory(filteredTotalAmountCategory);
+
+    if (
+      filteredTotalAmountCategory.length === 0 ||
+      filteredCapitalGainCategory.length === 0
+    ) {
+      return {
+        totalAmount: 0,
+        totalCapitalGain: 0,
+        totalPerf: 0,
+        totalMonthAvg: 0,
+        avgYearlyPerf: 0,
+        currentYearCapitalGain: 0,
+        currentYearPerf: 0,
+        perfByAccount: [],
+        perfByCategory: [],
+        worstMonth: { date: new Date(), perf: 0, amount: 0 },
+        bestMonth: { date: new Date(), perf: 0, amount: 0 },
+      };
+    }
 
     const latestInvestmentTotalAmount = getLastInvestmentCategory(
-      resultTotalAmountCategory,
+      filteredTotalAmountCategory,
     );
 
     const firstInvestmentTotalAmount = getFirstInvestmentCategory(
-      resultTotalAmountCategory,
+      filteredTotalAmountCategory,
     );
 
     const latestInvestmentCapitalGain = getLastInvestmentCategory(
-      resultCapitalGainCategory,
+      filteredCapitalGainCategory,
     );
 
     const filteredYearly = resultYearlyCategory.filter(
-      (inv) => inv.category === 'ALL' && inv.year > 2022,
+      (inv) =>
+        inv.category === 'ALL' &&
+        inv.year > 2022 &&
+        (!cutoffDate || inv.year < cutoffDate.getFullYear()),
     );
 
     const averageYearlyPerf = computeCAGR(
@@ -63,21 +120,72 @@ export class InvestmentService {
       latestInvestmentTotalAmount.date,
     );
 
-    const { amount, performance } = filteredYearly.find(
-      (inv) => Number(inv.year) === getCurrentYear(),
-    ) || { amount: 0, performance: 0 };
+    const currentYear = cutoffDate?.getFullYear() ?? getCurrentYear();
+    const currentYearCapitalGainRows = filteredCapitalGainCategory.filter(
+      (inv) =>
+        inv.category === 'ALL' &&
+        new Date(inv.date).getFullYear() === currentYear,
+    );
+    const currentYearPerformanceRows = filteredTotalAmountCategory.filter(
+      (inv) =>
+        inv.category === 'ALL' &&
+        new Date(inv.date).getFullYear() === currentYear,
+    );
+    const currentYearCapitalGain = currentYearCapitalGainRows.reduce(
+      (sum, current) => sum + Number(current.amountDiff),
+      0,
+    );
+    const currentYearPerf = currentYearPerformanceRows.reduce(
+      (performance, current) =>
+        current.performance <= -1
+          ? -1
+          : (1 + performance) * (1 + Number(current.performance)) - 1,
+      0,
+    );
 
-    const findWorstMonth = resultTotalAmountCategory
-      .filter((inv) => inv.category === 'ALL')
-      .reduce((worst, current) => {
-        return current.performance < worst.performance ? current : worst;
-      });
+    const yearlyCurrentYear = filteredYearly.find(
+      (inv) => Number(inv.year) === currentYear,
+    );
+    const amount = cutoffDate
+      ? currentYearCapitalGain
+      : yearlyCurrentYear?.amount || 0;
+    const performance = cutoffDate
+      ? currentYearPerf
+      : yearlyCurrentYear?.performance || 0;
 
-    const findBestMonth = resultTotalAmountCategory
+    const findWorstMonth = filteredTotalAmountCategory
       .filter((inv) => inv.category === 'ALL')
-      .reduce((best, current) => {
-        return current.performance > best.performance ? current : best;
-      });
+      .reduce(
+        (worst, current) => {
+          return current.performance < worst.performance ? current : worst;
+        },
+        {
+          date: new Date(),
+          performance: 0,
+          amount: 0,
+          amountDiff: 0,
+          avgDiff: 0,
+          cumulativePerformance: 0,
+          category: 'ALL' as InvestmentCategory,
+        },
+      );
+
+    const findBestMonth = filteredTotalAmountCategory
+      .filter((inv) => inv.category === 'ALL')
+      .reduce(
+        (best, current) => {
+          return current.performance > best.performance ? current : best;
+        },
+        {
+          date: new Date(),
+          performance: 0,
+          amount: 0,
+          amountDiff: 0,
+          avgDiff: 0,
+          cumulativePerformance: 0,
+          category: 'ALL' as InvestmentCategory,
+        },
+      );
 
     const defaultMonth = { date: new Date(), perf: 0, amount: 0 };
 
@@ -107,7 +215,7 @@ export class InvestmentService {
             perf: findWorstMonth.performance,
             amount:
               findInvestmentByDate(
-                resultCapitalGainCategory,
+                filteredCapitalGainCategory,
                 findWorstMonth.date,
               )?.amountDiff || 0,
           }
@@ -118,7 +226,7 @@ export class InvestmentService {
             perf: findBestMonth.performance,
             amount:
               findInvestmentByDate(
-                resultCapitalGainCategory,
+                filteredCapitalGainCategory,
                 findBestMonth.date,
               )?.amountDiff || 0,
           }
