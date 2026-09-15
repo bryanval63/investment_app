@@ -3,6 +3,7 @@ import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSele
 import { InvestmentsAreaChartCategory } from "@/features/investments/charts/categories/InvestmentsAreaChartCategory";
 import { InvestmentsBarChartCategory } from "@/features/investments/charts/categories/InvestmentsBarChartCategory";
 import { InvestmentsYearlyBarChartCategory } from "@/features/investments/charts/categories/InvestmentsYearlyBarChartCategory";
+import { InvestmentsAreaChartAccounts } from "@/features/investments/charts/accounts/InvestmentsAreaChartAccounts";
 import {
   INVESTMENT_CATEGORIES,
   type InvestmentCategory,
@@ -20,6 +21,9 @@ export const InvestmentsPerformances = () => {
           onValueChange={setCategory}
           options={INVESTMENT_CATEGORIES}
         />
+      </div>
+      <div className="lg:col-span-2">
+        <InvestmentsAreaChartAccounts />
       </div>
       <InvestmentsBarChartCategory
         type="totalAmount"

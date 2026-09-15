@@ -1,10 +1,14 @@
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { StatValue } from "@/components/custom/StatsValue/StatsValue";
 import { SummaryCard } from "@/components/custom/SummaryCard/SummaryCard";
-import { getInvestmentsTotalGroupedByAccountMonthlyApi } from "@/services/investments/investments-total.service";
+import {
+  getInvestmentsTotalGroupedByAccountMonthlyApi,
+  getInvestmentsTotalGroupedByAccountYearlyApi,
+} from "@/services/investments/investments-total.service";
 import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
 import {
   findLastItemByDate,
+  getCurrentYear,
   type InvestmentColumnKey,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
@@ -20,11 +24,21 @@ export const InvestmentsAccountsCards = ({
   accountId,
 }: InvestmentsAccountsCardsProps) => {
   const { data: latestInvestment } = useQuery({
-    queryKey: ["investmentsTotalGroupedByAccountYearly", type, accountId],
+    queryKey: ["investmentsTotalGroupedByAccountMonthly", type, accountId],
     queryFn: () => getInvestmentsTotalGroupedByAccountMonthlyApi(type),
     select: (data) =>
       findLastItemByDate(
         data.filter((investment) => investment.accountId === accountId),
+      ),
+  });
+  const { data: currentYearInvestment } = useQuery({
+    queryKey: ["investmentsTotalGroupedByAccountYearly", accountId],
+    queryFn: getInvestmentsTotalGroupedByAccountYearlyApi,
+    select: (data) =>
+      data.find(
+        (investment) =>
+          investment.accountId === accountId &&
+          Number(investment.year) === getCurrentYear(),
       ),
   });
 
@@ -33,9 +47,12 @@ export const InvestmentsAccountsCards = ({
   const performance = latestInvestment?.performance || 0;
   const cumulativePerformance = latestInvestment?.cumulativePerformance || 0;
   const capitalGain = latestInvestment?.capitalGain || 0;
+  const currentYearPerformance = currentYearInvestment?.performance || 0;
 
   const formattedAmountDiff = formatToEuro(amountDiff);
   const formattedPerformance = formatToPercentage(performance);
+  const formattedCurrentYearPerformance =
+    formatToPercentage(currentYearPerformance);
 
   return (
     <div className="flex flex-col lg:flex-row gap-3 lg:gap-8 lg:justify-center lg:items-center">
@@ -57,6 +74,13 @@ export const InvestmentsAccountsCards = ({
             />
           </div>
         </CardContainer>
+        <CardContainer title="Performance de l'année en cours">
+          <StatValue
+            value={currentYearPerformance}
+            formatted={formattedCurrentYearPerformance}
+            style="text-xl"
+          />
+        </CardContainer>
         <CardContainer title="Montant total du mois">
           <StatValue
             value={amountDiff}
@@ -68,4 +92,3 @@ export const InvestmentsAccountsCards = ({
     </div>
   );
 };
-
