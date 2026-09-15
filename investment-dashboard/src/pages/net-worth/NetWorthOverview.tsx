@@ -62,26 +62,42 @@ export const NetWorthOverview = () => {
 
   return (
     <MainContainer columns={3}>
-      <CardContainer title="Patrimoine financier total">
-        <StatValue
-          value={lastNetWorth}
-          formatted={formattedLastNetWorth}
-          style="text-xl"
-        />
-      </CardContainer>
-      <CardContainer title="Capital investi net après impôts">
-        <StatValue
-          value={netInvestedCapital}
-          formatted={formattedNetInvestedCapital}
-          style="text-xl"
-        />
-      </CardContainer>
-      <CardContainer title="Total des impôts et frais">
-        <StatValue
-          value={taxDifference}
-          formatted={formattedTaxesAndFees}
-          style="text-xl"
-        />
+      <CardContainer
+        title="Synthèse du patrimoine financier"
+        cardStyle="w-full col-span-3"
+      >
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-slate-500">
+              Patrimoine financier total
+            </span>
+            <StatValue
+              value={lastNetWorth}
+              formatted={formattedLastNetWorth}
+              style="text-2xl"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-slate-500">
+              Capital investi net après impôts
+            </span>
+            <StatValue
+              value={netInvestedCapital}
+              formatted={formattedNetInvestedCapital}
+              style="text-2xl"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-slate-500">
+              Total des impôts et frais
+            </span>
+            <StatValue
+              value={taxDifference}
+              formatted={formattedTaxesAndFees}
+              style="text-2xl"
+            />
+          </div>
+        </div>
       </CardContainer>
       <CardContainer title="Gain par rapport au mois précédent">
         <StatValue
