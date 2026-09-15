@@ -3,6 +3,7 @@ import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { StatValue } from "@/components/custom/StatsValue/StatsValue";
 import { getNetWorthesApi } from "@/services/net-worthes/net-worthes.service";
+import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
 import {
   formatToEuro,
   formatToPercentage,
@@ -12,6 +13,7 @@ import {
   findLastItemByDate,
   findSecondLastItemByDate,
   type NetWorthResponseDto,
+  type InvestmentOverviewResponseDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
 
@@ -19,6 +21,11 @@ export const NetWorthOverview = () => {
   const { data: netWorthes } = useQuery<NetWorthResponseDto[]>({
     queryKey: ["net-worthes"],
     queryFn: () => getNetWorthesApi(),
+  });
+  const { data: investmentsOverview } =
+    useQuery<InvestmentOverviewResponseDto>({
+    queryKey: ["investmentsOverview"],
+    queryFn: () => getInvestmentsOverviewApi(),
   });
 
   const lastNetWorth = netWorthes
@@ -34,6 +41,12 @@ export const NetWorthOverview = () => {
 
   const formattedDifference = formatToEuro(difference);
   const formattedLastNetWorth = formatToEuro(lastNetWorth);
+  const taxDifference =
+    (investmentsOverview?.totalAmount ?? 0) -
+    (investmentsOverview?.totalNetAmount ?? 0);
+  const netInvestedCapital = lastNetWorth - taxDifference;
+  const formattedNetInvestedCapital = formatToEuro(netInvestedCapital);
+  const formattedTaxesAndFees = formatToEuro(taxDifference);
   const formattedPerformance = formatToPercentage(performance);
 
   const chartData =
@@ -53,6 +66,20 @@ export const NetWorthOverview = () => {
         <StatValue
           value={lastNetWorth}
           formatted={formattedLastNetWorth}
+          style="text-xl"
+        />
+      </CardContainer>
+      <CardContainer title="Capital investi net après impôts">
+        <StatValue
+          value={netInvestedCapital}
+          formatted={formattedNetInvestedCapital}
+          style="text-xl"
+        />
+      </CardContainer>
+      <CardContainer title="Total des impôts et frais">
+        <StatValue
+          value={taxDifference}
+          formatted={formattedTaxesAndFees}
           style="text-xl"
         />
       </CardContainer>

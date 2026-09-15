@@ -20,6 +20,7 @@ import {
   performanceByAccount,
   performanceByCategory,
 } from './investment.utils';
+import { calculateInvestmentTax } from './tax.utils';
 
 @Injectable()
 export class InvestmentService {
@@ -71,6 +72,19 @@ export class InvestmentService {
       resultCapitalGainCategory,
     );
     const filteredTotalAmountAccount = filterByCutoff(resultTotalAmountAccount);
+    const latestNetAmount = filteredTotalAmountAccount
+      .filter((item) => item.accountId > 0)
+      .reduce((latest, item) => {
+        const current = latest.get(item.accountId);
+        if (!current || new Date(item.date) > new Date(current.date)) {
+          latest.set(item.accountId, item);
+        }
+        return latest;
+      }, new Map<number, InvestmentTotalByMonthGroupByAccountResponseDto>());
+    const totalNetAmount = [...latestNetAmount.values()].reduce(
+      (sum, item) => sum + item.netAmount,
+      0,
+    );
 
     const perfByAccount = performanceByAccount(filteredTotalAmountAccount);
 
@@ -82,6 +96,7 @@ export class InvestmentService {
     ) {
       return {
         totalAmount: 0,
+        totalNetAmount: 0,
         totalCapitalGain: 0,
         totalPerf: 0,
         totalMonthAvg: 0,
@@ -191,6 +206,7 @@ export class InvestmentService {
 
     return {
       totalAmount: latestInvestmentTotalAmount.amount,
+      totalNetAmount,
       totalCapitalGain: latestInvestmentCapitalGain.amount,
       totalPerf: latestInvestmentTotalAmount.cumulativePerformance,
       totalMonthAvg: latestInvestmentCapitalGain.avgDiff,
@@ -337,12 +353,12 @@ export class InvestmentService {
     `;
   }
 
-  findTotalByMonthGroupedByAccount(
+  async findTotalByMonthGroupedByAccount(
     unit: InvestmentColumnKey,
   ): Promise<InvestmentTotalByMonthGroupByAccountResponseDto[]> {
     const column = COLUMN_MAP[unit];
 
-    return this.prisma.$queryRaw<
+    const result = await this.prisma.$queryRaw<
       InvestmentTotalByMonthGroupByAccountResponseDto[]
     >`
       SELECT
@@ -426,7 +442,7 @@ export class InvestmentService {
               i.date,
               SUM(${column}) * 1.0 as amount,
               SUM(i.transactionAmount) * 1.0 as transactionAmount,
-              capitalGain
+              SUM(i.capitalGain) * 1.0 as capitalGain
             FROM "Investment" i
             JOIN "Account" a ON i."accountId" = a.id
             GROUP BY a.id, a.name, i.date
@@ -436,6 +452,41 @@ export class InvestmentService {
 
       ORDER BY accountId, date ASC;
     `;
+
+    const accounts = await this.prisma.account.findMany({
+      select: {
+        id: true,
+        type: { select: { code: true } },
+      },
+    });
+    const accountTaxInfo = new Map(
+      accounts.map((account) => [
+        account.id,
+        {
+          type: account.type.code,
+        },
+      ]),
+    );
+
+    return result.map((row) => {
+      const taxInfo = accountTaxInfo.get(Number(row.accountId));
+      const taxAmount =
+        taxInfo?.type
+          ? calculateInvestmentTax({
+              type: taxInfo.type,
+              capitalGain: Number(row.capitalGain),
+            })
+          : 0;
+
+      return {
+        ...row,
+        accountId: Number(row.accountId),
+        amount: Number(row.amount),
+        capitalGain: Number(row.capitalGain),
+        taxAmount,
+        netAmount: Number(row.amount) - taxAmount,
+      };
+    });
   }
 
   findTotalByYearGroupedByCategory(): Promise<

@@ -47,6 +47,7 @@ export const InvestmentsAccountsCards = ({
   const performance = latestInvestment?.performance || 0;
   const cumulativePerformance = latestInvestment?.cumulativePerformance || 0;
   const capitalGain = latestInvestment?.capitalGain || 0;
+  const netAmount = latestInvestment?.netAmount ?? amount;
   const currentYearPerformance = currentYearInvestment?.performance || 0;
 
   const formattedAmountDiff = formatToEuro(amountDiff);
@@ -58,6 +59,7 @@ export const InvestmentsAccountsCards = ({
     <div className="flex flex-col lg:flex-row gap-3 lg:gap-8 lg:justify-center lg:items-center">
       <SummaryCard
         totalAmount={amount}
+        totalNetAmount={netAmount}
         totalCapitalGain={capitalGain}
         totalPerf={cumulativePerformance}
         img={chartImg}

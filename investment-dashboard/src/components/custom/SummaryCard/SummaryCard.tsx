@@ -7,6 +7,7 @@ import { StatValue } from "../StatsValue/StatsValue";
 type SummaryCardProps = {
   title: string;
   totalAmount: number;
+  totalNetAmount: number;
   totalCapitalGain: number;
   totalPerf: number;
   img: string;
@@ -16,12 +17,14 @@ type SummaryCardProps = {
 export const SummaryCard = ({
   title,
   totalAmount,
+  totalNetAmount,
   totalCapitalGain,
   totalPerf,
   img,
   cardStyle,
 }: SummaryCardProps) => {
   const formattedTotalAmount = formatToEuro(totalAmount);
+  const formattedTotalNetAmount = formatToEuro(totalNetAmount);
   const formattedTotalCapitalGain = formatToEuro(totalCapitalGain, {
     signDisplay: "always",
   });
@@ -47,6 +50,15 @@ export const SummaryCard = ({
             {formattedTotalAmount}
           </div>
 
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-slate-500">
+              Montant net estimé après impôts
+            </span>
+            <span className="text-2xl font-semibold text-slate-900">
+              {formattedTotalNetAmount}
+            </span>
+          </div>
+
           <div className="flex items-center gap-3 lg:gap-8 flex-wrap">
             <span
               className={`text-xl font-normal text-white py-1 px-2 rounded-2xl ${getColorAndBgColor(totalCapitalGain, true, true)}`}
@@ -65,4 +77,3 @@ export const SummaryCard = ({
     </Card>
   );
 };
-

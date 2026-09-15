@@ -38,6 +38,7 @@ export const InvestmentsOverviewCards = ({
     : investmentsOverview;
 
   const totalAmount = overview?.totalAmount || 0;
+  const totalNetAmount = overview?.totalNetAmount ?? totalAmount;
   const totalCapitalGain = overview?.totalCapitalGain || 0;
   const totalPerf = overview?.totalPerf || 0;
   const totalMonthAvg = overview?.totalMonthAvg || 0;
@@ -90,6 +91,7 @@ export const InvestmentsOverviewCards = ({
         <div className="w-full lg:w-1/2">
           <SummaryCard
             totalAmount={totalAmount}
+            totalNetAmount={totalNetAmount}
             totalCapitalGain={totalCapitalGain}
             totalPerf={totalPerf}
             img={chartImg}

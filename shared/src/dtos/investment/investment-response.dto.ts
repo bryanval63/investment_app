@@ -17,6 +17,8 @@ export interface InvestmentTotalByMonthGroupByAccountResponseDto extends Investm
   accountId: number;
   accountName: string;
   capitalGain: number;
+  taxAmount: number;
+  netAmount: number;
 }
 
 interface InvestmentTotalByYearResponseDto {
@@ -35,6 +37,7 @@ export interface InvestmentTotalByYearGroupByAccountResponseDto extends Investme
 
 export interface InvestmentOverviewResponseDto {
   totalAmount: number;
+  totalNetAmount: number;
   totalCapitalGain: number;
   totalPerf: number;
   totalMonthAvg: number;
