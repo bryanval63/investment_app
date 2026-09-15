@@ -53,7 +53,9 @@ const AccountPerformanceTooltip = ({
     <div className="border rounded-md bg-background/80 backdrop-blur px-3 py-2 shadow-sm">
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
       <div className="flex flex-col gap-1">
-        {payload.map((item) => (
+        {[...payload]
+          .sort((first, second) => Number(second.value) - Number(first.value))
+          .map((item) => (
           <div className="flex items-center gap-2" key={item.dataKey?.toString()}>
             <div
               className="h-2 w-2 rounded-sm"
@@ -63,7 +65,7 @@ const AccountPerformanceTooltip = ({
               {item.name}: {formatToPercentage(Number(item.value))}
             </p>
           </div>
-        ))}
+          ))}
       </div>
     </div>
   );
