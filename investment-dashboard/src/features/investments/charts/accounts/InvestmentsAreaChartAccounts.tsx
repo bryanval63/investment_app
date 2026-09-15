@@ -79,25 +79,58 @@ const getChartData = (
   const seriesById = new Map(series.map((account) => [account.id, account]));
   const dataByDate = new Map<number, ChartData>();
   const periodStart = new Date(new Date().getFullYear(), 0, 1).getTime();
-  const initialPerformanceByAccount = new Map<number, number>();
-  const periodInvestments =
-    investments?.filter((investment) => {
-      const timestamp = new Date(investment.date).getTime();
+  const initialPerformanceByAccount = new Map<
+    number,
+    { value: number; date: number }
+  >();
+  const accountInvestments = investments?.filter((investment) =>
+    seriesById.has(investment.accountId),
+  ) ?? [];
+  const periodInvestments = accountInvestments.filter((investment) => {
+    const timestamp = new Date(investment.date).getTime();
 
-      return (
-        seriesById.has(investment.accountId) &&
-        (period === "allTime" || timestamp >= periodStart)
-      );
-    }) ?? [];
-
-  periodInvestments.forEach((investment) => {
-    if (!initialPerformanceByAccount.has(investment.accountId)) {
-      initialPerformanceByAccount.set(
-        investment.accountId,
-        investment.cumulativePerformance,
-      );
-    }
+    return period === "allTime" || timestamp >= periodStart;
   });
+
+  if (period === "yearToDate") {
+    accountInvestments
+      .filter((investment) => new Date(investment.date).getTime() < periodStart)
+      .forEach((investment) => {
+        const currentBaseline = initialPerformanceByAccount.get(
+          investment.accountId,
+        );
+        const investmentDate = new Date(investment.date).getTime();
+        const currentBaselineDate =
+          currentBaseline?.date ?? Number.NEGATIVE_INFINITY;
+
+        if (investmentDate > currentBaselineDate) {
+          initialPerformanceByAccount.set(
+            investment.accountId,
+            { value: investment.cumulativePerformance, date: investmentDate },
+          );
+        }
+      });
+  } else {
+    periodInvestments.forEach((investment) => {
+      if (!initialPerformanceByAccount.has(investment.accountId)) {
+        initialPerformanceByAccount.set(
+          investment.accountId,
+          {
+            value: investment.cumulativePerformance,
+            date: new Date(investment.date).getTime(),
+          },
+        );
+      }
+    });
+  }
+
+  if (period === "yearToDate") {
+    series.forEach((account) => {
+      if (!initialPerformanceByAccount.has(account.id)) {
+        initialPerformanceByAccount.set(account.id, { value: 0, date: 0 });
+      }
+    });
+  }
 
   periodInvestments.forEach((investment) => {
     const timestamp = new Date(investment.date).getTime();
@@ -118,7 +151,7 @@ const getChartData = (
       period === "allTime"
         ? investment.cumulativePerformance
         : (1 + investment.cumulativePerformance) /
-            (1 + initialPerformance) -
+            (1 + initialPerformance.value) -
           1;
     dataByDate.set(timestamp, data);
   });
