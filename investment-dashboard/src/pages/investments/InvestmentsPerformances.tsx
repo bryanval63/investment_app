@@ -23,7 +23,7 @@ export const InvestmentsPerformances = () => {
         />
       </div>
       <div className="lg:col-span-2">
-        <InvestmentsAreaChartAccounts />
+        <InvestmentsAreaChartAccounts key={category} category={category} />
       </div>
       <InvestmentsBarChartCategory
         type="totalAmount"

@@ -5,7 +5,10 @@ import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSele
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import { getInvestmentsTotalGroupedByAccountMonthlyApi } from "@/services/investments/investments-total.service";
 import { formatToPercentage, formatToReadableDate } from "@/utils/format.utils";
-import type { InvestmentTotalByMonthGroupByAccountResponseDto } from "@investments/shared";
+import type {
+  InvestmentCategory,
+  InvestmentTotalByMonthGroupByAccountResponseDto,
+} from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
@@ -161,7 +164,13 @@ const getChartData = (
     .map(([, data]) => data);
 };
 
-export const InvestmentsAreaChartAccounts = () => {
+type InvestmentsAreaChartAccountsProps = {
+  category: InvestmentCategory;
+};
+
+export const InvestmentsAreaChartAccounts = ({
+  category,
+}: InvestmentsAreaChartAccountsProps) => {
   const [period, setPeriod] = useState<PerformancePeriod>("allTime");
   const [excludedAccountIds, setExcludedAccountIds] = useState<number[]>([]);
   const { data: accounts } = useQuery({
@@ -173,7 +182,13 @@ export const InvestmentsAreaChartAccounts = () => {
     queryFn: () => getInvestmentsTotalGroupedByAccountMonthlyApi("totalAmount"),
   });
 
-  const activeAccounts = accounts?.filter((account) => !account.isClosed) ?? [];
+  const activeAccounts =
+    accounts?.filter(
+      (account) =>
+        !account.isClosed &&
+        (category === "ALL" || account.category === category),
+    ) ?? [];
+
   const series = activeAccounts
     .filter((account) => !excludedAccountIds.includes(account.id))
     .map<AccountSeries>((account) => ({
