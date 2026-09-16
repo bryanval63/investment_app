@@ -1,10 +1,10 @@
 import { InvestmentType } from '@prisma/client';
 
-const SOCIAL_CONTRIBUTIONS_RATE = 0.172;
-const CRYPTO_FLAT_TAX_RATE = 0.3;
+const SOCIAL_CONTRIBUTIONS_RATE = 0.186;
 const SCPI_COST_RATE = 0.25;
-const LIFE_INSURANCE_INCOME_TAX_RATE = 0.128;
+const INCOME_TAX_RATE = 0.128;
 const LIFE_INSURANCE_ALLOWANCE = 4600;
+const CRYPTO_FLAT_TAX_RATE = SOCIAL_CONTRIBUTIONS_RATE + INCOME_TAX_RATE;
 
 export const calculateInvestmentTax = ({
   type,
@@ -26,7 +26,7 @@ export const calculateInvestmentTax = ({
     );
     return (
       taxableGain * SOCIAL_CONTRIBUTIONS_RATE +
-      incomeTaxableGain * LIFE_INSURANCE_INCOME_TAX_RATE
+      incomeTaxableGain * INCOME_TAX_RATE
     );
   }
 
