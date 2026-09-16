@@ -48,10 +48,11 @@ const ReferenceEditor = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {isEditing ? (
         <>
           <Input
+            className="min-w-0 flex-1"
             value={label}
             onChange={(event) => setLabel(event.target.value)}
             aria-label={`Libellé ${reference.code}`}
@@ -59,6 +60,7 @@ const ReferenceEditor = ({
           />
           <Button
             size="sm"
+            className="flex-1 sm:flex-none"
             onClick={() =>
               onSave(reference.id, label, () => setIsEditing(false))
             }
@@ -67,7 +69,12 @@ const ReferenceEditor = ({
             <Check size={16} />
             Sauvegarder
           </Button>
-          <Button size="sm" variant="ghost" onClick={cancel}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="flex-1 sm:flex-none"
+            onClick={cancel}
+          >
             <X size={16} />
             Annuler
           </Button>
@@ -78,6 +85,7 @@ const ReferenceEditor = ({
           <Button
             size="sm"
             variant="outline"
+            className="flex-1 sm:flex-none"
             onClick={() => setIsEditing(true)}
           >
             <Edit size={16} />
@@ -86,6 +94,7 @@ const ReferenceEditor = ({
           <Button
             size="sm"
             variant="destructive"
+            className="flex-1 sm:flex-none"
             onClick={() => {
               if (
                 window.confirm(
@@ -134,7 +143,7 @@ const ReferenceSection = ({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 border-b pb-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-b pb-3">
           <Input
             placeholder="Nouveau libellé"
             aria-label={`Nouveau ${title}`}
@@ -142,6 +151,7 @@ const ReferenceSection = ({
             onChange={(event) => setNewLabel(event.target.value)}
           />
           <Button
+            className="sm:w-auto"
             onClick={() => {
               onAdd(newLabel);
               setNewLabel("");
@@ -154,9 +164,9 @@ const ReferenceSection = ({
         {references.map((reference) => (
           <div
             key={reference.id}
-            className="grid grid-cols-[7rem_1fr] items-center gap-4 border-b pb-3 last:border-0"
+            className="flex flex-col sm:grid sm:grid-cols-[7rem_1fr] items-stretch sm:items-center gap-2 sm:gap-4 border-b pb-3 last:border-0"
           >
-            <span className="font-mono text-sm text-muted-foreground">
+            <span className="font-mono text-xs sm:text-sm text-muted-foreground">
               {reference.code}
             </span>
             <ReferenceEditor
