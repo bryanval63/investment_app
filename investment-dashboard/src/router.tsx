@@ -18,6 +18,8 @@ import { AccountsSidebar } from "./layouts/Sidebars/AccountsSidebar";
 import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
 import { TaxAdd } from "./pages/incomes/TaxAdd";
+import { Settings } from "./pages/settings/Settings";
+import { SettingsSidebar } from "./layouts/Sidebars/SettingsSidebar";
 
 export const router = createBrowserRouter([
   {
@@ -128,6 +130,18 @@ export const router = createBrowserRouter([
           {
             Component: NetWorthAdd,
             path: "add",
+          },
+        ],
+      },
+      {
+        path: "settings",
+        handle: {
+          sidebar: SettingsSidebar,
+        },
+        children: [
+          {
+            index: true,
+            Component: Settings,
           },
         ],
       },

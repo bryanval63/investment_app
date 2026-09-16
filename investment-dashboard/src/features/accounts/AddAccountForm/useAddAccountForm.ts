@@ -6,6 +6,7 @@ import type { AccountFormInput } from "./account-form.schema";
 import { AccountFormSchema, DEFAULT_ACCOUNT } from "./account-form.schema";
 import { createAccountApi } from "@/services/accounts/accounts.service";
 import { getInvestmentTypesRefApi } from "@/services/investments/investment-types-ref.service";
+import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import type { CreateAccountRequestDto } from "@investments/shared";
 
 export const useAddAccountForm = () => {
@@ -20,6 +21,11 @@ export const useAddAccountForm = () => {
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
   });
+  const { data: investmentCategories, isLoading: isLoadingCategories } =
+    useQuery({
+      queryKey: ["investment-categories-ref"],
+      queryFn: getInvestmentCategoriesRefApi,
+    });
 
   // Create account mutation
   const createAccountMutation = useMutation({
@@ -42,7 +48,10 @@ export const useAddAccountForm = () => {
   return {
     form,
     investmentTypes: investmentTypes || [],
-    isLoadingTypes,
+    investmentCategories: (investmentCategories || []).filter(
+      ({ code }) => code !== "ALL",
+    ),
+    isLoadingTypes: isLoadingTypes || isLoadingCategories,
     onSubmit,
     isSubmitting: createAccountMutation.isPending,
     error: createAccountMutation.error,

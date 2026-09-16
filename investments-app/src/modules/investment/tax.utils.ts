@@ -1,5 +1,3 @@
-import { InvestmentType } from '@prisma/client';
-
 const SOCIAL_CONTRIBUTIONS_RATE = 0.186;
 const SCPI_COST_RATE = 0.25;
 const INCOME_TAX_RATE = 0.128;
@@ -10,16 +8,16 @@ export const calculateInvestmentTax = ({
   type,
   capitalGain,
 }: {
-  type: InvestmentType;
+  type: string;
   capitalGain: number;
 }) => {
   const taxableGain = Math.max(0, capitalGain);
 
-  if (type === InvestmentType.PEA) {
+  if (type === 'PEA') {
     return taxableGain * SOCIAL_CONTRIBUTIONS_RATE;
   }
 
-  if (type === InvestmentType.LIFE_INSURANCE) {
+  if (type === 'LIFE_INSURANCE') {
     const incomeTaxableGain = Math.max(
       0,
       taxableGain - LIFE_INSURANCE_ALLOWANCE,
@@ -30,16 +28,16 @@ export const calculateInvestmentTax = ({
     );
   }
 
-  if (type === InvestmentType.CRYPTO) {
+  if (type === 'CRYPTO') {
     return taxableGain * CRYPTO_FLAT_TAX_RATE;
   }
 
-  if (type === InvestmentType.SCPI) {
+  if (type === 'SCPI') {
     return taxableGain * SCPI_COST_RATE;
   }
 
   // PEE gains are exempt here.
-  if (type === InvestmentType.PEE) {
+  if (type === 'PEE') {
     return 0;
   }
 

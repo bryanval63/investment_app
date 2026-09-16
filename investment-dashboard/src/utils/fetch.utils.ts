@@ -15,5 +15,12 @@ export async function api<T>(
     throw new Error("API error");
   }
 
+  if (
+    res.status === 204 ||
+    !res.headers.get("content-type")?.includes("application/json")
+  ) {
+    return undefined as T;
+  }
+
   return res.json();
 }

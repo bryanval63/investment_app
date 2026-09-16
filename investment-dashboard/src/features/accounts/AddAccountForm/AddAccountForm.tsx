@@ -5,13 +5,13 @@ import { SelectItem } from "@/components/ui/select";
 import { FormInput } from "@/components/custom/form/FormInput";
 import { Button } from "@/components/ui/button";
 import { useAddAccountForm } from "./useAddAccountForm";
-import { INVESTMENT_CATEGORIES } from "@investments/shared/constants/investments.constants";
 
 export const AddAccountForm = () => {
   const {
     form,
     investmentTypes,
     isLoadingTypes,
+    investmentCategories,
     onSubmit,
     isSubmitting,
     error,
@@ -43,13 +43,11 @@ export const AddAccountForm = () => {
               </FormSelect>
 
               <FormSelect name="category" label="Catégorie">
-                {INVESTMENT_CATEGORIES.filter((cat) => cat.code !== "ALL").map(
-                  ({ code, label }) => (
-                    <SelectItem key={code} value={code}>
-                      {label}
-                    </SelectItem>
-                  ),
-                )}
+                {investmentCategories.map(({ code, label }) => (
+                  <SelectItem key={code} value={code}>
+                    {label}
+                  </SelectItem>
+                ))}
               </FormSelect>
             </CardContent>
           </Card>

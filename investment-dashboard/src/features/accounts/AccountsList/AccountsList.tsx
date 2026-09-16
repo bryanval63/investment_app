@@ -5,11 +5,11 @@ import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSele
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getInvestmentTypesRefApi } from "@/services/investments/investment-types-ref.service";
+import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import {
   getAccountsApi,
   patchAccountApi,
 } from "@/services/accounts/accounts.service";
-import { INVESTMENT_CATEGORIES } from "@investments/shared";
 import type {
   AccountResponseDto,
   InvestmentTypeRefResponseDto,
@@ -35,6 +35,10 @@ export const AccountsList = () => {
   const { data: investmentTypes } = useQuery<InvestmentTypeRefResponseDto[]>({
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
+  });
+  const { data: investmentCategories } = useQuery({
+    queryKey: ["investment-categories-ref"],
+    queryFn: getInvestmentCategoriesRefApi,
   });
 
   const patchMutation = useMutation({
@@ -117,15 +121,17 @@ export const AccountsList = () => {
         editingId === row.original.id ? (
           <CustomSelect
             value={form.category as EditableAccountCategory}
-            options={INVESTMENT_CATEGORIES.filter(
-              (category) => category.code !== "ALL",
-            )}
+            options={
+              investmentCategories?.filter(
+                (category) => category.code !== "ALL",
+              ) ?? []
+            }
             onValueChange={(value) =>
               updateForm("category", value as EditableAccountCategory)
             }
           />
         ) : (
-          (INVESTMENT_CATEGORIES.find(
+          (investmentCategories?.find(
             (category) => category.code === row.original.category,
           )?.label ?? row.original.category)
         ),

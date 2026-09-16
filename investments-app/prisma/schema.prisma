@@ -44,27 +44,17 @@ model Tax {
   year Int
 }
 
-enum InvestmentType {
-  LIFE_INSURANCE
-  PEA
-  CRYPTO
-  SCPI
-  PEE
-}
-
-enum InvestmentCategory {
-  STOCK
-  SCPI
-  CRYPTO
-  OTHER
-  ALL
-}
-
 model InvestmentTypeRef {
   id Int @default(autoincrement()) @id
-  code InvestmentType @unique
+  code String @unique
   label String 
   accounts Account[]
+}
+
+model InvestmentCategoryRef {
+  id Int @default(autoincrement()) @id
+  code String @unique
+  label String
 }
 
 model Account {
@@ -73,7 +63,7 @@ model Account {
   typeId Int
   name String
   investments Investment[]
-  category InvestmentCategory @default(STOCK)
+  category String @default("STOCK")
   isClosed Boolean @default(false)
 }
 

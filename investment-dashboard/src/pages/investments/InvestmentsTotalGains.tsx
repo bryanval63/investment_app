@@ -3,14 +3,17 @@ import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSele
 import { InvestmentsAreaChartCategory } from "@/features/investments/charts/categories/InvestmentsAreaChartCategory";
 import { InvestmentsBarChartCategory } from "@/features/investments/charts/categories/InvestmentsBarChartCategory";
 import { InvestmentsYearlyBarChartCategory } from "@/features/investments/charts/categories/InvestmentsYearlyBarChartCategory";
-import {
-  INVESTMENT_CATEGORIES,
-  type InvestmentCategory,
-} from "@investments/shared";
+import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
+import type { InvestmentCategory } from "@investments/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const InvestmentsTotalGains = () => {
   const [category, setCategory] = useState<InvestmentCategory>("ALL");
+  const { data: investmentCategories = [] } = useQuery({
+    queryKey: ["investment-categories-ref"],
+    queryFn: getInvestmentCategoriesRefApi,
+  });
 
   return (
     <MainContainer>
@@ -18,7 +21,7 @@ export const InvestmentsTotalGains = () => {
         <CustomSelect
           value={category}
           onValueChange={setCategory}
-          options={INVESTMENT_CATEGORIES}
+          options={investmentCategories}
         />
       </div>
       <InvestmentsAreaChartCategory

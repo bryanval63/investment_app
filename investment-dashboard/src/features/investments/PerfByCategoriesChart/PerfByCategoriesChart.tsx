@@ -3,10 +3,9 @@ import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/Custom
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatToPercentage } from "@/utils/format.utils";
-import {
-  INVESTMENT_CATEGORIES,
-  type InvestmentOverviewResponseDto,
-} from "@investments/shared";
+import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
+import type { InvestmentOverviewResponseDto } from "@investments/shared";
+import { useQuery } from "@tanstack/react-query";
 
 type PerfByCategoriesChartProps = {
   perfByCategories: InvestmentOverviewResponseDto["perfByCategory"] | undefined;
@@ -16,6 +15,10 @@ export const PerfByCategoriesChart = ({
   perfByCategories,
 }: PerfByCategoriesChartProps) => {
   const isMobile = useIsMobile();
+  const { data: investmentCategories = [] } = useQuery({
+    queryKey: ["investment-categories-ref"],
+    queryFn: getInvestmentCategoriesRefApi,
+  });
   const chartData =
     perfByCategories
       ?.filter((category) => category.code !== "ALL")
@@ -24,7 +27,7 @@ export const PerfByCategoriesChart = ({
           yAxis:
             code === "CRYPTO" && isMobile
               ? "Cryptos"
-              : INVESTMENT_CATEGORIES?.find(
+              : investmentCategories.find(
                   (category) => category.code === code,
                 )?.label || "",
           xAxis: value,

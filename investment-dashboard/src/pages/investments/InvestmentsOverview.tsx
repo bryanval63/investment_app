@@ -7,10 +7,8 @@ import { InvestmentsOverviewCards } from "@/features/investments/InvestmentsOver
 import { PerfByAccountsChart } from "@/features/investments/PerfByAccountsChart/PerfByAccountsChart";
 import { PerfByCategoriesChart } from "@/features/investments/PerfByCategoriesChart/PerfByCategoriesChart";
 import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
-import {
-  INVESTMENT_CATEGORIES,
-  type InvestmentCategory,
-} from "@investments/shared";
+import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
+import type { InvestmentCategory } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -20,6 +18,10 @@ export const InvestmentsOverview = () => {
   const { data: investmentsOverview } = useQuery({
     queryKey: ["investmentsOverview"],
     queryFn: () => getInvestmentsOverviewApi(),
+  });
+  const { data: investmentCategories = [] } = useQuery({
+    queryKey: ["investment-categories-ref"],
+    queryFn: getInvestmentCategoriesRefApi,
   });
 
   return (
@@ -32,7 +34,7 @@ export const InvestmentsOverview = () => {
           <CustomSelect
             value={category}
             onValueChange={setCategory}
-            options={INVESTMENT_CATEGORIES}
+            options={investmentCategories}
           />
         </div>
 

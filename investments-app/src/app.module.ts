@@ -7,6 +7,7 @@ import { TaxModule } from './modules/tax/tax.module';
 import { IncomeTypeRefModule } from './modules/income-type-ref/income-type-ref.module';
 import { InvestmentTypeRefModule } from './modules/investment-type-ref/investment-type-ref.module';
 import { NetWorthModule } from './modules/net-worth/net-worth.module';
+import { InvestmentCategoryRefModule } from './modules/investment-category-ref/investment-category-ref.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NetWorthModule } from './modules/net-worth/net-worth.module';
     InvestmentModule,
     AccountModule,
     NetWorthModule,
+    InvestmentCategoryRefModule,
   ],
 })
 export class AppModule {}
