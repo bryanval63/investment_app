@@ -20,7 +20,10 @@ import {
   performanceByAccount,
   performanceByCategory,
 } from './investment.utils';
-import { calculateInvestmentTax } from './tax.utils';
+import {
+  calculateInvestmentEntryFee,
+  calculateInvestmentTax,
+} from './tax.utils';
 
 @Injectable()
 export class InvestmentService {
@@ -470,21 +473,27 @@ export class InvestmentService {
 
     return result.map((row) => {
       const taxInfo = accountTaxInfo.get(Number(row.accountId));
-      const taxAmount =
-        taxInfo?.type
-          ? calculateInvestmentTax({
-              type: taxInfo.type,
-              capitalGain: Number(row.capitalGain),
-            })
-          : 0;
+      const taxAmount = taxInfo?.type
+        ? calculateInvestmentTax({
+            type: taxInfo.type,
+            capitalGain: Number(row.capitalGain),
+          })
+        : 0;
+      const entryFee = taxInfo?.type
+        ? calculateInvestmentEntryFee({
+            type: taxInfo.type,
+            accountName: row.accountName,
+            investedCapital: Number(row.amount) - Number(row.capitalGain),
+          })
+        : 0;
 
       return {
         ...row,
         accountId: Number(row.accountId),
         amount: Number(row.amount),
         capitalGain: Number(row.capitalGain),
-        taxAmount,
-        netAmount: Number(row.amount) - taxAmount,
+        taxAmount: taxAmount + entryFee,
+        netAmount: Number(row.amount) - taxAmount - entryFee,
       };
     });
   }

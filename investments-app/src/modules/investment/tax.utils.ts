@@ -1,5 +1,7 @@
 const SOCIAL_CONTRIBUTIONS_RATE = 0.186;
 const SCPI_COST_RATE = 0.25;
+const CORUM_ORIGIN_ENTRY_FEE_RATE = 0.11966;
+const CORUM_XL_ENTRY_FEE_RATE = 0.12;
 const INCOME_TAX_RATE = 0.128;
 const LIFE_INSURANCE_ALLOWANCE = 4600;
 const CRYPTO_FLAT_TAX_RATE = SOCIAL_CONTRIBUTIONS_RATE + INCOME_TAX_RATE;
@@ -42,4 +44,27 @@ export const calculateInvestmentTax = ({
   }
 
   return 0;
+};
+
+export const calculateInvestmentEntryFee = ({
+  type,
+  accountName,
+  investedCapital,
+}: {
+  type: string;
+  accountName: string;
+  investedCapital: number;
+}) => {
+  if (type !== 'SCPI') {
+    return 0;
+  }
+
+  const normalizedName = accountName.toLocaleLowerCase('fr-FR');
+  const rate = normalizedName.includes('corum origin')
+    ? CORUM_ORIGIN_ENTRY_FEE_RATE
+    : normalizedName.includes('corum xl')
+      ? CORUM_XL_ENTRY_FEE_RATE
+      : 0;
+
+  return Math.max(0, investedCapital) * rate;
 };
