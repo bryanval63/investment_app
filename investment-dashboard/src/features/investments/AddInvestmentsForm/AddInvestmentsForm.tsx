@@ -29,7 +29,7 @@ export const AddInvestmentsForm = () => {
   } = useAddInvestmentsForm();
 
   return (
-    <QueryBoundary query={{ error, fetchStatus }}>
+    <QueryBoundary query={{ data: accounts, error, fetchStatus }}>
       <div className="max-w-5xl m-auto flex flex-col justify-between h-full gap-3 lg:gap-8">
         <FormProvider {...form}>
           <form
