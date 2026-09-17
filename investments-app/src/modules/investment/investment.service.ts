@@ -518,14 +518,17 @@ export class InvestmentService {
         globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_ALLOWANCE) ??
         DEFAULT_LIFE_INSURANCE_ALLOWANCE,
       lifeInsuranceSocialContributionsRate:
-        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE) ??
-        DEFAULT_LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+        globalSettings.get(
+          SETTING_KEYS.LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+        ) ?? DEFAULT_LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
       lifeInsuranceReducedIncomeTaxRate:
-        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE) ??
-        DEFAULT_LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
+        globalSettings.get(
+          SETTING_KEYS.LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
+        ) ?? DEFAULT_LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
       lifeInsuranceContributionThreshold:
-        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_CONTRIBUTION_THRESHOLD) ??
-        DEFAULT_LIFE_INSURANCE_THRESHOLD,
+        globalSettings.get(
+          SETTING_KEYS.LIFE_INSURANCE_CONTRIBUTION_THRESHOLD,
+        ) ?? DEFAULT_LIFE_INSURANCE_THRESHOLD,
       lifeInsuranceAllowanceDurationYears:
         globalSettings.get(
           SETTING_KEYS.LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS,
@@ -551,9 +554,34 @@ export class InvestmentService {
         },
       ]),
     );
+    const lifeInsuranceContributionTotalsByDate = new Map<string, number>();
+
+    for (const row of result) {
+      const taxInfo = accountTaxInfo.get(Number(row.accountId));
+      if (taxInfo?.type !== 'LIFE_INSURANCE') {
+        continue;
+      }
+
+      const rowDateKey = row.date
+        ? new Date(row.date).toISOString().slice(0, 10)
+        : 'unknown';
+      const contributionTotal = Math.max(
+        0,
+        Number(row.amount) - Number(row.capitalGain),
+      );
+
+      lifeInsuranceContributionTotalsByDate.set(
+        rowDateKey,
+        (lifeInsuranceContributionTotalsByDate.get(rowDateKey) ?? 0) +
+          contributionTotal,
+      );
+    }
 
     return result.map((row) => {
       const taxInfo = accountTaxInfo.get(Number(row.accountId));
+      const rowDateKey = row.date
+        ? new Date(row.date).toISOString().slice(0, 10)
+        : 'unknown';
       const taxAmount = taxInfo?.type
         ? calculateInvestmentTax({
             type: taxInfo.type,
@@ -569,10 +597,12 @@ export class InvestmentService {
                 : undefined,
             totalContributions:
               taxInfo.type === 'LIFE_INSURANCE'
-                ? Math.max(0, Number(row.amount) - Number(row.capitalGain))
+                ? (lifeInsuranceContributionTotalsByDate.get(rowDateKey) ?? 0)
                 : undefined,
             totalCessions:
-              taxInfo.type === 'CRYPTO' ? Math.max(0, Number(row.amount)) : undefined,
+              taxInfo.type === 'CRYPTO'
+                ? Math.max(0, Number(row.amount))
+                : undefined,
             settings: taxSettings,
           })
         : 0;
