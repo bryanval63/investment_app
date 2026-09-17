@@ -1,5 +1,4 @@
 const SOCIAL_CONTRIBUTIONS_RATE = 0.186;
-const SCPI_COST_RATE = 0.25;
 const CORUM_ORIGIN_ENTRY_FEE_RATE = 0.11966;
 const CORUM_XL_ENTRY_FEE_RATE = 0.12;
 const INCOME_TAX_RATE = 0.128;
@@ -34,12 +33,8 @@ export const calculateInvestmentTax = ({
     return taxableGain * CRYPTO_FLAT_TAX_RATE;
   }
 
-  if (type === 'SCPI') {
-    return taxableGain * SCPI_COST_RATE;
-  }
-
   // PEE gains are exempt here.
-  if (type === 'PEE') {
+  if (['PEE', 'SCPI'].includes(type)) {
     return 0;
   }
 
