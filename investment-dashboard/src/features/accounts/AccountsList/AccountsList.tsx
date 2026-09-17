@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Check, Edit, X } from "lucide-react";
 import { useState } from "react";
+import { DatePicker } from "@/components/custom/form/DatePicker";
 
 type AccountForm = UpdateAccountRequestDto;
 type EditableAccountCategory = Exclude<AccountForm["category"], "ALL">;
@@ -58,6 +59,7 @@ export const AccountsList = () => {
       type: account.type,
       category: account.category,
       isClosed: account.isClosed,
+      openingDate: account.openingDate?.slice(0, 10) ?? "",
     });
   };
 
@@ -134,6 +136,23 @@ export const AccountsList = () => {
           (investmentCategories?.find(
             (category) => category.code === row.original.category,
           )?.label ?? row.original.category)
+        ),
+    },
+    {
+      accessorKey: "openingDate",
+      header: "Ouverture",
+      cell: ({ row }) =>
+        editingId === row.original.id ? (
+          <DatePicker
+            label="Date d'ouverture"
+            value={form.openingDate}
+            clearable
+            onChange={(value) => updateForm("openingDate", value)}
+          />
+        ) : row.original.openingDate ? (
+          new Date(row.original.openingDate).toLocaleDateString("fr-FR")
+        ) : (
+          "-"
         ),
     },
     {

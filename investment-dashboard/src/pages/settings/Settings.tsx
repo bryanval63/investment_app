@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,129 +6,51 @@ import { Button } from "@/components/ui/button";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import {
-  getInvestmentTypesRefApi,
-  patchInvestmentTypeRefApi,
-  createInvestmentTypeRefApi,
-  deleteInvestmentTypeRefApi,
-} from "@/services/investments/investment-types-ref.service";
-import {
-  getInvestmentCategoriesRefApi,
-  patchInvestmentCategoryRefApi,
-  createInvestmentCategoryRefApi,
-  deleteInvestmentCategoryRefApi,
-} from "@/services/investments/investment-categories-ref.service";
-import {
   getSettingsApi,
   updateSettingApi,
 } from "@/services/settings/settings.service";
-import type {
-  InvestmentCategoryRefResponseDto,
-  InvestmentTypeRefResponseDto,
-  SettingResponseDto,
-} from "@investments/shared";
+import type { SettingResponseDto } from "@investments/shared";
+import type { UpdateSettingRequestDto } from "@investments/shared";
 
 const GLOBAL_SCOPE = "GLOBAL";
+const ENTRY_FEE_RATE = "ENTRY_FEE_RATE";
 const SOCIAL_CONTRIBUTIONS_RATE = "SOCIAL_CONTRIBUTIONS_RATE";
 const INCOME_TAX_RATE = "INCOME_TAX_RATE";
 const LIFE_INSURANCE_ALLOWANCE = "LIFE_INSURANCE_ALLOWANCE";
-const ENTRY_FEE_RATE = "ENTRY_FEE_RATE";
+const LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE =
+  "LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE";
+const LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE =
+  "LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE";
+const LIFE_INSURANCE_CONTRIBUTION_THRESHOLD =
+  "LIFE_INSURANCE_CONTRIBUTION_THRESHOLD";
+const LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS =
+  "LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS";
+const LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER =
+  "LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER";
+const PEA_ALLOWANCE_DURATION_YEARS = "PEA_ALLOWANCE_DURATION_YEARS";
+const CRYPTO_CESSION_THRESHOLD = "CRYPTO_CESSION_THRESHOLD";
 const EMPTY_SETTINGS: SettingResponseDto[] = [];
 
 const DEFAULT_VALUES: Record<string, number> = {
   [`${GLOBAL_SCOPE}:${SOCIAL_CONTRIBUTIONS_RATE}`]: 0.186,
   [`${GLOBAL_SCOPE}:${INCOME_TAX_RATE}`]: 0.128,
   [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_ALLOWANCE}`]: 4600,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE}`]: 0.172,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE}`]: 0.075,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_CONTRIBUTION_THRESHOLD}`]: 150000,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS}`]: 8,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER}`]: 2,
+  [`${GLOBAL_SCOPE}:${PEA_ALLOWANCE_DURATION_YEARS}`]: 5,
+  [`${GLOBAL_SCOPE}:${CRYPTO_CESSION_THRESHOLD}`]: 305,
 };
 
-const ReferenceList = ({
-  title,
-  references,
-  onSave,
-  onAdd,
-  onDelete,
-}: {
-  title: string;
-  references: (
-    | InvestmentTypeRefResponseDto
-    | InvestmentCategoryRefResponseDto
-  )[];
-  onSave: (id: number, label: string) => void;
-  onAdd: (label: string) => void;
-  onDelete: (id: number) => void;
-}) => {
-  const [newLabel, setNewLabel] = useState("");
-  const [editing, setEditing] = useState<number | null>(null);
-  const [label, setLabel] = useState("");
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Nouveau libellé"
-            value={newLabel}
-            onChange={(event) => setNewLabel(event.target.value)}
-          />
-          <Button
-            disabled={!newLabel.trim()}
-            onClick={() => {
-              onAdd(newLabel.trim());
-              setNewLabel("");
-            }}
-          >
-            Ajouter
-          </Button>
-        </div>
-        {references.map((reference) => (
-          <div key={reference.id} className="flex gap-2 items-center">
-            <span className="font-mono text-xs w-32">{reference.code}</span>
-            {editing === reference.id ? (
-              <>
-                <Input
-                  value={label}
-                  onChange={(event) => setLabel(event.target.value)}
-                />
-                <Button
-                  onClick={() => {
-                    onSave(reference.id, label);
-                    setEditing(null);
-                  }}
-                >
-                  Sauvegarder
-                </Button>
-                <Button variant="ghost" onClick={() => setEditing(null)}>
-                  Annuler
-                </Button>
-              </>
-            ) : (
-              <>
-                <span className="flex-1">{reference.label}</span>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setEditing(reference.id);
-                    setLabel(reference.label);
-                  }}
-                >
-                  Éditer
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => onDelete(reference.id)}
-                >
-                  Supprimer
-                </Button>
-              </>
-            )}
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-};
+const percentKeys = new Set([
+  ENTRY_FEE_RATE,
+  SOCIAL_CONTRIBUTIONS_RATE,
+  INCOME_TAX_RATE,
+  LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+  LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
+]);
 
 export const Settings = () => {
   const queryClient = useQueryClient();
@@ -141,72 +63,14 @@ export const Settings = () => {
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
-  const { data: types = [] } = useQuery({
-    queryKey: ["investment-types-ref"],
-    queryFn: getInvestmentTypesRefApi,
-  });
-  const { data: categories = [] } = useQuery({
-    queryKey: ["investment-categories-ref"],
-    queryFn: getInvestmentCategoriesRefApi,
-  });
-
-  useEffect(() => {
-    setInputValues(
-      Object.fromEntries(
-        settings.map((setting) => {
-          const isPercent =
-            setting.key === ENTRY_FEE_RATE ||
-            setting.key === SOCIAL_CONTRIBUTIONS_RATE ||
-            setting.key === INCOME_TAX_RATE;
-          return [
-            `${setting.scope}:${setting.key}`,
-            isPercent ? String(setting.value * 100) : String(setting.value),
-          ];
-        }),
-      ),
-    );
-  }, [settings]);
 
   const updateMutation = useMutation({
-    mutationFn: updateSettingApi,
+    mutationFn: (updatedSettings: UpdateSettingRequestDto[]) =>
+      Promise.all(updatedSettings.map(updateSettingApi)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
       queryClient.invalidateQueries({ queryKey: ["investmentsOverview"] });
       queryClient.invalidateQueries({ queryKey: ["investments"] });
-    },
-  });
-  const referenceMutation = useMutation({
-    mutationFn: async (action: {
-      kind: "type" | "category";
-      operation: "save" | "add" | "delete";
-      id?: number;
-      label?: string;
-    }) => {
-      if (action.kind === "type") {
-        if (action.operation === "save")
-          return patchInvestmentTypeRefApi(action.id!, {
-            label: action.label!,
-          });
-        if (action.operation === "add")
-          return createInvestmentTypeRefApi({ label: action.label! });
-        return deleteInvestmentTypeRefApi(action.id!);
-      }
-      if (action.operation === "save")
-        return patchInvestmentCategoryRefApi(action.id!, {
-          label: action.label!,
-        });
-      if (action.operation === "add")
-        return createInvestmentCategoryRefApi({ label: action.label! });
-      return deleteInvestmentCategoryRefApi(action.id!);
-    },
-    onSuccess: (_, action) => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          action.kind === "type"
-            ? "investment-types-ref"
-            : "investment-categories-ref",
-        ],
-      });
     },
   });
 
@@ -216,9 +80,7 @@ export const Settings = () => {
 
   const entryFeeValue = (accountName: string) => {
     const configuredValue = settingValue(accountName, ENTRY_FEE_RATE);
-    if (configuredValue !== undefined) {
-      return configuredValue;
-    }
+    if (configuredValue !== undefined) return configuredValue;
 
     const normalizedName = accountName.toLocaleLowerCase("fr-FR");
     return normalizedName.includes("corum origin")
@@ -228,18 +90,16 @@ export const Settings = () => {
         : undefined;
   };
 
-  const inputValue = (scope: string, key: string, asPercent = false) => {
-    const keyName = `${scope}:${key}`;
-    const rawValue = inputValues[keyName];
-    if (rawValue !== undefined) {
-      return rawValue;
-    }
+  const inputValue = (scope: string, key: string) => {
+    const rawValue = inputValues[`${scope}:${key}`];
+    if (rawValue !== undefined) return rawValue;
 
-    const value =
-      key === ENTRY_FEE_RATE ? entryFeeValue(scope) : settingValue(scope, key);
+    const value = key === ENTRY_FEE_RATE
+      ? entryFeeValue(scope)
+      : settingValue(scope, key);
     return value === undefined
       ? ""
-      : asPercent
+      : percentKeys.has(key)
         ? String(value * 100)
         : String(value);
   };
@@ -251,70 +111,114 @@ export const Settings = () => {
     }));
   };
 
-  const save = (scope: string, key: string, asPercent = false) => {
-    const rawValue = inputValues[`${scope}:${key}`];
-    const value = Number(rawValue) / (asPercent ? 100 : 1);
-    if (!Number.isFinite(value) || value < 0) return;
-    updateMutation.mutate({ scope, key, value });
+  const saveAll = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const settingKeys = [
+      [GLOBAL_SCOPE, SOCIAL_CONTRIBUTIONS_RATE],
+      [GLOBAL_SCOPE, INCOME_TAX_RATE],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_CONTRIBUTION_THRESHOLD],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS],
+      [GLOBAL_SCOPE, LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER],
+      [GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS],
+      [GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD],
+      ...scpiAccounts.map((account) => [account.name, ENTRY_FEE_RATE]),
+    ];
+    const updatedSettings = settingKeys.map(([scope, key]) => {
+      const rawValue = inputValues[`${scope}:${key}`] ?? inputValue(scope, key);
+      return {
+        scope,
+        key,
+        value: Number(rawValue) / (percentKeys.has(key) ? 100 : 1),
+      };
+    });
+
+    if (
+      updatedSettings.some(
+        ({ value }) => !Number.isFinite(value) || value < 0,
+      )
+    ) {
+      return;
+    }
+
+    updateMutation.mutate(updatedSettings);
   };
 
   const scpiAccounts = accounts.filter((account) => account.type === "SCPI");
 
   return (
     <MainContainer columns={1}>
+      <form onSubmit={saveAll} className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Impôts</CardTitle>
+          <CardTitle>Impôts par type de compte</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          {[
-            [SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
-            [INCOME_TAX_RATE, "Impôt sur le revenu (%)"],
-          ].map(([key, label]) => (
-            <div key={key} className="flex gap-2 items-end">
-              <label className="flex-1 text-sm">
-                {label}
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  value={inputValue(GLOBAL_SCOPE, key, true)}
-                  onChange={(event) =>
-                    changeValue(GLOBAL_SCOPE, key, event.target.value)
-                  }
+        <CardContent className="grid gap-6 md:grid-cols-2">
+          <section className="rounded-lg border p-4">
+            <h3 className="mb-4 font-semibold">Règles communes</h3>
+            <div className="grid gap-4">
+              {[
+                [SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
+                [INCOME_TAX_RATE, "Impôt sur le revenu (%)"],
+              ].map(([key, label]) => (
+                <SettingInput
+                  key={key}
+                  label={label}
+                  value={inputValue(GLOBAL_SCOPE, key)}
+                  onChange={(value) => changeValue(GLOBAL_SCOPE, key, value)}
+                  disabled={updateMutation.isPending}
                 />
-              </label>
-              <Button
-                onClick={() => save(GLOBAL_SCOPE, key, true)}
-                disabled={updateMutation.isPending}
-              >
-                Enregistrer
-              </Button>
+              ))}
             </div>
-          ))}
-          <div className="flex gap-2 items-end">
-            <label className="flex-1 text-sm">
-              Abattement assurance-vie (€)
-              <Input
-                type="number"
-                min="0"
-                value={inputValue(GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE)}
-                onChange={(event) =>
-                  changeValue(
-                    GLOBAL_SCOPE,
-                    LIFE_INSURANCE_ALLOWANCE,
-                    event.target.value,
-                  )
-                }
-              />
-            </label>
-            <Button
-              onClick={() => save(GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE)}
+          </section>
+
+          <section className="rounded-lg border p-4">
+            <h3 className="mb-4 font-semibold">Assurance-vie</h3>
+            <div className="grid gap-4">
+              {[
+                [LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
+                [LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE, "Taux réduit (%)"],
+                [LIFE_INSURANCE_ALLOWANCE, "Abattement (€)"],
+                [LIFE_INSURANCE_CONTRIBUTION_THRESHOLD, "Seuil de versements (€)"],
+                [LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS, "Durée avant abattement (années)"],
+                [LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER, "Multiplicateur couple"],
+              ].map(([key, label]) => (
+                <SettingInput
+                  key={key}
+                  label={label}
+                  value={inputValue(GLOBAL_SCOPE, key)}
+                  onChange={(value) => changeValue(GLOBAL_SCOPE, key, value)}
+                  disabled={updateMutation.isPending}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border p-4">
+            <h3 className="mb-4 font-semibold">PEA</h3>
+            <SettingInput
+              label="Durée minimale avant exonération (années)"
+              value={inputValue(GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS)}
+              onChange={(value) =>
+                changeValue(GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS, value)
+              }
               disabled={updateMutation.isPending}
-            >
-              Enregistrer
-            </Button>
-          </div>
+            />
+          </section>
+
+          <section className="rounded-lg border p-4">
+            <h3 className="mb-4 font-semibold">Crypto-actifs</h3>
+            <SettingInput
+              label="Seuil d'exonération (€)"
+              value={inputValue(GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD)}
+              onChange={(value) =>
+                changeValue(GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD, value)
+              }
+              disabled={updateMutation.isPending}
+            />
+          </section>
         </CardContent>
       </Card>
 
@@ -328,83 +232,59 @@ export const Settings = () => {
               Ajoutez un compte de type SCPI pour configurer ses frais.
             </p>
           ) : (
-            scpiAccounts.map((account) => {
-              return (
-                <div key={account.id} className="flex gap-2 items-end max-w-xl">
-                  <label className="flex-1 text-sm">
-                    {account.name} (%)
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.001"
-                      value={inputValue(account.name, ENTRY_FEE_RATE, true)}
-                      onChange={(event) =>
-                        changeValue(
-                          account.name,
-                          ENTRY_FEE_RATE,
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </label>
-                  <Button
-                    onClick={() => save(account.name, ENTRY_FEE_RATE, true)}
-                    disabled={updateMutation.isPending}
-                  >
-                    Enregistrer
-                  </Button>
-                </div>
-              );
-            })
+            scpiAccounts.map((account) => (
+              <SettingInput
+                key={account.id}
+                label={`${account.name} (%)`}
+                value={inputValue(account.name, ENTRY_FEE_RATE)}
+                onChange={(value) =>
+                  changeValue(account.name, ENTRY_FEE_RATE, value)
+                }
+                disabled={updateMutation.isPending}
+              />
+            ))
           )}
         </CardContent>
       </Card>
-      <ReferenceList
-        title="Types de comptes"
-        references={types}
-        onSave={(id, label) =>
-          referenceMutation.mutate({
-            kind: "type",
-            operation: "save",
-            id,
-            label,
-          })
-        }
-        onAdd={(label) =>
-          referenceMutation.mutate({ kind: "type", operation: "add", label })
-        }
-        onDelete={(id) =>
-          referenceMutation.mutate({ kind: "type", operation: "delete", id })
-        }
-      />
-      <ReferenceList
-        title="Catégories"
-        references={categories.filter(({ code }) => code !== "ALL")}
-        onSave={(id, label) =>
-          referenceMutation.mutate({
-            kind: "category",
-            operation: "save",
-            id,
-            label,
-          })
-        }
-        onAdd={(label) =>
-          referenceMutation.mutate({
-            kind: "category",
-            operation: "add",
-            label,
-          })
-        }
-        onDelete={(id) =>
-          referenceMutation.mutate({
-            kind: "category",
-            operation: "delete",
-            id,
-          })
-        }
-      />
+      {updateMutation.error && (
+        <p className="text-sm text-destructive">
+          Impossible d&apos;enregistrer les paramètres.
+        </p>
+      )}
+      <div className="flex justify-end">
+        <Button type="submit" disabled={updateMutation.isPending}>
+          {updateMutation.isPending ? "Enregistrement..." : "Enregistrer les paramètres"}
+        </Button>
+      </div>
+      </form>
     </MainContainer>
   );
 };
+
+const SettingInput = ({
+  label,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+}) => (
+  <div>
+    <label className="block w-full max-w-sm text-sm">
+      {label}
+      <Input
+        type="number"
+        min="0"
+        step="0.001"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={disabled}
+      />
+    </label>
+  </div>
+);
 
 export default Settings;

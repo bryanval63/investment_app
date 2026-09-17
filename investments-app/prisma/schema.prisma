@@ -65,6 +65,7 @@ model Account {
   investments Investment[]
   category String @default("STOCK")
   isClosed Boolean @default(false)
+  openingDate DateTime?
 }
 
 model Investment {

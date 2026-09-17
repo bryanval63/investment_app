@@ -3,4 +3,5 @@ export interface CreateAccountRequestDto {
   name: string;
   type: string;
   category: InvestmentCategory;
+  openingDate?: string | null;
 }

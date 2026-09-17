@@ -25,6 +25,13 @@ import {
   calculateInvestmentTax,
   DEFAULT_INCOME_TAX_RATE,
   DEFAULT_LIFE_INSURANCE_ALLOWANCE,
+  DEFAULT_LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS,
+  DEFAULT_LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
+  DEFAULT_LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+  DEFAULT_LIFE_INSURANCE_THRESHOLD,
+  DEFAULT_LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER,
+  DEFAULT_PEA_ALLOWANCE_DURATION_YEARS,
+  DEFAULT_CRYPTO_CESSION_THRESHOLD,
   DEFAULT_SOCIAL_CONTRIBUTIONS_RATE,
 } from './tax.utils';
 import { SETTING_KEYS, SettingsService } from '../settings/settings.service';
@@ -35,6 +42,24 @@ export class InvestmentService {
     private prisma: PrismaService,
     private settingsService: SettingsService,
   ) {}
+
+  private getFullYearsBetween(
+    startDate: Date | undefined,
+    endDate: Date,
+  ): number {
+    if (!startDate) {
+      return 0;
+    }
+
+    const start = new Date(startDate);
+    let years = endDate.getFullYear() - start.getFullYear();
+    const anniversary = new Date(start);
+    anniversary.setFullYear(start.getFullYear() + years);
+    if (anniversary > endDate) {
+      years -= 1;
+    }
+    return Math.max(0, years);
+  }
 
   async getOverview(
     previousMonth = false,
@@ -468,6 +493,12 @@ export class InvestmentService {
         id: true,
         name: true,
         type: { select: { code: true } },
+        openingDate: true,
+        investments: {
+          orderBy: { date: 'asc' },
+          take: 1,
+          select: { date: true },
+        },
       },
     });
     const settings = await this.settingsService.findAll();
@@ -486,12 +517,37 @@ export class InvestmentService {
       lifeInsuranceAllowance:
         globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_ALLOWANCE) ??
         DEFAULT_LIFE_INSURANCE_ALLOWANCE,
+      lifeInsuranceSocialContributionsRate:
+        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE) ??
+        DEFAULT_LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+      lifeInsuranceReducedIncomeTaxRate:
+        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE) ??
+        DEFAULT_LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE,
+      lifeInsuranceContributionThreshold:
+        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_CONTRIBUTION_THRESHOLD) ??
+        DEFAULT_LIFE_INSURANCE_THRESHOLD,
+      lifeInsuranceAllowanceDurationYears:
+        globalSettings.get(
+          SETTING_KEYS.LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS,
+        ) ?? DEFAULT_LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS,
+      lifeInsuranceCoupleAllowanceMultiplier:
+        globalSettings.get(
+          SETTING_KEYS.LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER,
+        ) ?? DEFAULT_LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER,
+      peaAllowanceDurationYears:
+        globalSettings.get(SETTING_KEYS.PEA_ALLOWANCE_DURATION_YEARS) ??
+        DEFAULT_PEA_ALLOWANCE_DURATION_YEARS,
+      cryptoCessionThreshold:
+        globalSettings.get(SETTING_KEYS.CRYPTO_CESSION_THRESHOLD) ??
+        DEFAULT_CRYPTO_CESSION_THRESHOLD,
     };
     const accountTaxInfo = new Map(
       accounts.map((account) => [
         account.id,
         {
           type: account.type.code,
+          openingDate: account.openingDate,
+          firstInvestmentDate: account.investments[0]?.date,
         },
       ]),
     );
@@ -502,6 +558,21 @@ export class InvestmentService {
         ? calculateInvestmentTax({
             type: taxInfo.type,
             capitalGain: Number(row.capitalGain),
+            value: Number(row.amount),
+            durationInYears:
+              taxInfo.firstInvestmentDate &&
+              ['LIFE_INSURANCE', 'PEA'].includes(taxInfo.type)
+                ? this.getFullYearsBetween(
+                    taxInfo.openingDate ?? taxInfo.firstInvestmentDate,
+                    new Date(row.date),
+                  )
+                : undefined,
+            totalContributions:
+              taxInfo.type === 'LIFE_INSURANCE'
+                ? Math.max(0, Number(row.amount) - Number(row.capitalGain))
+                : undefined,
+            totalCessions:
+              taxInfo.type === 'CRYPTO' ? Math.max(0, Number(row.amount)) : undefined,
             settings: taxSettings,
           })
         : 0;

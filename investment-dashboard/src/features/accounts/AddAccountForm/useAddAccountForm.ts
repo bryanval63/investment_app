@@ -40,6 +40,7 @@ export const useAddAccountForm = () => {
       name: data.name,
       type: data.type as CreateAccountRequestDto["type"],
       category: data.category as CreateAccountRequestDto["category"],
+      openingDate: data.openingDate || null,
     };
 
     createAccountMutation.mutate(payload);

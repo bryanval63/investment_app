@@ -37,6 +37,9 @@ export class AccountService {
         name: createAccountDto.name,
         typeId: investmentType.id,
         category: createAccountDto.category,
+        openingDate: createAccountDto.openingDate
+          ? new Date(createAccountDto.openingDate)
+          : undefined,
       },
       select: SELECT_ACCOUNT_WITH_TYPE.select,
     });
@@ -64,6 +67,9 @@ export class AccountService {
         typeId: investmentType.id,
         category: updateAccountDto.category,
         isClosed: updateAccountDto.isClosed,
+        openingDate: updateAccountDto.openingDate
+          ? new Date(updateAccountDto.openingDate)
+          : null,
       },
       select: SELECT_ACCOUNT_WITH_TYPE.select,
     });

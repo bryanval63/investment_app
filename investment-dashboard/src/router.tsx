@@ -19,6 +19,7 @@ import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
 import { TaxAdd } from "./pages/incomes/TaxAdd";
 import { Settings } from "./pages/settings/Settings";
+import { SettingsReferences } from "./pages/settings/SettingsReferences";
 import { SettingsSidebar } from "./layouts/Sidebars/SettingsSidebar";
 
 export const router = createBrowserRouter([
@@ -141,7 +142,15 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
+            Component: () => <Navigate to="/settings/taxes" replace />,
+          },
+          {
+            path: "taxes",
             Component: Settings,
+          },
+          {
+            path: "references",
+            Component: SettingsReferences,
           },
         ],
       },

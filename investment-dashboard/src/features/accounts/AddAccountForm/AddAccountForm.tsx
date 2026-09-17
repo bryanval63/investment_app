@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FormSelect } from "@/components/custom/form/FormSelect";
 import { SelectItem } from "@/components/ui/select";
 import { FormInput } from "@/components/custom/form/FormInput";
+import { DatePicker } from "@/components/custom/form/DatePicker";
 import { Button } from "@/components/ui/button";
 import { useAddAccountForm } from "./useAddAccountForm";
 
@@ -32,6 +33,11 @@ export const AddAccountForm = () => {
                 required
                 label="Nom du compte"
                 placeholder="Ex: Mon PEA"
+              />
+              <DatePicker
+                label="Date d'ouverture du compte"
+                value={form.watch("openingDate")}
+                onChange={(value) => form.setValue("openingDate", value ?? "")}
               />
 
               <FormSelect name="type" label="Type de compte">

@@ -10,12 +10,14 @@ export const AccountFormSchema = z.object({
       message: "La catégorie de compte est invalide",
     },
   ),
+  openingDate: z.string().optional(),
 });
 
 export const DEFAULT_ACCOUNT: AccountFormInput = {
   name: "",
   type: "",
   category: "STOCK",
+  openingDate: "",
 };
 
 export type AccountFormInput = z.input<typeof AccountFormSchema>;

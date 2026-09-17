@@ -5,4 +5,5 @@ export interface AccountResponseDto {
   name: string;
   type: string;
   isClosed: boolean;
+  openingDate: string | null;
 }

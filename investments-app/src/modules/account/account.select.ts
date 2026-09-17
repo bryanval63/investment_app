@@ -7,6 +7,7 @@ export const SELECT_ACCOUNT_WITH_TYPE =
       name: true,
       category: true,
       isClosed: true,
+      openingDate: true,
       type: true,
     },
   });
