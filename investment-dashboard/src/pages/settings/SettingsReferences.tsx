@@ -44,13 +44,15 @@ const ReferenceList = ({
     <Card>
       <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            className="min-w-0"
             placeholder="Nouveau libellé"
             value={newLabel}
             onChange={(event) => setNewLabel(event.target.value)}
           />
           <Button
+            className="w-full sm:w-auto"
             disabled={!newLabel.trim()}
             onClick={() => {
               onAdd(newLabel.trim());
@@ -61,25 +63,50 @@ const ReferenceList = ({
           </Button>
         </div>
         {references.map((reference) => (
-          <div key={reference.id} className="flex items-center gap-2">
-            <span className="w-32 font-mono text-xs">{reference.code}</span>
+          <div key={reference.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <span className="w-full shrink-0 font-mono text-xs sm:w-32">{reference.code}</span>
             {editing === reference.id ? (
               <>
-                <Input value={label} onChange={(event) => setLabel(event.target.value)} />
-                <Button onClick={() => { onSave(reference.id, label); setEditing(null); }}>
-                  Sauvegarder
-                </Button>
-                <Button variant="ghost" onClick={() => setEditing(null)}>Annuler</Button>
+                <Input
+                  className="min-w-0 flex-1"
+                  value={label}
+                  onChange={(event) => setLabel(event.target.value)}
+                />
+                <div className="flex gap-2 sm:shrink-0">
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    onClick={() => { onSave(reference.id, label); setEditing(null); }}
+                  >
+                    Sauvegarder
+                  </Button>
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    variant="ghost"
+                    onClick={() => setEditing(null)}
+                  >
+                    Annuler
+                  </Button>
+                </div>
               </>
             ) : (
               <>
-                <span className="flex-1">{reference.label}</span>
-                <Button variant="outline" onClick={() => { setEditing(reference.id); setLabel(reference.label); }}>
-                  Éditer
-                </Button>
-                <Button variant="destructive" onClick={() => onDelete(reference.id)}>
-                  Supprimer
-                </Button>
+                <span className="min-w-0 flex-1 break-words">{reference.label}</span>
+                <div className="flex gap-2 sm:shrink-0">
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    variant="outline"
+                    onClick={() => { setEditing(reference.id); setLabel(reference.label); }}
+                  >
+                    Éditer
+                  </Button>
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    variant="destructive"
+                    onClick={() => onDelete(reference.id)}
+                  >
+                    Supprimer
+                  </Button>
+                </div>
               </>
             )}
           </div>
