@@ -18,8 +18,9 @@ export default defineConfig({
         description: "Mon application de suivi d'investissements",
         theme_color: "#ffffff", // Adapte selon ton thème Tailwind
         background_color: "#ffffff",
-        display: "standalone", // 👈 Permet de masquer la barre d'adresse du navigateur !
-        orientation: "any",
+        display: "fullscreen", // Sur Android, privilégie le mode plein écran pour gagner de la place
+        display_override: ["fullscreen", "standalone", "browser"],
+        orientation: "any", // Autorise portrait et paysage
         icons: [
           {
             src: "icon_192.png",
