@@ -1,7 +1,16 @@
-import { MainContainer } from "@/components/custom/containers/MainContainer";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { MainContainer } from "@/components/custom/containers/MainContainer";
+import { getAccountsApi } from "@/services/accounts/accounts.service";
+import {
+  getInvestmentTypesRefApi,
+  patchInvestmentTypeRefApi,
+  createInvestmentTypeRefApi,
+  deleteInvestmentTypeRefApi,
+} from "@/services/investments/investment-types-ref.service";
 import {
   getInvestmentCategoriesRefApi,
   patchInvestmentCategoryRefApi,
@@ -9,133 +18,47 @@ import {
   deleteInvestmentCategoryRefApi,
 } from "@/services/investments/investment-categories-ref.service";
 import {
-  getInvestmentTypesRefApi,
-  patchInvestmentTypeRefApi,
-  createInvestmentTypeRefApi,
-  deleteInvestmentTypeRefApi,
-} from "@/services/investments/investment-types-ref.service";
+  getSettingsApi,
+  updateSettingApi,
+} from "@/services/settings/settings.service";
 import type {
   InvestmentCategoryRefResponseDto,
   InvestmentTypeRefResponseDto,
+  SettingResponseDto,
 } from "@investments/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Edit, Trash2, X } from "lucide-react";
-import { useState } from "react";
 
-type Reference =
-  | InvestmentTypeRefResponseDto
-  | InvestmentCategoryRefResponseDto;
+const GLOBAL_SCOPE = "GLOBAL";
+const SOCIAL_CONTRIBUTIONS_RATE = "SOCIAL_CONTRIBUTIONS_RATE";
+const INCOME_TAX_RATE = "INCOME_TAX_RATE";
+const LIFE_INSURANCE_ALLOWANCE = "LIFE_INSURANCE_ALLOWANCE";
+const ENTRY_FEE_RATE = "ENTRY_FEE_RATE";
+const EMPTY_SETTINGS: SettingResponseDto[] = [];
 
-const ReferenceEditor = ({
-  reference,
-  onSave,
-  isSaving,
-  onDelete,
-  isDeleting,
-}: {
-  reference: Reference;
-  onSave: (id: number, label: string, onSaved: () => void) => void;
-  isSaving: boolean;
-  onDelete: (id: number) => void;
-  isDeleting: boolean;
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(reference.label);
-
-  const cancel = () => {
-    setLabel(reference.label);
-    setIsEditing(false);
-  };
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {isEditing ? (
-        <>
-          <Input
-            className="min-w-0 flex-1"
-            value={label}
-            onChange={(event) => setLabel(event.target.value)}
-            aria-label={`Libellé ${reference.code}`}
-            autoFocus
-          />
-          <Button
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={() =>
-              onSave(reference.id, label, () => setIsEditing(false))
-            }
-            disabled={isSaving || !label.trim()}
-          >
-            <Check size={16} />
-            Sauvegarder
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="flex-1 sm:flex-none"
-            onClick={cancel}
-          >
-            <X size={16} />
-            Annuler
-          </Button>
-        </>
-      ) : (
-        <>
-          <span className="flex-1">{reference.label}</span>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 sm:flex-none"
-            onClick={() => setIsEditing(true)}
-          >
-            <Edit size={16} />
-            Éditer
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              if (
-                window.confirm(
-                  `Supprimer « ${reference.label} » ? Cette action est irréversible.`,
-                )
-              ) {
-                onDelete(reference.id);
-              }
-            }}
-            disabled={isDeleting}
-            aria-label={`Supprimer ${reference.label}`}
-          >
-            <Trash2 size={16} />
-            Supprimer
-          </Button>
-        </>
-      )}
-    </div>
-  );
+const DEFAULT_VALUES: Record<string, number> = {
+  [`${GLOBAL_SCOPE}:${SOCIAL_CONTRIBUTIONS_RATE}`]: 0.186,
+  [`${GLOBAL_SCOPE}:${INCOME_TAX_RATE}`]: 0.128,
+  [`${GLOBAL_SCOPE}:${LIFE_INSURANCE_ALLOWANCE}`]: 4600,
 };
 
-const ReferenceSection = ({
+const ReferenceList = ({
   title,
   references,
   onSave,
-  isSaving,
   onAdd,
-  isAdding,
   onDelete,
-  isDeleting,
 }: {
   title: string;
-  references: Reference[];
-  onSave: (id: number, label: string, onSaved: () => void) => void;
-  isSaving: boolean;
+  references: (
+    | InvestmentTypeRefResponseDto
+    | InvestmentCategoryRefResponseDto
+  )[];
+  onSave: (id: number, label: string) => void;
   onAdd: (label: string) => void;
-  isAdding: boolean;
   onDelete: (id: number) => void;
-  isDeleting: boolean;
 }) => {
   const [newLabel, setNewLabel] = useState("");
+  const [editing, setEditing] = useState<number | null>(null);
+  const [label, setLabel] = useState("");
 
   return (
     <Card>
@@ -143,39 +66,63 @@ const ReferenceSection = ({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-b pb-3">
+        <div className="flex gap-2">
           <Input
             placeholder="Nouveau libellé"
-            aria-label={`Nouveau ${title}`}
             value={newLabel}
             onChange={(event) => setNewLabel(event.target.value)}
           />
           <Button
-            className="sm:w-auto"
+            disabled={!newLabel.trim()}
             onClick={() => {
-              onAdd(newLabel);
+              onAdd(newLabel.trim());
               setNewLabel("");
             }}
-            disabled={isAdding || !newLabel.trim()}
           >
             Ajouter
           </Button>
         </div>
         {references.map((reference) => (
-          <div
-            key={reference.id}
-            className="flex flex-col sm:grid sm:grid-cols-[7rem_1fr] items-stretch sm:items-center gap-2 sm:gap-4 border-b pb-3 last:border-0"
-          >
-            <span className="font-mono text-xs sm:text-sm text-muted-foreground">
-              {reference.code}
-            </span>
-            <ReferenceEditor
-              reference={reference}
-              onSave={onSave}
-              isSaving={isSaving}
-              onDelete={onDelete}
-              isDeleting={isDeleting}
-            />
+          <div key={reference.id} className="flex gap-2 items-center">
+            <span className="font-mono text-xs w-32">{reference.code}</span>
+            {editing === reference.id ? (
+              <>
+                <Input
+                  value={label}
+                  onChange={(event) => setLabel(event.target.value)}
+                />
+                <Button
+                  onClick={() => {
+                    onSave(reference.id, label);
+                    setEditing(null);
+                  }}
+                >
+                  Sauvegarder
+                </Button>
+                <Button variant="ghost" onClick={() => setEditing(null)}>
+                  Annuler
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="flex-1">{reference.label}</span>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditing(reference.id);
+                    setLabel(reference.label);
+                  }}
+                >
+                  Éditer
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => onDelete(reference.id)}
+                >
+                  Supprimer
+                </Button>
+              </>
+            )}
           </div>
         ))}
       </CardContent>
@@ -185,7 +132,15 @@ const ReferenceSection = ({
 
 export const Settings = () => {
   const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  const { data: settings = EMPTY_SETTINGS } = useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettingsApi,
+  });
+  const { data: accounts = [] } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: getAccountsApi,
+  });
   const { data: types = [] } = useQuery({
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
@@ -194,128 +149,261 @@ export const Settings = () => {
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });
-  const editableCategories = categories.filter(({ code }) => code !== "ALL");
 
-  const typeMutation = useMutation({
-    mutationFn: ({ id, label }: { id: number; label: string }) =>
-      patchInvestmentTypeRefApi(id, { label }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["investment-types-ref"] }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
+  useEffect(() => {
+    setInputValues(
+      Object.fromEntries(
+        settings.map((setting) => {
+          const isPercent =
+            setting.key === ENTRY_FEE_RATE ||
+            setting.key === SOCIAL_CONTRIBUTIONS_RATE ||
+            setting.key === INCOME_TAX_RATE;
+          return [
+            `${setting.scope}:${setting.key}`,
+            isPercent ? String(setting.value * 100) : String(setting.value),
+          ];
+        }),
       ),
+    );
+  }, [settings]);
+
+  const updateMutation = useMutation({
+    mutationFn: updateSettingApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      queryClient.invalidateQueries({ queryKey: ["investmentsOverview"] });
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
+    },
   });
-  const categoryMutation = useMutation({
-    mutationFn: ({ id, label }: { id: number; label: string }) =>
-      patchInvestmentCategoryRefApi(id, { label }),
-    onSuccess: () =>
+  const referenceMutation = useMutation({
+    mutationFn: async (action: {
+      kind: "type" | "category";
+      operation: "save" | "add" | "delete";
+      id?: number;
+      label?: string;
+    }) => {
+      if (action.kind === "type") {
+        if (action.operation === "save")
+          return patchInvestmentTypeRefApi(action.id!, {
+            label: action.label!,
+          });
+        if (action.operation === "add")
+          return createInvestmentTypeRefApi({ label: action.label! });
+        return deleteInvestmentTypeRefApi(action.id!);
+      }
+      if (action.operation === "save")
+        return patchInvestmentCategoryRefApi(action.id!, {
+          label: action.label!,
+        });
+      if (action.operation === "add")
+        return createInvestmentCategoryRefApi({ label: action.label! });
+      return deleteInvestmentCategoryRefApi(action.id!);
+    },
+    onSuccess: (_, action) => {
       queryClient.invalidateQueries({
-        queryKey: ["investment-categories-ref"],
-      }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
-      ),
-  });
-  const typeDeleteMutation = useMutation({
-    mutationFn: deleteInvestmentTypeRefApi,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["investment-types-ref"] }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
-      ),
-  });
-  const categoryDeleteMutation = useMutation({
-    mutationFn: deleteInvestmentCategoryRefApi,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["investment-categories-ref"],
-      }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
-      ),
-  });
-  const typeCreateMutation = useMutation({
-    mutationFn: createInvestmentTypeRefApi,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["investment-types-ref"] }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
-      ),
-  });
-  const categoryCreateMutation = useMutation({
-    mutationFn: createInvestmentCategoryRefApi,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["investment-categories-ref"],
-      }),
-    onError: (mutationError) =>
-      setError(
-        mutationError instanceof Error ? mutationError.message : "Erreur",
-      ),
+        queryKey: [
+          action.kind === "type"
+            ? "investment-types-ref"
+            : "investment-categories-ref",
+        ],
+      });
+    },
   });
 
-  const saveType = (id: number, label: string, onSaved?: () => void) => {
-    setError(null);
-    typeMutation.mutate({ id, label }, { onSuccess: onSaved });
+  const settingValue = (scope: string, key: string) =>
+    settings.find((setting) => setting.scope === scope && setting.key === key)
+      ?.value ?? DEFAULT_VALUES[`${scope}:${key}`];
+
+  const entryFeeValue = (accountName: string) => {
+    const configuredValue = settingValue(accountName, ENTRY_FEE_RATE);
+    if (configuredValue !== undefined) {
+      return configuredValue;
+    }
+
+    const normalizedName = accountName.toLocaleLowerCase("fr-FR");
+    return normalizedName.includes("corum origin")
+      ? 0.11966
+      : normalizedName.includes("corum xl")
+        ? 0.12
+        : undefined;
   };
-  const saveCategory = (id: number, label: string, onSaved?: () => void) => {
-    setError(null);
-    categoryMutation.mutate({ id, label }, { onSuccess: onSaved });
+
+  const inputValue = (scope: string, key: string, asPercent = false) => {
+    const keyName = `${scope}:${key}`;
+    const rawValue = inputValues[keyName];
+    if (rawValue !== undefined) {
+      return rawValue;
+    }
+
+    const value =
+      key === ENTRY_FEE_RATE ? entryFeeValue(scope) : settingValue(scope, key);
+    return value === undefined
+      ? ""
+      : asPercent
+        ? String(value * 100)
+        : String(value);
   };
-  const addType = (label: string) => {
-    setError(null);
-    typeCreateMutation.mutate({ label });
+
+  const changeValue = (scope: string, key: string, value: string) => {
+    setInputValues((current) => ({
+      ...current,
+      [`${scope}:${key}`]: value,
+    }));
   };
-  const addCategory = (label: string) => {
-    setError(null);
-    categoryCreateMutation.mutate({ label });
+
+  const save = (scope: string, key: string, asPercent = false) => {
+    const rawValue = inputValues[`${scope}:${key}`];
+    const value = Number(rawValue) / (asPercent ? 100 : 1);
+    if (!Number.isFinite(value) || value < 0) return;
+    updateMutation.mutate({ scope, key, value });
   };
-  const deleteType = (id: number) => {
-    setError(null);
-    typeDeleteMutation.mutate(id);
-  };
-  const deleteCategory = (id: number) => {
-    setError(null);
-    categoryDeleteMutation.mutate(id);
-  };
+
+  const scpiAccounts = accounts.filter((account) => account.type === "SCPI");
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Paramètres</h1>
-        <p className="text-muted-foreground">
-          Personnalisez les libellés utilisés dans vos comptes et graphiques.
-        </p>
-      </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <MainContainer>
-        <ReferenceSection
-          title="Types de comptes"
-          references={types}
-          onSave={saveType}
-          isSaving={typeMutation.isPending}
-          onAdd={addType}
-          isAdding={typeCreateMutation.isPending}
-          onDelete={deleteType}
-          isDeleting={typeDeleteMutation.isPending}
-        />
-        <ReferenceSection
-          title="Catégories"
-          references={editableCategories}
-          onSave={saveCategory}
-          isSaving={categoryMutation.isPending}
-          onAdd={addCategory}
-          isAdding={categoryCreateMutation.isPending}
-          onDelete={deleteCategory}
-          isDeleting={categoryDeleteMutation.isPending}
-        />
-      </MainContainer>
-    </div>
+    <MainContainer columns={1}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Impôts</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-3">
+          {[
+            [SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
+            [INCOME_TAX_RATE, "Impôt sur le revenu (%)"],
+          ].map(([key, label]) => (
+            <div key={key} className="flex gap-2 items-end">
+              <label className="flex-1 text-sm">
+                {label}
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={inputValue(GLOBAL_SCOPE, key, true)}
+                  onChange={(event) =>
+                    changeValue(GLOBAL_SCOPE, key, event.target.value)
+                  }
+                />
+              </label>
+              <Button
+                onClick={() => save(GLOBAL_SCOPE, key, true)}
+                disabled={updateMutation.isPending}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2 items-end">
+            <label className="flex-1 text-sm">
+              Abattement assurance-vie (€)
+              <Input
+                type="number"
+                min="0"
+                value={inputValue(GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE)}
+                onChange={(event) =>
+                  changeValue(
+                    GLOBAL_SCOPE,
+                    LIFE_INSURANCE_ALLOWANCE,
+                    event.target.value,
+                  )
+                }
+              />
+            </label>
+            <Button
+              onClick={() => save(GLOBAL_SCOPE, LIFE_INSURANCE_ALLOWANCE)}
+              disabled={updateMutation.isPending}
+            >
+              Enregistrer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Frais d&apos;entrée SCPI</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {scpiAccounts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Ajoutez un compte de type SCPI pour configurer ses frais.
+            </p>
+          ) : (
+            scpiAccounts.map((account) => {
+              return (
+                <div key={account.id} className="flex gap-2 items-end max-w-xl">
+                  <label className="flex-1 text-sm">
+                    {account.name} (%)
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.001"
+                      value={inputValue(account.name, ENTRY_FEE_RATE, true)}
+                      onChange={(event) =>
+                        changeValue(
+                          account.name,
+                          ENTRY_FEE_RATE,
+                          event.target.value,
+                        )
+                      }
+                    />
+                  </label>
+                  <Button
+                    onClick={() => save(account.name, ENTRY_FEE_RATE, true)}
+                    disabled={updateMutation.isPending}
+                  >
+                    Enregistrer
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+      <ReferenceList
+        title="Types de comptes"
+        references={types}
+        onSave={(id, label) =>
+          referenceMutation.mutate({
+            kind: "type",
+            operation: "save",
+            id,
+            label,
+          })
+        }
+        onAdd={(label) =>
+          referenceMutation.mutate({ kind: "type", operation: "add", label })
+        }
+        onDelete={(id) =>
+          referenceMutation.mutate({ kind: "type", operation: "delete", id })
+        }
+      />
+      <ReferenceList
+        title="Catégories"
+        references={categories.filter(({ code }) => code !== "ALL")}
+        onSave={(id, label) =>
+          referenceMutation.mutate({
+            kind: "category",
+            operation: "save",
+            id,
+            label,
+          })
+        }
+        onAdd={(label) =>
+          referenceMutation.mutate({
+            kind: "category",
+            operation: "add",
+            label,
+          })
+        }
+        onDelete={(id) =>
+          referenceMutation.mutate({
+            kind: "category",
+            operation: "delete",
+            id,
+          })
+        }
+      />
+    </MainContainer>
   );
 };
 

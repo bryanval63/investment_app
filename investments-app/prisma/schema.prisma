@@ -82,3 +82,11 @@ model NetWorth {
   amount Decimal @default(0)
   date DateTime
 }
+
+model InvestmentSetting {
+  id        Int    @default(autoincrement()) @id
+  key       String
+  scope     String @default("GLOBAL")
+  value     Float
+  @@unique([key, scope])
+}

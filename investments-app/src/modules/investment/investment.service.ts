@@ -23,11 +23,18 @@ import {
 import {
   calculateInvestmentEntryFee,
   calculateInvestmentTax,
+  DEFAULT_INCOME_TAX_RATE,
+  DEFAULT_LIFE_INSURANCE_ALLOWANCE,
+  DEFAULT_SOCIAL_CONTRIBUTIONS_RATE,
 } from './tax.utils';
+import { SETTING_KEYS, SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class InvestmentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private settingsService: SettingsService,
+  ) {}
 
   async getOverview(
     previousMonth = false,
@@ -459,9 +466,27 @@ export class InvestmentService {
     const accounts = await this.prisma.account.findMany({
       select: {
         id: true,
+        name: true,
         type: { select: { code: true } },
       },
     });
+    const settings = await this.settingsService.findAll();
+    const globalSettings = new Map(
+      settings
+        .filter((setting) => setting.scope === 'GLOBAL')
+        .map((setting) => [setting.key, setting.value]),
+    );
+    const taxSettings = {
+      socialContributionsRate:
+        globalSettings.get(SETTING_KEYS.SOCIAL_CONTRIBUTIONS_RATE) ??
+        DEFAULT_SOCIAL_CONTRIBUTIONS_RATE,
+      incomeTaxRate:
+        globalSettings.get(SETTING_KEYS.INCOME_TAX_RATE) ??
+        DEFAULT_INCOME_TAX_RATE,
+      lifeInsuranceAllowance:
+        globalSettings.get(SETTING_KEYS.LIFE_INSURANCE_ALLOWANCE) ??
+        DEFAULT_LIFE_INSURANCE_ALLOWANCE,
+    };
     const accountTaxInfo = new Map(
       accounts.map((account) => [
         account.id,
@@ -477,13 +502,19 @@ export class InvestmentService {
         ? calculateInvestmentTax({
             type: taxInfo.type,
             capitalGain: Number(row.capitalGain),
+            settings: taxSettings,
           })
         : 0;
       const entryFee = taxInfo?.type
         ? calculateInvestmentEntryFee({
             type: taxInfo.type,
             accountName: row.accountName,
-            investedCapital: Number(row.amount) - Number(row.capitalGain),
+            amount: Number(row.amount),
+            entryFeeRate: settings.find(
+              (setting) =>
+                setting.key === SETTING_KEYS.ENTRY_FEE_RATE &&
+                setting.scope === row.accountName,
+            )?.value,
           })
         : 0;
 
