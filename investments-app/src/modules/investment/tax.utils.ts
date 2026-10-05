@@ -236,7 +236,11 @@ export const calculateInvestmentTax = ({
     }).totalTax;
   }
 
-  if (['PEE', 'SCPI'].includes(type)) {
+  if (type === 'PEE') {
+    return round2(taxableGain * settings.socialContributionsRate);
+  }
+
+  if (type === 'SCPI') {
     return 0;
   }
 

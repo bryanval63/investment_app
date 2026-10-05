@@ -1,4 +1,40 @@
-import { calculateLifeInsuranceTax } from './tax.utils';
+import {
+  calculateInvestmentTax,
+  calculateLifeInsuranceTax,
+} from './tax.utils';
+
+describe('calculateInvestmentTax', () => {
+  it('applies the configured social contributions rate to PEE gains', () => {
+    const result = calculateInvestmentTax({
+      type: 'PEE',
+      value: 12000,
+      capitalGain: 2000,
+      settings: {
+        socialContributionsRate: 0.172,
+        incomeTaxRate: 0.128,
+        lifeInsuranceAllowance: 4600,
+        lifeInsuranceSocialContributionsRate: 0.172,
+        lifeInsuranceReducedIncomeTaxRate: 0.075,
+        lifeInsuranceContributionThreshold: 150000,
+        lifeInsuranceAllowanceDurationYears: 8,
+        lifeInsuranceCoupleAllowanceMultiplier: 2,
+        peaAllowanceDurationYears: 5,
+        cryptoCessionThreshold: 305,
+      },
+    });
+
+    expect(result).toBe(344);
+  });
+
+  it('does not charge PEE social contributions on losses', () => {
+    const result = calculateInvestmentTax({
+      type: 'PEE',
+      capitalGain: -2000,
+    });
+
+    expect(result).toBe(0);
+  });
+});
 
 describe('calculateLifeInsuranceTax', () => {
   it('keeps the reduced rate when total contributions stay below the threshold', () => {
