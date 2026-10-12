@@ -1,5 +1,4 @@
 import { FormProvider } from "react-hook-form";
-import { DEFAULT_INVESTMENT } from "./investments-form.schema";
 
 import { QueryBoundary } from "@/components/custom/QueryBoundary/QueryBoundary";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,7 +38,14 @@ export const AddInvestmentsForm = () => {
           >
             <FormMonthYear />
 
-            {fields.length > 0 && (
+            {accounts?.length === 0 && (
+              <p className="text-muted-foreground">
+                Aucun compte ouvert n'est disponible pour ajouter un
+                investissement.
+              </p>
+            )}
+
+            {fields.length > 0 && (accounts?.length ?? 0) > 0 && (
               <Card>
                 <CardContent className="flex flex-col gap-4">
                   {fields.map((field, index) => (
@@ -97,7 +103,8 @@ export const AddInvestmentsForm = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => append(DEFAULT_INVESTMENT)}
+              onClick={append}
+              disabled={!accounts?.length}
             >
               <Plus />
               Ajouter un investissement
@@ -119,7 +126,7 @@ export const AddInvestmentsForm = () => {
             type="submit"
             form="add-investments-form"
             className="w-full lg:w-auto"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !accounts?.length}
           >
             {isSubmitting ? "Création..." : "Valider"}
           </Button>

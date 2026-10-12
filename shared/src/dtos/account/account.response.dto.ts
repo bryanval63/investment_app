@@ -6,4 +6,5 @@ export interface AccountResponseDto {
   type: string;
   isClosed: boolean;
   openingDate: string | null;
+  defaultTransactionAmount: number;
 }

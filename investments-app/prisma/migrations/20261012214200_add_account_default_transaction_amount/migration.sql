@@ -1,0 +1,13 @@
+ALTER TABLE "Account"
+ADD COLUMN "defaultTransactionAmount" REAL NOT NULL DEFAULT 0;
+
+UPDATE "Account"
+SET "defaultTransactionAmount" = CASE "id"
+  WHEN 1 THEN 100
+  WHEN 2 THEN 100
+  WHEN 4 THEN 100
+  WHEN 5 THEN 100
+  WHEN 7 THEN 50
+  WHEN 8 THEN 50
+  ELSE 0
+END;

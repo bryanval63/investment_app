@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import type { AccountFormInput } from "./account-form.schema";
+import type { AccountFormInput, AccountFormOutput } from "./account-form.schema";
 import { AccountFormSchema, DEFAULT_ACCOUNT } from "./account-form.schema";
 import { createAccountApi } from "@/services/accounts/accounts.service";
 import { getInvestmentTypesRefApi } from "@/services/investments/investment-types-ref.service";
@@ -11,7 +11,7 @@ import type { CreateAccountRequestDto } from "@investments/shared";
 
 export const useAddAccountForm = () => {
   const navigate = useNavigate();
-  const form = useForm<AccountFormInput>({
+  const form = useForm<AccountFormInput, unknown, AccountFormOutput>({
     resolver: zodResolver(AccountFormSchema),
     defaultValues: DEFAULT_ACCOUNT,
   });
@@ -35,12 +35,13 @@ export const useAddAccountForm = () => {
     },
   });
 
-  const onSubmit = async (data: AccountFormInput) => {
+  const onSubmit = async (data: AccountFormOutput) => {
     const payload: CreateAccountRequestDto = {
       name: data.name,
       type: data.type as CreateAccountRequestDto["type"],
       category: data.category as CreateAccountRequestDto["category"],
       openingDate: data.openingDate || null,
+      defaultTransactionAmount: data.defaultTransactionAmount,
     };
 
     createAccountMutation.mutate(payload);

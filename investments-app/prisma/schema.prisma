@@ -66,6 +66,7 @@ model Account {
   category String @default("STOCK")
   isClosed Boolean @default(false)
   openingDate DateTime?
+  defaultTransactionAmount Float @default(0)
 }
 
 model Investment {

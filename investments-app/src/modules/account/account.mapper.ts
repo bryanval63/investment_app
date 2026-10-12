@@ -4,11 +4,22 @@ import { AccountWithType } from './account.type';
 export const mapAccountToDto = (
   accounts: AccountWithType[],
 ): AccountResponseDto[] =>
-  accounts.map(({ category, id, name, type, isClosed, openingDate }) => ({
-    category,
-    id,
-    name,
-    type: type.code,
-    isClosed,
-    openingDate: openingDate?.toISOString() ?? null,
-  }));
+  accounts.map(
+    ({
+      category,
+      id,
+      name,
+      type,
+      isClosed,
+      openingDate,
+      defaultTransactionAmount,
+    }) => ({
+      category,
+      id,
+      name,
+      type: type.code,
+      isClosed,
+      openingDate: openingDate?.toISOString() ?? null,
+      defaultTransactionAmount,
+    }),
+  );

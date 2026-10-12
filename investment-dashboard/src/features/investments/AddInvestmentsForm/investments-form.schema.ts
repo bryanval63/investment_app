@@ -1,6 +1,5 @@
 import { MONTHS_CODE } from "@investments/shared/constants/date.constant";
 import z from "zod";
-import { TRANSACTION_AMOUNT_BY_ACCOUNT } from "./useAddInvestmentsForm";
 
 export const InvestmentSchema = z.object({
   accountId: z.coerce.number().positive(),
@@ -19,7 +18,7 @@ export const DEFAULT_INVESTMENT: InvestmentsFormInput["investments"][number] = {
   accountId: "1",
   capitalGain: 0,
   totalAmount: 0,
-  transactionAmount: TRANSACTION_AMOUNT_BY_ACCOUNT[1],
+  transactionAmount: 0,
 };
 
 export type InvestmentsFormInput = z.input<typeof InvestmentsFormSchema>;

@@ -5,6 +5,7 @@ import {
   useReactTable,
   type ColumnDef,
   type SortingState,
+  type TableMeta,
 } from "@tanstack/react-table";
 
 import { Table } from "@/components/ui/table";
@@ -18,17 +19,20 @@ import { DataTableFooter } from "./DataTableFooter";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  meta?: TableMeta<TData>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  meta,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     data,
     columns,
+    meta,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),

@@ -11,6 +11,9 @@ export const AccountFormSchema = z.object({
     },
   ),
   openingDate: z.string().optional(),
+  defaultTransactionAmount: z.coerce
+    .number()
+    .min(0, "Le montant doit être positif ou nul"),
 });
 
 export const DEFAULT_ACCOUNT: AccountFormInput = {
@@ -18,6 +21,7 @@ export const DEFAULT_ACCOUNT: AccountFormInput = {
   type: "",
   category: "STOCK",
   openingDate: "",
+  defaultTransactionAmount: 0,
 };
 
 export type AccountFormInput = z.input<typeof AccountFormSchema>;

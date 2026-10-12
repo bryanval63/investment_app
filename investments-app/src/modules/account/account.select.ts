@@ -8,6 +8,7 @@ export const SELECT_ACCOUNT_WITH_TYPE =
       category: true,
       isClosed: true,
       openingDate: true,
+      defaultTransactionAmount: true,
       type: true,
     },
   });

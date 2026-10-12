@@ -23,6 +23,10 @@ export class AccountService {
   async create(
     createAccountDto: CreateAccountRequestDto,
   ): Promise<AccountResponseDto> {
+    this.validateDefaultTransactionAmount(
+      createAccountDto.defaultTransactionAmount,
+    );
+
     // Find the investment type ref by code
     const investmentType = await this.prisma.investmentTypeRef.findUnique({
       where: { code: createAccountDto.type },
@@ -40,6 +44,8 @@ export class AccountService {
         openingDate: createAccountDto.openingDate
           ? new Date(createAccountDto.openingDate)
           : undefined,
+        defaultTransactionAmount:
+          createAccountDto.defaultTransactionAmount ?? 0,
       },
       select: SELECT_ACCOUNT_WITH_TYPE.select,
     });
@@ -52,6 +58,10 @@ export class AccountService {
     id: number,
     updateAccountDto: UpdateAccountRequestDto,
   ): Promise<AccountResponseDto> {
+    this.validateDefaultTransactionAmount(
+      updateAccountDto.defaultTransactionAmount,
+    );
+
     const investmentType = await this.prisma.investmentTypeRef.findUnique({
       where: { code: updateAccountDto.type },
     });
@@ -70,11 +80,20 @@ export class AccountService {
         openingDate: updateAccountDto.openingDate
           ? new Date(updateAccountDto.openingDate)
           : null,
+        defaultTransactionAmount: updateAccountDto.defaultTransactionAmount,
       },
       select: SELECT_ACCOUNT_WITH_TYPE.select,
     });
 
     const [accountDto] = mapAccountToDto([account]);
     return accountDto;
+  }
+
+  private validateDefaultTransactionAmount(amount?: number): void {
+    if (amount !== undefined && (!Number.isFinite(amount) || amount < 0)) {
+      throw new Error(
+        'Default transaction amount must be a non-negative number',
+      );
+    }
   }
 }

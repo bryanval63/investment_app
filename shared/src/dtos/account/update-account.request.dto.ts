@@ -5,4 +5,5 @@ export interface UpdateAccountRequestDto {
   category: InvestmentCategory;
   isClosed: boolean;
   openingDate?: string | null;
+  defaultTransactionAmount?: number;
 }

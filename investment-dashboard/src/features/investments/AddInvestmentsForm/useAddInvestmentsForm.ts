@@ -6,7 +6,12 @@ import {
   type InvestmentRequestDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
-import { useFieldArray, useForm, type SubmitHandler } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  type SubmitHandler,
+} from "react-hook-form";
+import { useEffect, useMemo } from "react";
 import {
   DEFAULT_INVESTMENT,
   InvestmentsFormSchema,
@@ -16,24 +21,19 @@ import {
 import { postInvestmentsApi } from "@/services/investments/investments.service";
 import useFormMutation from "@/hooks/useFormMutation";
 
-export const TRANSACTION_AMOUNT_BY_ACCOUNT: Record<number, number> = {
-  1: 100,
-  2: 100,
-  4: 100,
-  5: 100,
-  7: 50,
-  8: 50,
-};
-
 export const useAddInvestmentsForm = () => {
   const {
-    data: accounts,
+    data: allAccounts,
     error,
     fetchStatus,
   } = useQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
+  const accounts = useMemo(
+    () => allAccounts?.filter(({ isClosed }) => !isClosed),
+    [allAccounts],
+  );
 
   const form = useForm<InvestmentsFormInput, unknown, InvestmentsFormOutput>({
     resolver: zodResolver(InvestmentsFormSchema),
@@ -44,19 +44,66 @@ export const useAddInvestmentsForm = () => {
     },
   });
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "investments",
   });
 
-  const handleAccountChange = (value: unknown, index: number) => {
-    const amount = TRANSACTION_AMOUNT_BY_ACCOUNT[Number(value)] ?? 0;
+  useEffect(() => {
+    if (!accounts) return;
 
-    update(index, {
-      ...fields[index],
-      accountId: value,
-      transactionAmount: amount,
+    form.getValues("investments").forEach((investment, index) => {
+      const account = accounts.find(
+        ({ id }) => id === Number(investment.accountId),
+      );
+      const defaultAccount = accounts[0];
+      const selectedAccount = account ?? defaultAccount;
+      if (!selectedAccount) return;
+
+      if (!account) {
+        form.setValue(
+          `investments.${index}.accountId`,
+          selectedAccount.id.toString(),
+          { shouldDirty: true },
+        );
+      }
+
+      if (
+        !account ||
+        (!form.getFieldState(`investments.${index}.transactionAmount`).isDirty &&
+          !form.getFieldState(`investments.${index}.transactionAmount`).isTouched)
+      ) {
+        form.setValue(
+          `investments.${index}.transactionAmount`,
+          selectedAccount.defaultTransactionAmount,
+        );
+      }
     });
+  }, [accounts, form]);
+
+  const appendInvestment = () => {
+    const defaultAccount = accounts?.[0];
+    append({
+      ...DEFAULT_INVESTMENT,
+      accountId: defaultAccount?.id.toString() ?? "",
+      transactionAmount: defaultAccount?.defaultTransactionAmount ?? 0,
+    });
+  };
+
+  const handleAccountChange = (value: unknown, index: number) => {
+    const account = accounts?.find(({ id }) => id === Number(value));
+    if (!account) return;
+
+    form.setValue(`investments.${index}.accountId`, value, {
+      shouldDirty: true,
+    });
+    form.setValue(
+      `investments.${index}.transactionAmount`,
+      account.defaultTransactionAmount,
+      {
+      shouldDirty: true,
+      },
+    );
   };
 
   const {
@@ -85,7 +132,7 @@ export const useAddInvestmentsForm = () => {
     accounts,
     error,
     fetchStatus,
-    append,
+    append: appendInvestment,
     remove,
     handleAccountChange,
     onSubmit,

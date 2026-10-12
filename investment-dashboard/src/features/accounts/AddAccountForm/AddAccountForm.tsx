@@ -34,6 +34,14 @@ export const AddAccountForm = () => {
                 label="Nom du compte"
                 placeholder="Ex: Mon PEA"
               />
+              <FormInput
+                name="defaultTransactionAmount"
+                type="number"
+                min="0"
+                step="any"
+                required
+                label="Montant de transaction par défaut"
+              />
               <DatePicker
                 label="Date d'ouverture du compte"
                 value={form.watch("openingDate")}
