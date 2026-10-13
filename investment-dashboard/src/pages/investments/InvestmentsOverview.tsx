@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { InvestmentsAreaChartCategory } from "@/features/investments/charts/categories/InvestmentsAreaChartCategory";
 import { InvestmentsBarChartCategory } from "@/features/investments/charts/categories/InvestmentsBarChartCategory";
 import { InvestmentsOverviewCards } from "@/features/investments/InvestmentsOverviewCards/InvestmentsOverviewCards";
+import { InvestmentAllocationChart } from "@/features/investments/InvestmentAllocationChart/InvestmentAllocationChart";
 import { PerfByAccountsChart } from "@/features/investments/PerfByAccountsChart/PerfByAccountsChart";
 import { PerfByCategoriesChart } from "@/features/investments/PerfByCategoriesChart/PerfByCategoriesChart";
 import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
@@ -55,6 +56,7 @@ export const InvestmentsOverview = () => {
       <Separator className="hidden lg:block" />
 
       <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-8">
+        <InvestmentAllocationChart />
         <PerfByAccountsChart
           perfByAccounts={investmentsOverview?.perfByAccount}
         />
