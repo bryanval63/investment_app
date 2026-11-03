@@ -48,6 +48,24 @@ export const NetWorthOverview = () => {
   const formattedNetInvestedCapital = formatToEuro(netInvestedCapital);
   const formattedTaxesAndFees = formatToEuro(taxDifference);
   const formattedPerformance = formatToPercentage(performance);
+  const currentYear = new Date().getFullYear();
+  const currentYearNetWorthes =
+    netWorthes?.filter(
+      ({ date }) => new Date(date).getFullYear() === currentYear,
+    ) ?? [];
+  const previousDecemberNetWorthes =
+    netWorthes?.filter((netWorth) => {
+      const date = new Date(netWorth.date);
+      return (
+        date.getFullYear() === currentYear - 1 && date.getMonth() === 11
+      );
+    }) ?? [];
+  const currentYearCapitalGain =
+    currentYearNetWorthes.length > 0 && previousDecemberNetWorthes.length > 0
+      ? findLastItemByDate(currentYearNetWorthes).amount -
+        findLastItemByDate(previousDecemberNetWorthes).amount
+      : 0;
+  const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
 
   const chartData =
     netWorthes?.map(({ amount, date }) => {
@@ -103,6 +121,13 @@ export const NetWorthOverview = () => {
         <StatValue
           value={difference}
           formatted={formattedDifference}
+          style="text-xl"
+        />
+      </CardContainer>
+      <CardContainer title="Gain depuis le début de l'année">
+        <StatValue
+          value={currentYearCapitalGain}
+          formatted={formattedCurrentYearCapitalGain}
           style="text-xl"
         />
       </CardContainer>

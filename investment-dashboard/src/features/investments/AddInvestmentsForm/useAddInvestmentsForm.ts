@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createDateNormalizedByMonthAndYear,
   getCurrentYear,
+  MONTHS,
   type InvestmentRequestDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
@@ -38,7 +39,7 @@ export const useAddInvestmentsForm = () => {
   const form = useForm<InvestmentsFormInput, unknown, InvestmentsFormOutput>({
     resolver: zodResolver(InvestmentsFormSchema),
     defaultValues: {
-      month: "january",
+      month: MONTHS[new Date().getMonth()].code,
       year: getCurrentYear(),
       investments: [DEFAULT_INVESTMENT],
     },
