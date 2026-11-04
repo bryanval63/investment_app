@@ -1,4 +1,5 @@
 import { CustomAreaChart } from "@/components/custom/charts/CustomAreaChart/CustomAreaChart";
+import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { StatValue } from "@/components/custom/StatsValue/StatsValue";
@@ -16,6 +17,11 @@ import {
   type InvestmentOverviewResponseDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
+
+type NetWorthYearlyGain = {
+  xAxis: number;
+  yAxis: number;
+};
 
 export const NetWorthOverview = () => {
   const { data: netWorthes } = useQuery<NetWorthResponseDto[]>({
@@ -49,22 +55,41 @@ export const NetWorthOverview = () => {
   const formattedTaxesAndFees = formatToEuro(taxDifference);
   const formattedPerformance = formatToPercentage(performance);
   const currentYear = new Date().getFullYear();
-  const currentYearNetWorthes =
-    netWorthes?.filter(
-      ({ date }) => new Date(date).getFullYear() === currentYear,
-    ) ?? [];
-  const previousDecemberNetWorthes =
-    netWorthes?.filter((netWorth) => {
-      const date = new Date(netWorth.date);
-      return (
-        date.getFullYear() === currentYear - 1 && date.getMonth() === 11
-      );
-    }) ?? [];
+  const netWorthGainsByYear: NetWorthYearlyGain[] = [
+    ...new Set(
+      netWorthes?.map(({ date }) => new Date(date).getFullYear()) ?? [],
+    ),
+  ]
+    .sort((a, b) => a - b)
+    .flatMap((year) => {
+      const currentYearNetWorthes =
+        netWorthes?.filter(
+          ({ date }) => new Date(date).getFullYear() === year,
+        ) ?? [];
+      const previousDecemberNetWorthes =
+        netWorthes?.filter((netWorth) => {
+          const date = new Date(netWorth.date);
+          return date.getFullYear() === year - 1 && date.getMonth() === 11;
+        }) ?? [];
+
+      if (
+        currentYearNetWorthes.length === 0 ||
+        previousDecemberNetWorthes.length === 0
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          xAxis: year,
+          yAxis:
+            findLastItemByDate(currentYearNetWorthes).amount -
+            findLastItemByDate(previousDecemberNetWorthes).amount,
+        },
+      ];
+    });
   const currentYearCapitalGain =
-    currentYearNetWorthes.length > 0 && previousDecemberNetWorthes.length > 0
-      ? findLastItemByDate(currentYearNetWorthes).amount -
-        findLastItemByDate(previousDecemberNetWorthes).amount
-      : 0;
+    netWorthGainsByYear.find(({ xAxis }) => xAxis === currentYear)?.yAxis ?? 0;
   const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
 
   const chartData =
@@ -138,9 +163,18 @@ export const NetWorthOverview = () => {
           style="text-xl"
         />
       </CardContainer>
+      
       <div className="col-span-3">
         <CardContainer title="Evolution du patrimoine financier">
           <CustomAreaChart chartData={chartData} />
+        </CardContainer>
+      </div>
+      <div className="col-span-3">
+        <CardContainer title="Gain du capital par année">
+          <CustomBarChart
+            chartData={netWorthGainsByYear}
+            displayLabels
+          />
         </CardContainer>
       </div>
     </MainContainer>
