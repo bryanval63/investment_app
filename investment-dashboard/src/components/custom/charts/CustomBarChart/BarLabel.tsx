@@ -5,6 +5,8 @@ import type { CustomChartUnit } from "../custom-chart.type";
 type CustomLabelProps = Omit<LabelProps, "value"> & {
   value?: string | number;
   unit: CustomChartUnit;
+  barLayout: "horizontal" | "vertical";
+  labelFormatter?: (value: number) => string;
 };
 
 const toNumber = (value: string | number | undefined): number =>
@@ -19,33 +21,46 @@ export const BarLabel = (props: CustomLabelProps) => {
   const barWidth = toNumber(width);
   const barHeight = toNumber(height);
 
-  const barSize = Math.abs(barWidth);
-  const isSmallBar = barSize < 50;
+  const isVertical = props.barLayout === "horizontal";
+  const barSize = Math.abs(isVertical ? barHeight : barWidth);
+  const hasEnoughSpace = isVertical
+    ? barSize >= 50 && Math.abs(barWidth) >= 44
+    : barSize >= 50 && Math.abs(barHeight) >= 16;
 
   const label =
-    props.unit === "eur"
+    props.labelFormatter?.(numericValue) ??
+    (props.unit === "eur"
       ? formatToEuro(numericValue)
-      : formatToPercentage(numericValue);
-  const shouldBeInside = !isSmallBar;
-
-  const posX = shouldBeInside
-    ? xPos + barWidth / 2
-    : numericValue < 0
-      ? xPos - 8
-      : xPos + barWidth + 8;
-
-  const anchor: "start" | "middle" | "end" = shouldBeInside
-    ? "middle"
-    : numericValue < 0
-      ? "end"
-      : "start";
+      : formatToPercentage(numericValue));
+  const shouldBeInside = hasEnoughSpace;
 
   const fill = shouldBeInside ? "#fff" : "#000";
+  const posX = isVertical
+    ? xPos + barWidth / 2
+    : shouldBeInside
+      ? xPos + barWidth / 2
+      : numericValue < 0
+        ? xPos - 8
+        : xPos + barWidth + 8;
+  const posY = isVertical
+    ? shouldBeInside
+      ? yPos + barHeight / 2
+      : numericValue < 0
+        ? yPos + barHeight + 12
+        : yPos - 8
+    : yPos + barHeight / 2;
+  const anchor: "start" | "middle" | "end" = isVertical
+    ? "middle"
+    : shouldBeInside
+      ? "middle"
+      : numericValue < 0
+        ? "end"
+        : "start";
 
   return (
     <text
       x={posX}
-      y={yPos + barHeight / 2}
+      y={posY}
       dy={4}
       textAnchor={anchor}
       fill={fill}

@@ -1,5 +1,6 @@
 import { CustomAreaChart } from "@/components/custom/charts/CustomAreaChart/CustomAreaChart";
 import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
+import { Button } from "@/components/ui/button";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { StatValue } from "@/components/custom/StatsValue/StatsValue";
@@ -17,13 +18,23 @@ import {
   type InvestmentOverviewResponseDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 type NetWorthYearlyGain = {
   xAxis: number;
   yAxis: number;
 };
 
+const NET_WORTH_GAINS_PER_PAGE = 10;
+
+const formatGainInThousands = (amount: number) =>
+  `${new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 1,
+  }).format(amount / 1000)} k€`;
+
 export const NetWorthOverview = () => {
+  const [yearOffset, setYearOffset] = useState(0);
   const { data: netWorthes } = useQuery<NetWorthResponseDto[]>({
     queryKey: ["net-worthes"],
     queryFn: () => getNetWorthesApi(),
@@ -91,6 +102,21 @@ export const NetWorthOverview = () => {
   const currentYearCapitalGain =
     netWorthGainsByYear.find(({ xAxis }) => xAxis === currentYear)?.yAxis ?? 0;
   const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
+  const maxYearOffset = Math.max(
+    0,
+    netWorthGainsByYear.length - NET_WORTH_GAINS_PER_PAGE,
+  );
+  const activeYearOffset = Math.min(yearOffset, maxYearOffset);
+  const visibleYearsStart = Math.max(
+    0,
+    netWorthGainsByYear.length -
+      NET_WORTH_GAINS_PER_PAGE -
+      activeYearOffset,
+  );
+  const visibleNetWorthGains = netWorthGainsByYear.slice(
+    visibleYearsStart,
+    visibleYearsStart + NET_WORTH_GAINS_PER_PAGE,
+  );
 
   const chartData =
     netWorthes?.map(({ amount, date }) => {
@@ -171,10 +197,43 @@ export const NetWorthOverview = () => {
       </div>
       <div className="col-span-3">
         <CardContainer title="Gain du capital par année">
-          <CustomBarChart
-            chartData={netWorthGainsByYear}
-            displayLabels
-          />
+          <div className="flex flex-col gap-3">
+            {maxYearOffset > 0 && (
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Afficher les années précédentes"
+                  onClick={() =>
+                    setYearOffset(Math.min(activeYearOffset + 1, maxYearOffset))
+                  }
+                  disabled={activeYearOffset >= maxYearOffset}
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Afficher les années suivantes"
+                  onClick={() =>
+                    setYearOffset(Math.max(activeYearOffset - 1, 0))
+                  }
+                  disabled={activeYearOffset === 0}
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+            )}
+            <CustomBarChart
+              chartData={visibleNetWorthGains}
+              displayLabels
+              labelsLandscapeOnly
+              labelFormatter={formatGainInThousands}
+              isAnimationActive={false}
+            />
+          </div>
         </CardContainer>
       </div>
     </MainContainer>
