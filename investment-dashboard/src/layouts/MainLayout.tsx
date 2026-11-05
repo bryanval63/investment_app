@@ -1,7 +1,15 @@
 import { Header } from "./Header/Header";
+import { Suspense } from "react";
 import { Outlet, useMatches } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AppMatch } from "./layouts.type";
+
+// Affiché pendant que les données d'une page sont en cours de chargement.
+const PageLoader = () => (
+  <div className="flex h-64 items-center justify-center text-sm text-slate-500">
+    Chargement...
+  </div>
+);
 
 export const MainLayout = () => {
   const matches = useMatches() as AppMatch[];
@@ -23,7 +31,9 @@ export const MainLayout = () => {
         <main className="flex-1 lg:min-h-full">
           <Card className="h-full lg:p-8 futuristic-card futuristic-border lg:overflow-hidden">
             <CardContent className="flex-1 relative lg:px-8 lg:overflow-auto">
-              <Outlet />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </CardContent>
           </Card>
         </main>

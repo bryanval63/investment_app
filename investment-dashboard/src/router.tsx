@@ -26,6 +26,12 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: MainLayout,
+    // Erreur de chargement d'une page (requête Suspense en échec)
+    errorElement: (
+      <div className="p-8 text-sm text-red-600">
+        Impossible de charger cette page. Réessaie dans un instant.
+      </div>
+    ),
     handle: {
       sidebar: InvestmentsSidebar,
     },

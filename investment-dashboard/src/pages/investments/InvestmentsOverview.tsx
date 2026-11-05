@@ -10,17 +10,19 @@ import { PerfByCategoriesChart } from "@/features/investments/PerfByCategoriesCh
 import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import type { InvestmentCategory } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const InvestmentsOverview = () => {
   const [category, setCategory] = useState<InvestmentCategory>("ALL");
 
-  const { data: investmentsOverview } = useQuery({
+  // Suspense : la page ne s'affiche qu'une fois ces données chargées
+  // (le fallback est fourni par le layout parent).
+  const { data: investmentsOverview } = useSuspenseQuery({
     queryKey: ["investmentsOverview"],
     queryFn: () => getInvestmentsOverviewApi(),
   });
-  const { data: investmentCategories = [] } = useQuery({
+  const { data: investmentCategories } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });
