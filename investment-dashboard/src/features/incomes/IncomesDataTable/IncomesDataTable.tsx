@@ -4,6 +4,7 @@ import { getIncomesApi } from "@/services/incomes/incomes.service";
 import { INCOMES_DATA_TABLE_COLUMNS } from "./income-columns";
 import { pivotIncomes } from "./incomes-data-table.utils";
 import { MONTHS } from "@investments/shared/constants/date.constant";
+import { formatToEuro } from "@/utils/format.utils";
 
 type IncomesDataTableProps = {
   year: number;
@@ -17,7 +18,9 @@ export const IncomesDataTable = ({ year }: IncomesDataTableProps) => {
   const pivot = pivotIncomes(incomes ?? []);
 
   return (
-    <div>
+    // w-full + min-w-0 : contraint le tableau à la largeur disponible pour que
+    // seul le tableau défile horizontalement (parent en flex-wrap).
+    <div className="w-full min-w-0">
       {/* Desktop / large screens: full DataTable */}
       <div className="hidden lg:block">
         <DataTable columns={INCOMES_DATA_TABLE_COLUMNS} data={pivot} />
@@ -30,16 +33,16 @@ export const IncomesDataTable = ({ year }: IncomesDataTableProps) => {
             key={row.type}
             className="rounded-md border bg-background p-3 shadow-sm"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 mb-2">
               <div className="font-medium">{row.type}</div>
               <div className="text-sm text-muted-foreground">
-                Total:{" "}
-                {Object.values(MONTHS)
-                  .reduce(
+                Total :{" "}
+                {formatToEuro(
+                  Object.values(MONTHS).reduce(
                     (sum, m) => sum + (Number((row as any)[m.code]) || 0),
                     0,
-                  )
-                  .toFixed(2)}
+                  ),
+                )}
               </div>
             </div>
 
@@ -49,8 +52,10 @@ export const IncomesDataTable = ({ year }: IncomesDataTableProps) => {
                   <div className="text-xs text-muted-foreground">
                     {label.slice(0, 3)}
                   </div>
-                  <div className="text-sm font-medium">
-                    {Number((row as any)[code] || 0).toFixed(2)}
+                  <div className="text-sm font-medium whitespace-nowrap">
+                    {formatToEuro(Number((row as any)[code] || 0), {
+                      maximumFractionDigits: 0,
+                    })}
                   </div>
                 </div>
               ))}

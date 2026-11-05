@@ -15,17 +15,21 @@ import { safeSort } from "./data-table.utils";
 import { DataTableHeader } from "./DataTableHeader";
 import { DataTableBody } from "./DataTableBody";
 import { DataTableFooter } from "./DataTableFooter";
+import { DataTableMobileCards } from "./DataTableMobileCards";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   meta?: TableMeta<TData>;
+  /** Sous `lg`, affiche une carte par ligne au lieu du tableau. */
+  mobileCards?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   meta,
+  mobileCards = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -48,13 +52,20 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="rounded-md border dark:bg-slate-900 ">
+      <div
+        className={`rounded-md border dark:bg-slate-900 ${mobileCards ? "hidden lg:block" : ""}`}
+      >
         <Table>
           <DataTableHeader table={table} />
           <DataTableBody table={table} columns={columns} />
           <DataTableFooter table={table} />
         </Table>
       </div>
+      {mobileCards && (
+        <div className="lg:hidden">
+          <DataTableMobileCards table={table} />
+        </div>
+      )}
     </div>
   );
 }

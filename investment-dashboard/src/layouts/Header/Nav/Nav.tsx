@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../header.css";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -8,7 +8,33 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export const Nav = () => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  // Mémorise la route sur laquelle le menu a été ouvert : il se referme
+  // automatiquement dès que la route change (liens, retour arrière…).
+  const [openedOnPath, setOpenedOnPath] = useState<string | null>(null);
+  const isOpen = openedOnPath === location.pathname;
+  const setIsOpen = (open: boolean) =>
+    setOpenedOnPath(open ? location.pathname : null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Ferme le menu mobile sur Échap ou clic en dehors.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenedOnPath(null);
+    };
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!navRef.current?.contains(event.target as Node))
+        setOpenedOnPath(null);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
 
   const investmentsLinkClass = () => {
     const isActive =
@@ -32,13 +58,13 @@ export const Nav = () => {
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <nav className={`nav ${isOpen ? "nav-open" : ""}`}>
+    <nav ref={navRef} className={`nav ${isOpen ? "nav-open" : ""}`}>
       <button
         type="button"
         className="nav-toggle"
         aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X /> : <Menu />}
       </button>

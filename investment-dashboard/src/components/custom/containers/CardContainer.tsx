@@ -14,14 +14,14 @@ export const CardContainer = ({
   cardStyle = "w-full",
 }: CardContainerProps) => {
   return (
-    <Card className={cardStyle}>
-      <CardHeader>
+    <Card className={`min-w-0 ${cardStyle}`}>
+      <CardHeader className="px-3 lg:px-6">
         <div className="flex flex-col gap-4">
           <CardTitle className="text-sm lg:text-base">{title}</CardTitle>
           <Separator className="hidden lg:block" />
         </div>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-3 lg:px-6">{children}</CardContent>
     </Card>
   );
 };

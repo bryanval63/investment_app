@@ -16,7 +16,11 @@ import type {
   InvestmentTypeRefResponseDto,
   UpdateAccountRequestDto,
 } from "@investments/shared";
-import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useSuspenseQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { Check, Edit, X } from "lucide-react";
 import { useState } from "react";
@@ -181,27 +185,33 @@ const ACCOUNT_COLUMNS: ColumnDef<AccountResponseDto>[] = [
       return editor?.editingId === row.original.id ? (
         <div className="flex gap-2">
           <Button
+            aria-label="Sauvegarder"
             size="sm"
             onClick={() => editor.save(row.original.id)}
             disabled={editor.isSaving}
           >
-            <Check size={16} /> Sauvegarder
+            <Check size={16} />
+            <span className="hidden 2xl:inline">Sauvegarder</span>
           </Button>
           <Button
+            aria-label="Annuler"
             size="sm"
             variant="ghost"
             onClick={() => editor.cancelEdit()}
           >
-            <X size={16} /> Annuler
+            <X size={16} />
+            <span className="hidden 2xl:inline">Annuler</span>
           </Button>
         </div>
       ) : (
         <Button
+          aria-label="Éditer"
           size="sm"
           variant="outline"
           onClick={() => editor?.startEdit(row.original)}
         >
-          <Edit size={16} /> Éditer
+          <Edit size={16} />
+          <span className="hidden 2xl:inline">Éditer</span>
         </Button>
       );
     },
@@ -217,7 +227,9 @@ export const AccountsList = () => {
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
-  const { data: investmentTypes } = useSuspenseQuery<InvestmentTypeRefResponseDto[]>({
+  const { data: investmentTypes } = useSuspenseQuery<
+    InvestmentTypeRefResponseDto[]
+  >({
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
   });
@@ -281,6 +293,7 @@ export const AccountsList = () => {
         <DataTable
           columns={ACCOUNT_COLUMNS}
           data={accounts ?? []}
+          mobileCards
           meta={{
             accountEditor: {
               editingId,

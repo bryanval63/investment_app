@@ -4,11 +4,11 @@ import { Nav } from "./Nav/Nav";
 export const Header = () => {
   return (
     <header className="header min-h-12">
-      <div className="logo flex-1 hidden lg:block">InvestTrack</div>
+      <div className="logo flex-1">InvestTrack</div>
 
       <Nav />
 
-      <div className="flex-1"></div>
+      <div className="header-spacer flex-1"></div>
     </header>
   );
 };

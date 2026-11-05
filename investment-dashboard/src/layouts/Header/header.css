@@ -93,15 +93,19 @@
 } */
 
 /* Responsive */
-@media (max-width: 768px) {
+/* Aligné sur le breakpoint Tailwind `lg` (1024px) utilisé par le layout. */
+@media (max-width: 1023px) {
   .header {
     min-height: 56px;
     padding: 8px 16px;
   }
 
   .header .logo {
-    display: block;
     font-size: 1.25rem;
+  }
+
+  .header-spacer {
+    display: none;
   }
 
   .nav {
