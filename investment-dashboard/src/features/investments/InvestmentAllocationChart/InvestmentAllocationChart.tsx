@@ -56,7 +56,7 @@ export const InvestmentAllocationChart = () => {
             <div className="relative h-64 min-w-0">
               <ChartContainer
                 config={chartConfig}
-                className="h-full w-full aspect-auto"
+                className="relative z-10 h-full w-full aspect-auto"
               >
                 <PieChart>
                   <Pie
@@ -73,14 +73,32 @@ export const InvestmentAllocationChart = () => {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value, name) => [
-                      `${formatToEuro(Number(value))} (${formatToPercentage(Number(value) / totalAmount)})`,
-                      name,
-                    ]}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const { name, value, payload: item } = payload[0];
+
+                      return (
+                        <div className="border rounded-md bg-background/80 backdrop-blur px-3 py-2 shadow-sm">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {name}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2 w-2 rounded-sm"
+                              style={{ backgroundColor: item?.color }}
+                            />
+                            <p className="text-sm font-medium text-foreground">
+                              {formatToEuro(Number(value))} (
+                              {formatToPercentage(Number(value) / totalAmount)})
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }}
                   />
                 </PieChart>
               </ChartContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center">
                 <span className="text-xs text-muted-foreground">Total</span>
                 <span className="text-sm font-semibold">
                   {formatToEuro(totalAmount, { maximumFractionDigits: 0 })}
