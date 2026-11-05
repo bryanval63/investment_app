@@ -3,41 +3,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { MONTHS_LABEL } from "@investments/shared";
+import {
+  buildCalendarDays,
+  buildPickerYears,
+  parseInputValue,
+  startOfMonth,
+  toDate,
+  toDisplayValue,
+  toInputValue,
+  toValue,
+} from "./date-picker.utils";
 
 const WEEK_DAYS = ["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"];
-const MONTHS = Array.from({ length: 12 }, (_, month) =>
-  new Intl.DateTimeFormat("fr-FR", { month: "long" }).format(
-    new Date(2020, month, 1),
-  ),
-);
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 201 }, (_, index) => CURRENT_YEAR + 100 - index);
-
-const toDate = (value: string) => {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const toValue = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-    date.getDate(),
-  ).padStart(2, "0")}`;
-
-const toInputValue = (value?: string | null) =>
-  value ? toDate(value).toLocaleDateString("fr-FR") : "";
-
-const parseInputValue = (value: string) => {
-  const match = value.trim().match(/^(\d{1,2})[/. -](\d{1,2})[/. -](\d{4})$/);
-  if (!match) return null;
-
-  const [, day, month, year] = match.map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
-    ? date
-    : null;
-};
 
 export const DatePicker = ({
   value,
@@ -51,10 +29,9 @@ export const DatePicker = ({
   clearable?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
-  const [month, setMonth] = useState(() => {
-    const date = value ? toDate(value) : new Date();
-    return new Date(date.getFullYear(), date.getMonth(), 1);
-  });
+  const [month, setMonth] = useState(() =>
+    startOfMonth(value ? toDate(value) : new Date()),
+  );
   const [inputValue, setInputValue] = useState(() => toInputValue(value));
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -67,15 +44,8 @@ export const DatePicker = ({
     return () => document.removeEventListener("mousedown", close);
   }, [open]);
 
-  const days = useMemo(() => {
-    const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
-    const offset = (firstDay.getDay() + 6) % 7;
-    const count = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-    return [
-      ...Array.from({ length: offset }, () => null),
-      ...Array.from({ length: count }, (_, index) => index + 1),
-    ];
-  }, [month]);
+  const years = useMemo(() => buildPickerYears(), []);
+  const days = useMemo(() => buildCalendarDays(month), [month]);
 
   const commitInputValue = (nextValue: string) => {
     const parsedDate = parseInputValue(nextValue);
@@ -84,8 +54,8 @@ export const DatePicker = ({
       return;
     }
 
-    setInputValue(parsedDate.toLocaleDateString("fr-FR"));
-    setMonth(new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1));
+    setInputValue(toDisplayValue(parsedDate));
+    setMonth(startOfMonth(parsedDate));
     onChange(toValue(parsedDate));
   };
 
@@ -141,7 +111,7 @@ export const DatePicker = ({
               variant="ghost"
               size="icon-sm"
               aria-label="Mois précédent"
-              onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+              onClick={() => setMonth(startOfMonth(month, -1))}
             >
               <ChevronLeft />
             </Button>
@@ -159,7 +129,7 @@ export const DatePicker = ({
                 )
               }
             >
-              {MONTHS.map((monthName, index) => (
+              {MONTHS_LABEL.map((monthName, index) => (
                 <option key={monthName} value={index}>
                   {monthName}
                 </option>
@@ -179,7 +149,7 @@ export const DatePicker = ({
                 )
               }
             >
-              {YEARS.map((year) => (
+              {years.map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
@@ -190,7 +160,7 @@ export const DatePicker = ({
               variant="ghost"
               size="icon-sm"
               aria-label="Mois suivant"
-              onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+              onClick={() => setMonth(startOfMonth(month, 1))}
             >
               <ChevronRight />
             </Button>
@@ -213,7 +183,7 @@ export const DatePicker = ({
                   )}
                   onClick={() => {
                     if (date) {
-                      setInputValue(date.toLocaleDateString("fr-FR"));
+                      setInputValue(toDisplayValue(date));
                       onChange(toValue(date));
                       setOpen(false);
                     }

@@ -10,10 +10,12 @@ import {
   formatToEuro,
   formatToPercentage,
   formatToReadableDate,
+  formatToThousandsEuro,
 } from "@/utils/format.utils";
 import {
   findLastItemByDate,
   findSecondLastItemByDate,
+  getCurrentYear,
   type NetWorthResponseDto,
   type InvestmentOverviewResponseDto,
 } from "@investments/shared";
@@ -27,11 +29,6 @@ type NetWorthYearlyGain = {
 };
 
 const NET_WORTH_GAINS_PER_PAGE = 10;
-
-const formatGainInThousands = (amount: number) =>
-  `${new Intl.NumberFormat("fr-FR", {
-    maximumFractionDigits: 1,
-  }).format(amount / 1000)} k€`;
 
 export const NetWorthOverview = () => {
   const [yearOffset, setYearOffset] = useState(0);
@@ -65,7 +62,7 @@ export const NetWorthOverview = () => {
   const formattedNetInvestedCapital = formatToEuro(netInvestedCapital);
   const formattedTaxesAndFees = formatToEuro(taxDifference);
   const formattedPerformance = formatToPercentage(performance);
-  const currentYear = new Date().getFullYear();
+  const currentYear = getCurrentYear();
   const netWorthGainsByYear: NetWorthYearlyGain[] = [
     ...new Set(
       netWorthes?.map(({ date }) => new Date(date).getFullYear()) ?? [],
@@ -230,7 +227,7 @@ export const NetWorthOverview = () => {
               chartData={visibleNetWorthGains}
               displayLabels
               labelsLandscapeOnly
-              labelFormatter={formatGainInThousands}
+              labelFormatter={formatToThousandsEuro}
               isAnimationActive={false}
             />
           </div>

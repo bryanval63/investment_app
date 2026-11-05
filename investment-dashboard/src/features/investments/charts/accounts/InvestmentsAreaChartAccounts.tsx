@@ -5,9 +5,10 @@ import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSele
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import { getInvestmentsTotalGroupedByAccountMonthlyApi } from "@/services/investments/investments-total.service";
 import { formatToPercentage, formatToReadableDate } from "@/utils/format.utils";
-import type {
-  InvestmentCategory,
-  InvestmentTotalByMonthGroupByAccountResponseDto,
+import {
+  getStartOfCurrentYear,
+  type InvestmentCategory,
+  type InvestmentTotalByMonthGroupByAccountResponseDto,
 } from "@investments/shared";
 import { useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
@@ -81,7 +82,7 @@ const getChartData = (
 ) => {
   const seriesById = new Map(series.map((account) => [account.id, account]));
   const dataByDate = new Map<number, ChartData>();
-  const periodStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+  const periodStart = getStartOfCurrentYear();
   const initialPerformanceByAccount = new Map<
     number,
     { value: number; date: number }

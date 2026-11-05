@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -11,7 +10,10 @@ import {
   CreateReferenceRequestDto,
 } from '@investments/shared';
 import { mapInvestmentCategoryRefToDto } from './investment-category-ref.mapper';
-import { toReferenceCode } from '../reference/reference.utils';
+import {
+  buildReferenceCode,
+  normalizeReferenceLabel,
+} from '../reference/reference.utils';
 
 @Injectable()
 export class InvestmentCategoryRefService {
@@ -28,15 +30,8 @@ export class InvestmentCategoryRefService {
   async create({
     label,
   }: CreateReferenceRequestDto): Promise<InvestmentCategoryRefResponseDto> {
-    const normalizedLabel = label.trim();
-    if (!normalizedLabel)
-      throw new BadRequestException('The label cannot be empty');
-    const code = toReferenceCode(normalizedLabel);
-    if (!code) {
-      throw new BadRequestException(
-        'The label must contain at least one letter or number',
-      );
-    }
+    const normalizedLabel = normalizeReferenceLabel(label);
+    const code = buildReferenceCode(normalizedLabel);
 
     const existingCategory = await this.prisma.investmentCategoryRef.findUnique(
       {
@@ -58,10 +53,7 @@ export class InvestmentCategoryRefService {
     id: number,
     { label }: UpdateReferenceLabelRequestDto,
   ): Promise<InvestmentCategoryRefResponseDto> {
-    const normalizedLabel = label.trim();
-    if (!normalizedLabel) {
-      throw new BadRequestException('The label cannot be empty');
-    }
+    const normalizedLabel = normalizeReferenceLabel(label);
 
     const category = await this.prisma.investmentCategoryRef.findUnique({
       where: { id },

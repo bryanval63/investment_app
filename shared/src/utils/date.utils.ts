@@ -1,13 +1,20 @@
 import { MONTHS } from "../constants/date.constant";
 import type { Months } from "../types/date.type";
 
+export const getCurrentYear = () => new Date().getFullYear();
+
+export const getCurrentMonthCode = (): Months =>
+  MONTHS[new Date().getMonth()].code;
+
+/** Timestamp du 1er janvier de l'année courante à minuit (heure locale). */
+export const getStartOfCurrentYear = () =>
+  new Date(getCurrentYear(), 0, 1).getTime();
+
 export const buildYearsUntilCurrent = (startYear = 2014): number[] =>
   Array.from(
-    { length: new Date().getFullYear() - startYear + 1 },
+    { length: getCurrentYear() - startYear + 1 },
     (_, i) => startYear + i,
   );
-
-export const getCurrentYear = () => new Date().getFullYear();
 
 export const getMonthIndex = (month: Months) =>
   MONTHS.findIndex((m) => m.code === month);

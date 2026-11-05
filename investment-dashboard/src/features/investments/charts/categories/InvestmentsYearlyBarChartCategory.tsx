@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getInvestmentsTotalGroupedByCategoryYearlyApi } from "@/services/investments/investments-total.service";
 import type { CustomChartUnit } from "@/components/custom/charts/custom-chart.type";
 import type { ChartType } from "../charts.type";
+import { CHART_START_YEAR } from "../charts.utils";
 
 type InvestmentsYearlyBarChartCategoryProps = {
   category: InvestmentCategory;
@@ -26,7 +27,7 @@ export const InvestmentsYearlyBarChartCategory = ({
 
   const chartData =
     investmentsTotalGroupedByCategoryYearly
-      ?.filter((gain) => gain.category === category && gain.year > 2022)
+      ?.filter((gain) => gain.category === category && gain.year > CHART_START_YEAR)
       .map(({ amount, year, performance }) => {
         let yAxis;
 

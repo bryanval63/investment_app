@@ -11,9 +11,18 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@investments/shared": ["src/index.ts"],
-      "@investments/shared/*": ["src/*"]
+      "@investments/shared": [
+        "src/index.ts"
+      ],
+      "@investments/shared/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
 }

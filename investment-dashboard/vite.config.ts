@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -49,6 +50,11 @@ export default defineConfig({
       "@investments/shared": path.resolve(__dirname, "../shared/src"),
       "@investments/shared/*": path.resolve(__dirname, "../shared/src/*"),
     },
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
+    include: ["src/**/*.test.{ts,tsx}"],
   },
   optimizeDeps: {
     // On interdit à Vite d'essayer d'analyser ou d'embarquer Prisma dans le navigateur
