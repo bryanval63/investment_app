@@ -128,15 +128,11 @@ describe("NetWorthOverview", () => {
     await waitFor(() => expect(barsText(bars)).toEqual(["2026:1234:1,2 k€"]));
   });
 
-  it("shows zero values while data is loading", async () => {
+  it("renders nothing until data is loaded", async () => {
     vi.mocked(getNetWorthesApi).mockReturnValue(new Promise(() => {}));
     renderPage();
-    expect(await cardText("Gain depuis le début de l'année")).toContain(
-      "0,00 €",
-    );
-    expect(await cardText("Gain par rapport au mois précédent")).toContain(
-      "0,00 €",
-    );
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.queryByText("Gain depuis le début de l'année")).toBeNull();
   });
 
   it("paginates yearly gains by 10 years", async () => {

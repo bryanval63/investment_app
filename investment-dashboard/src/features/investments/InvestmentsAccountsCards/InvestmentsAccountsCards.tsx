@@ -11,7 +11,7 @@ import {
   getCurrentYear,
   type InvestmentColumnKey,
 } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import chartImg from "@/assets/img/chart_v2.png";
 
 type InvestmentsAccountsCardsProps = {
@@ -23,7 +23,7 @@ export const InvestmentsAccountsCards = ({
   type,
   accountId,
 }: InvestmentsAccountsCardsProps) => {
-  const { data: latestInvestment } = useQuery({
+  const { data: latestInvestment } = useSuspenseQuery({
     queryKey: ["investmentsTotalGroupedByAccountMonthly", type, accountId],
     queryFn: () => getInvestmentsTotalGroupedByAccountMonthlyApi(type),
     select: (data) =>
@@ -31,7 +31,7 @@ export const InvestmentsAccountsCards = ({
         data.filter((investment) => investment.accountId === accountId),
       ),
   });
-  const { data: currentYearInvestment } = useQuery({
+  const { data: currentYearInvestment } = useSuspenseQuery({
     queryKey: ["investmentsTotalGroupedByAccountYearly", accountId],
     queryFn: getInvestmentsTotalGroupedByAccountYearlyApi,
     select: (data) =>

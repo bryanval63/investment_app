@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -55,11 +55,11 @@ const percentKeys = new Set([
 export const Settings = () => {
   const queryClient = useQueryClient();
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
-  const { data: settings = EMPTY_SETTINGS } = useQuery({
+  const { data: settings = EMPTY_SETTINGS } = useSuspenseQuery({
     queryKey: ["settings"],
     queryFn: getSettingsApi,
   });
-  const { data: accounts = [] } = useQuery({
+  const { data: accounts = [] } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });

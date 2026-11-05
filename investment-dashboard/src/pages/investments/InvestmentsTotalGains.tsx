@@ -5,12 +5,12 @@ import { InvestmentsBarChartCategory } from "@/features/investments/charts/categ
 import { InvestmentsYearlyBarChartCategory } from "@/features/investments/charts/categories/InvestmentsYearlyBarChartCategory";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import type { InvestmentCategory } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const InvestmentsTotalGains = () => {
   const [category, setCategory] = useState<InvestmentCategory>("ALL");
-  const { data: investmentCategories = [] } = useQuery({
+  const { data: investmentCategories = [] } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });

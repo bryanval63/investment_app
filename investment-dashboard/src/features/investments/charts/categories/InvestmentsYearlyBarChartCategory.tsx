@@ -1,7 +1,7 @@
 import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
 import type { InvestmentCategory } from "@investments/shared/types/investments.type";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getInvestmentsTotalGroupedByCategoryYearlyApi } from "@/services/investments/investments-total.service";
 import type { CustomChartUnit } from "@/components/custom/charts/custom-chart.type";
 import type { ChartType } from "../charts.type";
@@ -20,7 +20,7 @@ export const InvestmentsYearlyBarChartCategory = ({
   unit = "eur",
   chartType,
 }: InvestmentsYearlyBarChartCategoryProps) => {
-  const { data: investmentsTotalGroupedByCategoryYearly } = useQuery({
+  const { data: investmentsTotalGroupedByCategoryYearly } = useSuspenseQuery({
     queryKey: ["investmentsTotalGroupedByCategoryYearly"],
     queryFn: () => getInvestmentsTotalGroupedByCategoryYearlyApi(),
   });

@@ -19,7 +19,7 @@ import {
   type NetWorthResponseDto,
   type InvestmentOverviewResponseDto,
 } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
@@ -32,12 +32,12 @@ const NET_WORTH_GAINS_PER_PAGE = 10;
 
 export const NetWorthOverview = () => {
   const [yearOffset, setYearOffset] = useState(0);
-  const { data: netWorthes } = useQuery<NetWorthResponseDto[]>({
+  const { data: netWorthes } = useSuspenseQuery<NetWorthResponseDto[]>({
     queryKey: ["net-worthes"],
     queryFn: () => getNetWorthesApi(),
   });
   const { data: investmentsOverview } =
-    useQuery<InvestmentOverviewResponseDto>({
+    useSuspenseQuery<InvestmentOverviewResponseDto>({
     queryKey: ["investmentsOverview"],
     queryFn: () => getInvestmentsOverviewApi(),
   });

@@ -1,8 +1,8 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { startTransition, useState } from "react";
 import { InvestmentsAreaChartAccount } from "@/features/investments/charts/accounts/InvestmentsAreaChartAccount";
 import { InvestmentsBarChartAccountProps } from "@/features/investments/charts/accounts/InvestmentsBarChartAccount";
 import { InvestmentsYearlyBarChartAccount } from "@/features/investments/charts/accounts/InvestmentsYearlyBarChartAccount";
@@ -11,7 +11,7 @@ import { InvestmentsAccountsCards } from "@/features/investments/InvestmentsAcco
 export const InvestmentsAccounts = () => {
   const [accountId, setAccountId] = useState<number>(1);
 
-  const { data: accounts } = useQuery({
+  const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
@@ -28,7 +28,10 @@ export const InvestmentsAccounts = () => {
       <div className="col-span-3 justify-center flex items-center gap-4">
         <CustomSelect
           value={accountId.toString()}
-          onValueChange={(accountId) => setAccountId(Number(accountId))}
+          // Transition : garde la page affichée pendant le chargement du compte.
+          onValueChange={(accountId) =>
+            startTransition(() => setAccountId(Number(accountId)))
+          }
           options={mappedAccounts.filter((acc) => !acc.isClosed)}
         />
       </div>

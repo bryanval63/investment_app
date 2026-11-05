@@ -16,7 +16,7 @@ import type {
   InvestmentTypeRefResponseDto,
   UpdateAccountRequestDto,
 } from "@investments/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { Check, Edit, X } from "lucide-react";
 import { useState } from "react";
@@ -213,15 +213,15 @@ export const AccountsList = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<AccountForm>>({});
 
-  const { data: accounts } = useQuery({
+  const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
-  const { data: investmentTypes } = useQuery<InvestmentTypeRefResponseDto[]>({
+  const { data: investmentTypes } = useSuspenseQuery<InvestmentTypeRefResponseDto[]>({
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
   });
-  const { data: investmentCategories } = useQuery({
+  const { data: investmentCategories } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });

@@ -3,10 +3,10 @@ import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/Custom
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { getStatsGroupedByTypeIncomesApi } from "@/services/incomes/incomes-stats.service";
 import { formatToEuro } from "@/utils/format.utils";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const IncomesByTypeChart = () => {
-  const { data: incomesGroupBy } = useQuery({
+  const { data: incomesGroupBy } = useSuspenseQuery({
     queryKey: ["incomesGroupedByType"],
     queryFn: () => getStatsGroupedByTypeIncomesApi(),
   });

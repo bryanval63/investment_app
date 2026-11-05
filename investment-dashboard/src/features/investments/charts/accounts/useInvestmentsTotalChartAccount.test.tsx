@@ -61,12 +61,12 @@ describe("useInvestmentsTotalChartAccount", () => {
     );
   });
 
-  it("returns an empty array while data is loading", () => {
+  it("suspends while data is loading", () => {
     vi.mocked(getInvestmentsTotalGroupedByAccountMonthlyApi).mockReturnValue(
       new Promise(() => {}),
     );
     const { result } = renderChartHook("sum");
-    expect(result.current.chartData).toEqual([]);
+    expect(result.current).toBeNull();
   });
 
   it("calls the API with the requested unit", async () => {

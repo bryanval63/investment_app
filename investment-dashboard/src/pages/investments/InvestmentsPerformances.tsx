@@ -8,12 +8,12 @@ import {
   type InvestmentCategory,
 } from "@investments/shared";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 export const InvestmentsPerformances = () => {
   const [category, setCategory] = useState<InvestmentCategory>("ALL");
-  const { data: investmentCategories = [] } = useQuery({
+  const { data: investmentCategories = [] } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });

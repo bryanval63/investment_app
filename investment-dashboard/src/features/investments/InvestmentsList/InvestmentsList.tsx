@@ -3,7 +3,7 @@ import { DataTable } from "@/components/custom/DataTable/DataTable";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteInvestmentApi,
   getInvestmentsApi,
@@ -16,11 +16,11 @@ import { getAccountsApi } from "@/services/accounts/accounts.service";
 
 export const InvestmentsList = () => {
   const queryClient = useQueryClient();
-  const { data: investments } = useQuery({
+  const { data: investments } = useSuspenseQuery({
     queryKey: ["investments"],
     queryFn: () => getInvestmentsApi(),
   });
-  const { data: accounts } = useQuery({
+  const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });

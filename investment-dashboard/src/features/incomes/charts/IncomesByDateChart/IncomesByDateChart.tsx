@@ -1,5 +1,5 @@
 import { getStatsGroupedByDateIncomesApi } from "@/services/incomes/incomes-stats.service";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
 import type { IncomeUnit } from "@investments/shared";
 import { formatToReadableDate } from "@/utils/format.utils";
@@ -26,7 +26,7 @@ export const IncomesByDateChart = ({
   unit,
   hasTaxes,
 }: IncomesByDateChartProps) => {
-  const { data: incomesGroupedByDate } = useQuery({
+  const { data: incomesGroupedByDate } = useSuspenseQuery({
     queryKey: ["incomesGroupedByDate", unit, hasTaxes],
     queryFn: () => getStatsGroupedByDateIncomesApi(unit, hasTaxes),
   });

@@ -10,7 +10,7 @@ import {
   type InvestmentCategory,
   type InvestmentTotalByMonthGroupByAccountResponseDto,
 } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
@@ -174,11 +174,11 @@ export const InvestmentsAreaChartAccounts = ({
 }: InvestmentsAreaChartAccountsProps) => {
   const [period, setPeriod] = useState<PerformancePeriod>("allTime");
   const [excludedAccountIds, setExcludedAccountIds] = useState<number[]>([]);
-  const { data: accounts } = useQuery({
+  const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
-  const { data: investments } = useQuery({
+  const { data: investments } = useSuspenseQuery({
     queryKey: ["investmentsTotalGroupedByAccountMonthly", "totalAmount"],
     queryFn: () => getInvestmentsTotalGroupedByAccountMonthlyApi("totalAmount"),
   });

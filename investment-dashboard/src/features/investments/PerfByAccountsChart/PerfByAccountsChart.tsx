@@ -4,7 +4,7 @@ import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import { formatToPercentage } from "@/utils/format.utils";
 import type { InvestmentOverviewResponseDto } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 type PerfByAccountsChartProps = {
   perfByAccounts: InvestmentOverviewResponseDto["perfByAccount"] | undefined;
@@ -13,7 +13,7 @@ type PerfByAccountsChartProps = {
 export const PerfByAccountsChart = ({
   perfByAccounts,
 }: PerfByAccountsChartProps) => {
-  const { data: accounts } = useQuery({
+  const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });

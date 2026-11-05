@@ -6,7 +6,7 @@ import { IncomesByTypeChart } from "@/features/incomes/charts/IncomesByTypeChart
 import { IncomesMonthlyAverageChart } from "@/features/incomes/charts/IncomesMonthlyAverageChart/IncomesMonthlyAverageChart";
 import type { IncomeUnit } from "@investments/shared";
 import { INCOME_UNIT } from "@investments/shared/constants/income.constant";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 
 type IncomeUnitOmitType = Exclude<IncomeUnit, "type">;
 
@@ -21,13 +21,15 @@ export const IncomesOverview = () => {
       <div className="col-span-2 justify-center flex items-center gap-4">
         <CustomSelect
           value={unit}
-          onValueChange={setUnit}
+          // Transition : garde les graphiques affichés pendant le chargement
+          // des nouvelles données au lieu de repasser sur « Chargement... ».
+          onValueChange={(value) => startTransition(() => setUnit(value))}
           options={filteredUnits}
         />
         <CustomCheckbox
           label="Impôts"
           checked={hasTaxes}
-          setChecked={setHasTaxes}
+          setChecked={(value) => startTransition(() => setHasTaxes(value))}
         />
       </div>
       <IncomesByDateChart unit={unit} hasTaxes={hasTaxes} />

@@ -3,7 +3,7 @@ import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { getStatsGroupedByDateIncomesApi } from "@/services/incomes/incomes-stats.service";
 import { formatToReadableDate } from "@/utils/format.utils";
 import { getCurrentYear } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 type IncomesMonthlyAverageChartProps = {
   hasTaxes: boolean;
@@ -12,7 +12,7 @@ type IncomesMonthlyAverageChartProps = {
 export const IncomesMonthlyAverageChart = ({
   hasTaxes,
 }: IncomesMonthlyAverageChartProps) => {
-  const { data: incomesGroupedByDate } = useQuery({
+  const { data: incomesGroupedByDate } = useSuspenseQuery({
     queryKey: ["incomesGroupedByDate", hasTaxes],
     queryFn: () => getStatsGroupedByDateIncomesApi("year", hasTaxes),
   });

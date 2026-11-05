@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -118,11 +118,11 @@ const ReferenceList = ({
 
 export const SettingsReferences = () => {
   const queryClient = useQueryClient();
-  const { data: types = [] } = useQuery({
+  const { data: types = [] } = useSuspenseQuery({
     queryKey: ["investment-types-ref"],
     queryFn: getInvestmentTypesRefApi,
   });
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });

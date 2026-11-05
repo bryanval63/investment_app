@@ -4,7 +4,7 @@ import {
   buildYearsUntilCurrent,
   getCurrentYear,
 } from "@investments/shared/utils/date.utils";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 
 const years = buildYearsUntilCurrent().map((y) => ({
   code: y.toString(),
@@ -19,7 +19,10 @@ export const IncomesData = () => {
       <CustomSelect
         value={selectedYear.toString()}
         options={years}
-        onValueChange={(value) => setSelectedYear(parseInt(value))}
+        // Transition : garde le tableau affiché pendant le chargement de l'année.
+        onValueChange={(value) =>
+          startTransition(() => setSelectedYear(parseInt(value)))
+        }
       />
 
       <IncomesDataTable year={selectedYear} />

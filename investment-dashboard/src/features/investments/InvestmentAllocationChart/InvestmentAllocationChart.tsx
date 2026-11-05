@@ -3,18 +3,17 @@ import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import { getInvestmentsTotalGroupedByCategoryMonthlyApi } from "@/services/investments/investments-total.service";
 import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
 
 const chartConfig = {} satisfies ChartConfig;
 
 export const InvestmentAllocationChart = () => {
-  const { data: investmentsByCategory, isPending: isInvestmentsPending } =
-    useQuery({
-      queryKey: ["investmentsTotalGroupedByCategory", "totalAmount"],
-      queryFn: () => getInvestmentsTotalGroupedByCategoryMonthlyApi("totalAmount"),
-    });
-  const { data: categories, isPending: areCategoriesPending } = useQuery({
+  const { data: investmentsByCategory } = useSuspenseQuery({
+    queryKey: ["investmentsTotalGroupedByCategory", "totalAmount"],
+    queryFn: () => getInvestmentsTotalGroupedByCategoryMonthlyApi("totalAmount"),
+  });
+  const { data: categories } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });
@@ -48,11 +47,7 @@ export const InvestmentAllocationChart = () => {
   return (
     <CardContainer title="Répartition des investissements par catégorie">
       <div>
-        {isInvestmentsPending || areCategoriesPending ? (
-          <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-            Chargement de la répartition...
-          </p>
-        ) : chartData.length === 0 ? (
+        {chartData.length === 0 ? (
           <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">
             Aucune donnée d’investissement par catégorie.
           </p>

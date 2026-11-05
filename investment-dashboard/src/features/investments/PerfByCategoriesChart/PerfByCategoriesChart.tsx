@@ -5,7 +5,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatToPercentage } from "@/utils/format.utils";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import type { InvestmentOverviewResponseDto } from "@investments/shared";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 type PerfByCategoriesChartProps = {
   perfByCategories: InvestmentOverviewResponseDto["perfByCategory"] | undefined;
@@ -15,7 +15,7 @@ export const PerfByCategoriesChart = ({
   perfByCategories,
 }: PerfByCategoriesChartProps) => {
   const isMobile = useIsMobile();
-  const { data: investmentCategories = [] } = useQuery({
+  const { data: investmentCategories = [] } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getInvestmentsTotalGroupedByCategoryMonthlyApi } from "@/services/investments/investments-total.service";
 import type {
   InvestmentCategory,
@@ -18,7 +18,7 @@ export const useInvestmentsTotalChartCategory = ({
   type,
   chartType,
 }: useInvestmentsTotalChartCategoryProps) => {
-  const { data: investmentsTotalGroupedByCategory } = useQuery({
+  const { data: investmentsTotalGroupedByCategory } = useSuspenseQuery({
     queryKey: ["investmentsTotalGroupedByCategory", type],
     queryFn: () => getInvestmentsTotalGroupedByCategoryMonthlyApi(type),
   });
