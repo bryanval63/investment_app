@@ -21,4 +21,6 @@ shared/dist
 
 # OS
 .DS_Store
-investments-app/prisma/dev.db
+
+# Bases SQLite locales (la prod utilise le volume Docker sqlite_data)
+*.db
