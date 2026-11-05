@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "investment-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "investment-dashboard"],
+      "port": 5173
+    }
+  ]
+}
