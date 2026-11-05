@@ -24,3 +24,6 @@ shared/dist
 
 # Bases SQLite locales (la prod utilise le volume Docker sqlite_data)
 *.db
+
+# Claude Code local settings
+.claude/settings.local.json
