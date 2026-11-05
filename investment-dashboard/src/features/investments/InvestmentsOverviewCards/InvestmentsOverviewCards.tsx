@@ -74,6 +74,7 @@ export const InvestmentsOverviewCards = ({
   );
 
   const cardContainerStyle = "justify-between lg:justify-evenly";
+  const statStyle = "text-base sm:text-xl";
 
   return (
     <div className="flex flex-col gap-3 lg:gap-8">
@@ -87,20 +88,21 @@ export const InvestmentsOverviewCards = ({
         />
       </Field>
 
-      <div className="flex flex-col lg:flex-row items-center gap-3 lg:gap-8">
-        <div className="w-full lg:w-1/2">
+      {/* Côte à côte uniquement sur très grand écran : en dessous, les cartes seraient trop étroites. */}
+      <div className="flex flex-col 2xl:flex-row items-center gap-3 lg:gap-4 xl:gap-8">
+        <div className="w-full 2xl:w-1/2">
           <SummaryCard
             totalAmount={totalAmount}
             totalNetAmount={totalNetAmount}
             totalCapitalGain={totalCapitalGain}
             totalPerf={totalPerf}
             img={chartImg}
-            cardStyle="lg:w-fit lg:m-auto"
+            cardStyle="w-full 2xl:w-fit 2xl:m-auto"
             title="Valeur totale du portefeuille"
           />
         </div>
 
-        <div className="w-full lg:w-1/2 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-8">
+        <div className="w-full 2xl:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4 xl:gap-8">
           <CardContainer
             title="Moyenne annuelle des performances"
             cardStyle={cardContainerStyle}
@@ -108,7 +110,7 @@ export const InvestmentsOverviewCards = ({
             <StatValue
               value={avgYearlyPerf}
               formatted={formattedAvgYearlyPerf}
-              style="text-xl"
+              style={statStyle}
             />
           </CardContainer>
           <CardContainer
@@ -118,12 +120,12 @@ export const InvestmentsOverviewCards = ({
             <StatValue
               value={currentYearPerf}
               formatted={formattedCurrentYearPerf}
-              style="text-xl"
+              style={statStyle}
             />
           </CardContainer>
           <CardContainer
             title="Meilleure performance mensuelle"
-            cardStyle={`${cardContainerStyle} order-5 lg:order-none`}
+            cardStyle={`${cardContainerStyle} order-5 md:order-none`}
           >
             <div className="flex flex-col gap-4 items-center capitalize">
               {formattedBestMonthDate}
@@ -131,12 +133,12 @@ export const InvestmentsOverviewCards = ({
                 <StatValue
                   value={bestMonthPerf}
                   formatted={formattedBestMonthPerf}
-                  style="text-xl"
+                  style={statStyle}
                 />
                 <StatValue
                   value={bestMonthAmount}
                   formatted={formattedBestMonthAmount}
-                  style="text-xl"
+                  style={statStyle}
                 />
               </div>
             </div>
@@ -148,7 +150,7 @@ export const InvestmentsOverviewCards = ({
             <StatValue
               value={totalMonthAvg}
               formatted={formattedTotalMonthAvg}
-              style="text-xl"
+              style={statStyle}
             />
           </CardContainer>
           <CardContainer
@@ -158,7 +160,7 @@ export const InvestmentsOverviewCards = ({
             <StatValue
               value={currentYearCapitalGain}
               formatted={formattedCurrentYearCapitalGain}
-              style="text-xl"
+              style={statStyle}
             />
           </CardContainer>
 
@@ -172,12 +174,12 @@ export const InvestmentsOverviewCards = ({
                 <StatValue
                   value={worstMonthPerf}
                   formatted={formattedWorstMonthPerf}
-                  style="text-xl"
+                  style={statStyle}
                 />
                 <StatValue
                   value={worstMonthAmount}
                   formatted={formattedWorstMonthAmount}
-                  style="text-xl"
+                  style={statStyle}
                 />
               </div>
             </div>

@@ -3,7 +3,11 @@ import { DataTable } from "@/components/custom/DataTable/DataTable";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useSuspenseQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   deleteInvestmentApi,
   getInvestmentsApi,
@@ -159,35 +163,43 @@ export const InvestmentsList = () => {
         editingId === row.original.id ? (
           <div className="flex gap-2">
             <Button
+              aria-label="Sauvegarder"
               size="sm"
               variant="default"
               onClick={() => save(row.original.id)}
             >
-              <Check size={16} /> Sauvegarder
+              <Check size={16} />
+              <span className="hidden 2xl:inline">Sauvegarder</span>
             </Button>
             <Button
+              aria-label="Annuler"
               size="sm"
               variant="ghost"
               onClick={() => setEditingId(null)}
             >
-              <X size={16} /> Annuler
+              <X size={16} />
+              <span className="hidden 2xl:inline">Annuler</span>
             </Button>
           </div>
         ) : (
           <div className="flex gap-2">
             <Button
+              aria-label="Éditer"
               size="sm"
               variant="outline"
               onClick={() => startEdit(row.original)}
             >
-              <Edit size={16} /> Éditer
+              <Edit size={16} />
+              <span className="hidden 2xl:inline">Éditer</span>
             </Button>
             <Button
+              aria-label="Supprimer"
               size="sm"
               variant="destructive"
               onClick={() => remove(row.original.id)}
             >
-              <Trash2 size={16} /> Supprimer
+              <Trash2 size={16} />
+              <span className="hidden 2xl:inline">Supprimer</span>
             </Button>
           </div>
         ),
@@ -197,7 +209,7 @@ export const InvestmentsList = () => {
   return (
     <MainContainer columns={1}>
       <div>
-        <DataTable columns={columns} data={investments ?? []} />
+        <DataTable columns={columns} data={investments ?? []} mobileCards />
       </div>
     </MainContainer>
   );

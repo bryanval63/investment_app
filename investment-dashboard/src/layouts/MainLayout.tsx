@@ -18,19 +18,19 @@ export const MainLayout = () => {
   const Sidebar = routeWithHandle?.handle?.sidebar;
 
   return (
-    <div className="h-screen bg-linear-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 from-slate-50 via-slate-200 to-slate-50 flex flex-col overflow-hidden">
+    <div className="h-dvh bg-linear-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 from-slate-50 via-slate-200 to-slate-50 flex flex-col overflow-hidden">
       <Header />
 
-      <div className="flex flex-1 p-2 gap-3 lg:p-8 lg:gap-8 justify-between overflow-auto lg:overflow-hidden flex-col lg:flex-row">
-        <aside className="lg:w-80">
-          <Card className="h-full futuristic-card futuristic-border p-4 lg:p-8">
+      <div className="flex flex-1 min-h-0 p-2 gap-3 lg:p-4 lg:gap-4 xl:p-8 xl:gap-8 justify-between overflow-auto lg:overflow-hidden flex-col lg:flex-row">
+        <aside className="shrink-0 lg:w-60 xl:w-80">
+          <Card className="h-full futuristic-card futuristic-border p-2 lg:p-6 xl:p-8">
             {Sidebar && <Sidebar />}
           </Card>
         </aside>
 
-        <main className="flex-1 lg:min-h-full">
-          <Card className="h-full lg:p-8 futuristic-card futuristic-border lg:overflow-hidden">
-            <CardContent className="flex-1 relative lg:px-8 lg:overflow-auto">
+        <main className="flex-1 min-w-0 lg:min-h-full">
+          <Card className="h-full lg:p-4 xl:p-8 futuristic-card futuristic-border lg:overflow-hidden">
+            <CardContent className="flex-1 relative lg:px-4 xl:px-8 lg:overflow-auto">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
@@ -41,4 +41,3 @@ export const MainLayout = () => {
     </div>
   );
 };
-

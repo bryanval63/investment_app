@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 
-export function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+// Par défaut aligné sur le breakpoint Tailwind `lg` (1024px) utilisé par le layout.
+export function useIsMobile(breakpoint = 1024) {
+  const query = `(max-width: ${breakpoint - 1}px)`;
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia(query).matches,
+  );
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
+    const mediaQuery = window.matchMedia(query);
+    const handleChange = () => setIsMobile(mediaQuery.matches);
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [breakpoint]);
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [query]);
 
   return isMobile;
 }
