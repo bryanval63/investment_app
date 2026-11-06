@@ -4,7 +4,12 @@ import { decimalNumber } from "@/utils/zod.utils";
 
 export const TaxFormSchema = z.object({
   year: z.coerce.number().min(2000).max(2100).int(),
-  amount: decimalNumber(z.coerce.number().positive()),
+  // Négatif : impôt payé ; positif : remboursement.
+  amount: decimalNumber(
+    z.coerce.number().refine((value) => value !== 0, {
+      message: "Le montant ne peut pas être nul",
+    }),
+  ),
 });
 
 export const DEFAULT_TAX: TaxFormInput = {

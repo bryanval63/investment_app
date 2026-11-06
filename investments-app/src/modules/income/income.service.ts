@@ -13,7 +13,7 @@ import {
 import { SELECT_INCOME_WITH_TYPE } from './income.selects';
 import { mapIncomeToDto, mapIncomesArrayToDto } from './income.mappers';
 import { IncomeTypeRefService } from '../income-type-ref/income-type-ref.service';
-import { Prisma, Tax } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { TaxService } from '../tax/tax.service';
 import { IncomeExcludingType } from './income.type';
 
@@ -66,7 +66,7 @@ export class IncomeService {
 
     const taxByYear = new Map<number, number>();
 
-    taxes.forEach(({ year, amount }: Tax) => {
+    taxes.forEach(({ year, amount }) => {
       taxByYear.set(
         year,
         unit === 'month' ? Number(amount) / 12 : Number(amount),
