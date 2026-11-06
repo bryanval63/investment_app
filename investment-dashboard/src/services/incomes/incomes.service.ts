@@ -7,6 +7,5 @@ const INCOMES_URL = "incomes";
 export const getIncomesApi = (year = getCurrentYear()) =>
   api<IncomeResponseDto[]>("GET", `${INCOMES_URL}?year=${year}`);
 
-export const postIncomesApi = (incomes: IncomeRequestDto[]) => {
+export const postIncomesApi = (incomes: IncomeRequestDto[]) =>
   api<IncomeRequestDto[]>("POST", INCOMES_URL, incomes);
-};
