@@ -66,7 +66,18 @@ Each module is `*.module.ts` / `*.controller.ts` / `*.service.ts`, plus where re
 - Data loading uses `useSuspenseQuery`; `MainLayout` wraps the `<Outlet />` in `<Suspense>` and the root route has an `errorElement`. After mutations, invalidate the relevant query keys (string keys like `["accounts"]`, `["investments"]`, `["investmentsOverview"]`).
 - Routing: each top-level section sets `handle.sidebar`; `MainLayout` renders the sidebar of the deepest matched route that has a handle.
 - Layout must work on mobile (`hooks/useIsMobile.ts`; `DataTable` has a `DataTableMobileCards` variant).
-- Tests: vitest + Testing Library, setup in `src/test/setup.ts`; `src/test/test-utils.tsx` provides `createQueryWrapper()` and `normalizeSpaces()` (fr-FR `Intl` output contains non-breaking spaces).
+- Tests: vitest + Testing Library, setup in `src/test/setup.ts`; `src/test/test-utils.tsx` provides `createQueryWrapper()` and `normalizeSpaces()` (fr-FR `Intl` output contains non-breaking spaces). The setup stubs `window.matchMedia` with `matches: false`, so `useIsMobile()` is desktop by default; spy on `window.matchMedia` to test mobile behaviour.
+
+## UI design system (`investment-dashboard/src/components/custom/`)
+
+The look is shared through components: change the shared piece rather than restyling one screen, so the whole app stays consistent. Style reference: slate neutrals + indigo accent (header/nav), `rounded-xl` cards, labels `text-xs font-medium uppercase tracking-wide text-muted-foreground`, numbers `tabular-nums`, positive emerald / negative red (`utils/style.utils.ts#getColorAndBgColor`).
+
+- **Charts** (`charts/`): colours, axis, grid and zero-line props come from `chart-theme.ts` (`CHART_COLORS`, `SERIES_COLORS`/`getSeriesColor`, `getValueColor`, `axisProps`, `gridProps`, `zeroLineProps`); never hard-code colours or use `var(--chart-n)`. Formatting in `custom-chart.utils.ts` (axis amounts are compact via `formatToCompactEuro`, « 40 k€ »). Tooltips render `CustomTooltip/ChartTooltipCard`.
+  - `CustomAreaChart` (gradient; `tone="auto"` = green/red by last value, for perf and capital-gain curves), `CustomBarChart` (vertical only; `displayLabels` puts `BarLabel` at the bar end, auto-hidden when bars are narrow), `RankedBarList` (ranked rows with progress bars; use it instead of horizontal bar charts), `summary/Sparkline`.
+  - Recharts gotchas: put `<Tooltip>` **before** `<Bar>` in the JSX (the hover cursor is painted at the Tooltip's position and would hide the hovered bar); in a custom bar `shape`, negative bars get a negative `height` with `y` at the bar end, so a single `radius={[6, 6, 0, 0]}` rounds the outer end of both signs. Animations stall while the preview pane is hidden, so charts can look empty in screenshots.
+- **Cards and layout**: `containers/CardContainer` for every chart/content card (`title`, optional `description`, `action` slot on the right for period switch or pagination); `summary/SummarySection` + `SummaryHero` + `KpiTile`/`KpiValue` for page summaries; `containers/SectionCard` for form/settings sections; `containers/PageToolbar` + `ToolbarField` for page filters (with `CustomSelect variant="pill"`, `Switch` for booleans); `fields/SegmentedControl` for 2–4 exclusive options.
+- **Tables**: `DataTable` (+ `mobileCards`); row actions with `DataTable/IconActionButton`.
+- **Forms**: `form/FormActions` (`RemoveRowButton`, `AddRowButton`, `SubmitButton`, `FormFooter`, `FormSubmitError`), `form/InputWithSuffix` for units (%, €, ans).
 
 ## Deployment
 
