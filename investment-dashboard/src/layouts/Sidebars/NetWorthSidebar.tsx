@@ -1,6 +1,6 @@
 import { Sidebar } from "./Sidebar";
 import type { SidebarConfig } from "./sidebar.type";
-import { Plus, LayoutDashboard } from "lucide-react";
+import { Plus, LayoutDashboard, Table } from "lucide-react";
 
 export const NetWorthSidebar = () => {
   const NET_WORTH_MENU: SidebarConfig = [
@@ -9,6 +9,12 @@ export const NetWorthSidebar = () => {
       shortTitle: "Aperçu",
       link: "/net-worth",
       icon: <LayoutDashboard />,
+    },
+    {
+      title: "Historique",
+      shortTitle: "Historique",
+      link: "/net-worth/data",
+      icon: <Table />,
     },
     {
       title: "Ajouter une somme",

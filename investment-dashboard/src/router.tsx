@@ -17,6 +17,7 @@ import { NetWorthSidebar } from "./layouts/Sidebars/NetWorthSidebar";
 import { AccountsSidebar } from "./layouts/Sidebars/AccountsSidebar";
 import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
+import { NetWorthData } from "./pages/net-worth/NetWorthData";
 import { TaxAdd } from "./pages/incomes/TaxAdd";
 import { Settings } from "./pages/settings/Settings";
 import { SettingsReferences } from "./pages/settings/SettingsReferences";
@@ -133,6 +134,10 @@ export const router = createBrowserRouter([
           {
             index: true,
             Component: NetWorthOverview,
+          },
+          {
+            Component: NetWorthData,
+            path: "data",
           },
           {
             Component: NetWorthAdd,

@@ -11,3 +11,9 @@ export const getNetWorthesApi = () =>
 
 export const postNetWorthApi = (netWorth: NetWorthRequestDto) =>
   api<NetWorthRequestDto>("POST", NET_WORTHES_URL, netWorth);
+
+export const patchNetWorthApi = (id: number, netWorth: NetWorthRequestDto) =>
+  api<NetWorthResponseDto>("PATCH", `${NET_WORTHES_URL}/${id}`, netWorth);
+
+export const deleteNetWorthApi = (id: number) =>
+  api<void>("DELETE", `${NET_WORTHES_URL}/${id}`);

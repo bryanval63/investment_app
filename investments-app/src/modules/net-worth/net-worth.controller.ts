@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { NetWorthService } from './net-worth.service';
 import {
   type NetWorthRequestDto,
@@ -20,5 +30,19 @@ export class NetWorthController {
   ): Promise<{ success: boolean }> {
     await this.netWorthService.create(netWorth);
     return { success: true };
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() netWorth: NetWorthRequestDto,
+  ): Promise<NetWorthResponseDto> {
+    return this.netWorthService.update(id, netWorth);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.netWorthService.remove(id);
   }
 }
