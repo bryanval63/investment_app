@@ -77,6 +77,7 @@ export const IncomesSummary = ({ hasTaxes, className }: IncomesSummaryProps) => 
           amount={yearToDate}
           capitalGain={difference}
           perf={perf}
+          comparisonLabel={`vs même période ${currentYear - 1}`}
           secondaryLabel={`Même période en ${currentYear - 1}`}
           secondaryAmount={previousYearToDate}
           chartData={chartData}

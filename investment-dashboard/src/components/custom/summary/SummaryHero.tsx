@@ -13,6 +13,8 @@ type SummaryHeroProps = {
   capitalGain?: number;
   /** Pastille en pourcentage à côté du badge. */
   perf?: number;
+  /** Référence du badge et de la pastille (ex. « vs même période 2025 »). */
+  comparisonLabel?: string;
   /** Ligne secondaire (ex. montant net après impôts). */
   secondaryAmount?: number;
   secondaryLabel?: string;
@@ -29,6 +31,7 @@ export const SummaryHero = ({
   amount,
   capitalGain,
   perf,
+  comparisonLabel,
   secondaryAmount,
   secondaryLabel = "Net estimé après impôts",
   trend,
@@ -76,6 +79,11 @@ export const SummaryHero = ({
                   formatted={formatToPercentage(perf)}
                   style="text-sm rounded-full"
                 />
+              )}
+              {comparisonLabel && (
+                <span className="text-sm text-muted-foreground">
+                  {comparisonLabel}
+                </span>
               )}
             </div>
           )}
