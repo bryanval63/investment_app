@@ -31,6 +31,7 @@ import {
   Receipt,
   Trophy,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useState } from "react";
 
 type NetWorthYearlyGain = {
@@ -38,11 +39,13 @@ type NetWorthYearlyGain = {
   yAxis: number;
 };
 
-const NET_WORTH_GAINS_PER_PAGE = 10;
+/** Sur mobile uniquement : en desktop, toutes les années tiennent en largeur. */
+const NET_WORTH_GAINS_PER_PAGE_MOBILE = 10;
 
 const textColor = (value: number) => getColorAndBgColor(value, false);
 
 export const NetWorthOverview = () => {
+  const isMobile = useIsMobile();
   const [yearOffset, setYearOffset] = useState(0);
   const { data: netWorthes } = useSuspenseQuery<NetWorthResponseDto[]>({
     queryKey: ["net-worthes"],
@@ -109,18 +112,21 @@ export const NetWorthOverview = () => {
     (best, gain) => (!best || gain.yAxis > best.yAxis ? gain : best),
     undefined,
   );
+  const gainsPerPage = isMobile
+    ? NET_WORTH_GAINS_PER_PAGE_MOBILE
+    : netWorthGainsByYear.length;
   const maxYearOffset = Math.max(
     0,
-    netWorthGainsByYear.length - NET_WORTH_GAINS_PER_PAGE,
+    netWorthGainsByYear.length - gainsPerPage,
   );
   const activeYearOffset = Math.min(yearOffset, maxYearOffset);
   const visibleYearsStart = Math.max(
     0,
-    netWorthGainsByYear.length - NET_WORTH_GAINS_PER_PAGE - activeYearOffset,
+    netWorthGainsByYear.length - gainsPerPage - activeYearOffset,
   );
   const visibleNetWorthGains = netWorthGainsByYear.slice(
     visibleYearsStart,
-    visibleYearsStart + NET_WORTH_GAINS_PER_PAGE,
+    visibleYearsStart + gainsPerPage,
   );
 
   const chartData =
@@ -142,8 +148,8 @@ export const NetWorthOverview = () => {
           <SummaryHero
             title="Patrimoine financier total"
             amount={lastNetWorth}
-            capitalGain={difference}
-            perf={performance}
+            // Gain et performance du mois : déjà dans la tuile « Gain du mois ».
+            trend={difference}
             secondaryLabel="Capital investi net après impôts"
             secondaryAmount={netInvestedCapital}
             chartData={chartData}

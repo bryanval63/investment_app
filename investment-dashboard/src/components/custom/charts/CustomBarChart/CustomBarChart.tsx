@@ -77,6 +77,12 @@ export function CustomBarChart<T>({
           tickFormatter={getTickFormatterYAxis(unit)}
           width={52}
         />
+        {/* Avant les barres : Recharts dessine le fond de survol à la position
+            du Tooltip, il passerait sinon par-dessus la barre survolée. */}
+        <Tooltip
+          cursor={{ fill: CHART_COLORS.cursor, radius: 6 }}
+          content={<CustomTooltip unit={unit} signed />}
+        />
         {crossesZero(values) && <ReferenceLine {...zeroLineProps} />}
         <Bar
           dataKey="yAxis"
@@ -105,10 +111,6 @@ export function CustomBarChart<T>({
             />
           )}
         </Bar>
-        <Tooltip
-          cursor={{ fill: CHART_COLORS.cursor, radius: 6 }}
-          content={<CustomTooltip unit={unit} signed />}
-        />
       </BarChart>
     </ChartContainer>
   );

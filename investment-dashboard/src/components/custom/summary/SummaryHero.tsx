@@ -16,6 +16,8 @@ type SummaryHeroProps = {
   /** Ligne secondaire (ex. montant net après impôts). */
   secondaryAmount?: number;
   secondaryLabel?: string;
+  /** Sens de la tendance (couleur de la courbe) si ni badge ni pastille. */
+  trend?: number;
   /** Élément affiché en haut à droite (ex. switch). */
   headerAction?: ReactNode;
   chartData?: SparklinePoint[];
@@ -29,11 +31,12 @@ export const SummaryHero = ({
   perf,
   secondaryAmount,
   secondaryLabel = "Net estimé après impôts",
+  trend,
   headerAction,
   chartData = [],
   className,
 }: SummaryHeroProps) => {
-  const trendValue = perf ?? capitalGain ?? 0;
+  const trendValue = trend ?? perf ?? capitalGain ?? 0;
 
   return (
     <Card
