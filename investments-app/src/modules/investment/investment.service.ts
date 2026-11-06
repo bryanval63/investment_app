@@ -28,6 +28,7 @@ import {
 } from './investment.utils';
 import {
   calculateInvestmentEntryFee,
+  findAccountEntryFeeRate,
   calculateInvestmentTax,
   DEFAULT_INCOME_TAX_RATE,
   DEFAULT_LIFE_INSURANCE_ALLOWANCE,
@@ -615,13 +616,11 @@ export class InvestmentService {
       const entryFee = taxInfo?.type
         ? calculateInvestmentEntryFee({
             type: taxInfo.type,
-            accountName: row.accountName,
             amount: Number(row.amount),
-            entryFeeRate: settings.find(
-              (setting) =>
-                setting.key === SETTING_KEYS.ENTRY_FEE_RATE &&
-                setting.scope === row.accountName,
-            )?.value,
+            entryFeeRate: findAccountEntryFeeRate(
+              settings,
+              Number(row.accountId),
+            ),
           })
         : 0;
 

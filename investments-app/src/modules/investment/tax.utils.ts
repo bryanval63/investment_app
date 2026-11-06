@@ -1,3 +1,8 @@
+import {
+  accountSettingScope,
+  ENTRY_FEE_RATE_SETTING_KEY,
+} from '@investments/shared';
+
 export const DEFAULT_SOCIAL_CONTRIBUTIONS_RATE = 0.186;
 export const DEFAULT_INCOME_TAX_RATE = 0.128;
 export const DEFAULT_LIFE_INSURANCE_ALLOWANCE = 4600;
@@ -8,8 +13,6 @@ export const DEFAULT_LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS = 8;
 export const DEFAULT_LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER = 2;
 export const DEFAULT_PEA_ALLOWANCE_DURATION_YEARS = 5;
 export const DEFAULT_CRYPTO_CESSION_THRESHOLD = 305;
-const DEFAULT_CORUM_ORIGIN_ENTRY_FEE_RATE = 0.11966;
-const DEFAULT_CORUM_XL_ENTRY_FEE_RATE = 0.12;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -247,28 +250,24 @@ export const calculateInvestmentTax = ({
   return 0;
 };
 
+/** Frais d'entrée SCPI : taux réglé pour le compte (0 si aucun). */
 export const calculateInvestmentEntryFee = ({
   type,
-  accountName,
   amount,
-  entryFeeRate,
+  entryFeeRate = 0,
 }: {
   type: string;
-  accountName: string;
   amount: number;
   entryFeeRate?: number;
-}) => {
-  if (type !== 'SCPI') {
-    return 0;
-  }
+}) => (type === 'SCPI' ? Math.max(0, amount) * entryFeeRate : 0);
 
-  const normalizedName = accountName.toLocaleLowerCase('fr-FR');
-  const defaultRate = normalizedName.includes('corum origin')
-    ? DEFAULT_CORUM_ORIGIN_ENTRY_FEE_RATE
-    : normalizedName.includes('corum xl')
-      ? DEFAULT_CORUM_XL_ENTRY_FEE_RATE
-      : 0;
-  const rate = entryFeeRate ?? defaultRate;
-
-  return Math.max(0, amount) * rate;
-};
+/** Taux de frais d'entrée réglé pour un compte, retrouvé par son id. */
+export const findAccountEntryFeeRate = (
+  settings: { key: string; scope: string; value: number }[],
+  accountId: number,
+) =>
+  settings.find(
+    ({ key, scope }) =>
+      key === ENTRY_FEE_RATE_SETTING_KEY &&
+      scope === accountSettingScope(accountId),
+  )?.value;

@@ -24,3 +24,4 @@ export * from "./dtos/net-worth/net-worth-response.dto";
 export * from "./dtos/net-worth/net-worth-request.dto";
 export * from "./dtos/settings/setting-response.dto";
 export * from "./dtos/settings/update-setting.request.dto";
+export * from "./constants/settings.constant";

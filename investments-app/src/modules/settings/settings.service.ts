@@ -71,8 +71,6 @@ const DEFAULT_SETTINGS = [
     scope: 'GLOBAL',
     value: 305,
   },
-  { key: SETTING_KEYS.ENTRY_FEE_RATE, scope: 'Corum Origin', value: 0.11966 },
-  { key: SETTING_KEYS.ENTRY_FEE_RATE, scope: 'Corum XL', value: 0.12 },
 ];
 
 @Injectable()
