@@ -26,6 +26,9 @@ import { Settings } from "./pages/settings/Settings";
 import { SettingsReferences } from "./pages/settings/SettingsReferences";
 import { SettingsSidebar } from "./layouts/Sidebars/SettingsSidebar";
 
+// Pages qui commencent par un résumé sombre : leur squelette de chargement l'annonce.
+const SUMMARY_PAGE = { pageLoader: "summary" } as const;
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -53,6 +56,7 @@ export const router = createBrowserRouter([
           {
             index: true,
             Component: IncomesOverview,
+            handle: SUMMARY_PAGE,
           },
           {
             Component: IncomesData,
@@ -98,6 +102,7 @@ export const router = createBrowserRouter([
           {
             index: true,
             Component: InvestmentsOverview,
+            handle: SUMMARY_PAGE,
           },
           {
             Component: InvestmentsAdd,
@@ -126,6 +131,7 @@ export const router = createBrowserRouter([
           {
             Component: InvestmentsAccounts,
             path: "accounts",
+            handle: SUMMARY_PAGE,
           },
         ],
       },
@@ -158,6 +164,7 @@ export const router = createBrowserRouter([
           {
             index: true,
             Component: NetWorthOverview,
+            handle: SUMMARY_PAGE,
           },
           {
             Component: NetWorthData,
