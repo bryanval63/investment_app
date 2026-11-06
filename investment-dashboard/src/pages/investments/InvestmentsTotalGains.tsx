@@ -1,4 +1,5 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
+import { PageToolbar, ToolbarField } from "@/components/custom/containers/PageToolbar";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { InvestmentsAreaChartCategory } from "@/features/investments/charts/categories/InvestmentsAreaChartCategory";
 import { InvestmentsBarChartCategory } from "@/features/investments/charts/categories/InvestmentsBarChartCategory";
@@ -17,18 +18,23 @@ export const InvestmentsTotalGains = () => {
 
   return (
     <MainContainer>
-      <div className="col-span-2 justify-center flex items-center gap-4">
-        <CustomSelect
-          value={category}
-          onValueChange={setCategory}
-          options={investmentCategories}
-        />
-      </div>
+      <PageToolbar>
+        <ToolbarField label="Catégorie" htmlFor="category">
+          <CustomSelect
+            id="category"
+            variant="pill"
+            value={category}
+            onValueChange={setCategory}
+            options={investmentCategories}
+          />
+        </ToolbarField>
+      </PageToolbar>
       <InvestmentsAreaChartCategory
         type="capitalGain"
         category={category}
         chartType="sum"
         title="Total des plus values"
+        tone="auto"
       />
       <InvestmentsAreaChartCategory
         type="capitalGain"

@@ -1,4 +1,5 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
+import { PageToolbar, ToolbarField } from "@/components/custom/containers/PageToolbar";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -25,16 +26,20 @@ export const InvestmentsAccounts = () => {
 
   return (
     <MainContainer columns={3}>
-      <div className="col-span-3 justify-center flex items-center gap-4">
-        <CustomSelect
-          value={accountId.toString()}
+      <PageToolbar>
+        <ToolbarField label="Compte" htmlFor="account">
+          <CustomSelect
+            id="account"
+            variant="pill"
+            value={accountId.toString()}
           // Transition : garde la page affichée pendant le chargement du compte.
           onValueChange={(accountId) =>
             startTransition(() => setAccountId(Number(accountId)))
           }
-          options={mappedAccounts.filter((acc) => !acc.isClosed)}
-        />
-      </div>
+            options={mappedAccounts.filter((acc) => !acc.isClosed)}
+          />
+        </ToolbarField>
+      </PageToolbar>
 
       <div className="col-span-3">
         <InvestmentsAccountsCards type="totalAmount" accountId={accountId} />
@@ -49,7 +54,7 @@ export const InvestmentsAccounts = () => {
         />
       </div>
 
-      <div className="col-span-3 flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-8">
+      <div className="col-span-3 flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-4 xl:gap-8">
         <InvestmentsYearlyBarChartAccount
           accountId={accountId}
           title="Performances par années"
@@ -69,6 +74,7 @@ export const InvestmentsAccounts = () => {
         chartType="cumulPerf"
         title="Cumul des performances"
         unit="per"
+        tone="auto"
       />
 
       <InvestmentsBarChartAccountProps
@@ -98,6 +104,7 @@ export const InvestmentsAccounts = () => {
         accountId={accountId}
         title="Cumul des plus values"
         chartType="capGain"
+        tone="auto"
       />
 
       <InvestmentsAreaChartAccount

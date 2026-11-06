@@ -199,14 +199,21 @@ export const NetWorthOverview = () => {
         </CardContainer>
       </div>
       <div className="col-span-3">
-        <CardContainer title="Gain du capital par année">
-          <div className="flex flex-col gap-3">
-            {maxYearOffset > 0 && (
-              <div className="flex justify-end gap-2">
+        <CardContainer
+          title="Gain du capital par année"
+          description={
+            visibleNetWorthGains.length > 1
+              ? `${visibleNetWorthGains[0].xAxis} – ${visibleNetWorthGains.at(-1)?.xAxis}`
+              : undefined
+          }
+          action={
+            maxYearOffset > 0 && (
+              <div className="flex items-center gap-1 rounded-full bg-slate-100/80 p-1">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="size-7 rounded-full"
                   aria-label="Afficher les années précédentes"
                   onClick={() =>
                     setYearOffset(Math.min(activeYearOffset + 1, maxYearOffset))
@@ -217,8 +224,9 @@ export const NetWorthOverview = () => {
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="size-7 rounded-full"
                   aria-label="Afficher les années suivantes"
                   onClick={() =>
                     setYearOffset(Math.max(activeYearOffset - 1, 0))
@@ -228,15 +236,15 @@ export const NetWorthOverview = () => {
                   <ChevronRight />
                 </Button>
               </div>
-            )}
-            <CustomBarChart
-              chartData={visibleNetWorthGains}
-              displayLabels
-              labelsLandscapeOnly
-              labelFormatter={formatToThousandsEuro}
-              isAnimationActive={false}
-            />
-          </div>
+            )
+          }
+        >
+          <CustomBarChart
+            chartData={visibleNetWorthGains}
+            displayLabels
+            labelFormatter={formatToThousandsEuro}
+            isAnimationActive={false}
+          />
         </CardContainer>
       </div>
     </MainContainer>

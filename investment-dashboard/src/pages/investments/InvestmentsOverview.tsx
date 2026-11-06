@@ -1,6 +1,6 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
-import { Separator } from "@/components/ui/separator";
+import { PageToolbar, ToolbarField } from "@/components/custom/containers/PageToolbar";
 import { InvestmentsAreaChartCategory } from "@/features/investments/charts/categories/InvestmentsAreaChartCategory";
 import { InvestmentsBarChartCategory } from "@/features/investments/charts/categories/InvestmentsBarChartCategory";
 import { InvestmentsOverviewCards } from "@/features/investments/InvestmentsOverviewCards/InvestmentsOverviewCards";
@@ -28,44 +28,55 @@ export const InvestmentsOverview = () => {
   });
 
   return (
-    <div className="flex flex-col gap-3 lg:gap-8">
+    <div className="flex flex-col gap-6 lg:gap-8">
       <InvestmentsOverviewCards investmentsOverview={investmentsOverview} />
-      <Separator />
 
-      <MainContainer>
-        <div className="col-span-2 justify-center flex items-center gap-4">
-          <CustomSelect
-            value={category}
-            onValueChange={setCategory}
-            options={investmentCategories}
+      <section className="flex flex-col gap-3 lg:gap-4">
+        <PageToolbar className="justify-between">
+          <h2 className="text-base font-semibold text-slate-900">Évolution</h2>
+          <ToolbarField label="Catégorie" htmlFor="category">
+            <CustomSelect
+              id="category"
+              variant="pill"
+              value={category}
+              onValueChange={setCategory}
+              options={investmentCategories}
+            />
+          </ToolbarField>
+        </PageToolbar>
+        <MainContainer>
+          <InvestmentsAreaChartCategory
+            type="totalAmount"
+            category={category}
+            chartType="sum"
+            title="Total des investissements"
+          />
+          <InvestmentsBarChartCategory
+            type="totalAmount"
+            category={category}
+            title="Variation des investissements"
+            chartType="diff"
+          />
+        </MainContainer>
+      </section>
+
+      <section className="flex flex-col gap-3 lg:gap-4">
+        <h2 className="text-base font-semibold text-slate-900">
+          Répartition et performances
+        </h2>
+        {/* lg : donut sur toute la largeur puis les deux classements ; 2xl : trois colonnes. */}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4 xl:gap-8 2xl:grid-cols-3">
+          <div className="min-w-0 lg:col-span-2 2xl:col-span-1">
+            <InvestmentAllocationChart />
+          </div>
+          <PerfByAccountsChart
+            perfByAccounts={investmentsOverview?.perfByAccount}
+          />
+          <PerfByCategoriesChart
+            perfByCategories={investmentsOverview?.perfByCategory}
           />
         </div>
-
-        <InvestmentsAreaChartCategory
-          type="totalAmount"
-          category={category}
-          chartType="sum"
-          title="Total des investissements"
-        />
-        <InvestmentsBarChartCategory
-          type="totalAmount"
-          category={category}
-          title="Variation des investissements"
-          chartType="diff"
-        />
-      </MainContainer>
-
-      <Separator className="hidden lg:block" />
-
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-8">
-        <InvestmentAllocationChart />
-        <PerfByAccountsChart
-          perfByAccounts={investmentsOverview?.perfByAccount}
-        />
-        <PerfByCategoriesChart
-          perfByCategories={investmentsOverview?.perfByCategory}
-        />
-      </div>
+      </section>
     </div>
   );
 };
