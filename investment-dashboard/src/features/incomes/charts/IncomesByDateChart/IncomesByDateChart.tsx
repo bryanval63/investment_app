@@ -39,14 +39,10 @@ export const IncomesByDateChart = ({
       };
     }) ?? [];
 
-  const tickFormatterXAxis = (value: string, index: number) =>
-    unit === "month" ? (index % 10 === 0 ? value : "") : value;
-
   return (
     <CardContainer title="Total des revenus par date">
       <CustomBarChart<CustomBarChartAxis>
         chartData={chartData}
-        tickFormatterXAxis={tickFormatterXAxis}
       />
     </CardContainer>
   );

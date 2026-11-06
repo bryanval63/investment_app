@@ -1,3 +1,4 @@
+import { PageToolbar, ToolbarField } from "@/components/custom/containers/PageToolbar";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { IncomesDataTable } from "@/features/incomes/IncomesDataTable/IncomesDataTable";
 import {
@@ -15,15 +16,21 @@ export const IncomesData = () => {
   const [selectedYear, setSelectedYear] = useState<number>(getCurrentYear());
 
   return (
-    <div className="flex gap-8 justify-center flex-wrap">
-      <CustomSelect
-        value={selectedYear.toString()}
-        options={years}
-        // Transition : garde le tableau affiché pendant le chargement de l'année.
-        onValueChange={(value) =>
-          startTransition(() => setSelectedYear(parseInt(value)))
-        }
-      />
+    <div className="flex flex-col gap-4">
+      <PageToolbar>
+        <ToolbarField label="Année" htmlFor="income-year">
+          <CustomSelect
+            id="income-year"
+            variant="pill"
+            value={selectedYear.toString()}
+            options={years}
+            // Transition : garde le tableau affiché pendant le chargement de l'année.
+            onValueChange={(value) =>
+              startTransition(() => setSelectedYear(parseInt(value)))
+            }
+          />
+        </ToolbarField>
+      </PageToolbar>
 
       <IncomesDataTable year={selectedYear} />
     </div>

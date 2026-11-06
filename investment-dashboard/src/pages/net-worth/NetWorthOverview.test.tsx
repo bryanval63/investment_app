@@ -72,6 +72,7 @@ describe("NetWorthOverview", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("displays synthesis, monthly gain, year-to-date gain and performance", async () => {
@@ -90,8 +91,9 @@ describe("NetWorthOverview", () => {
     );
     const hero = await cardText("Patrimoine financier total");
     expect(hero).toContain("120 000,00 €");
-    expect(hero).toContain("+10 000,00 €");
-    expect(hero).toContain("9,09 %");
+    // Gain et performance du mois : uniquement dans la tuile dédiée.
+    expect(hero).not.toContain("+10 000,00 €");
+    expect(hero).not.toContain("9,09 %");
     const monthly = await cardText("Gain du mois");
     expect(monthly).toContain("+10 000,00 €");
     expect(monthly).toContain("9,09 %");
@@ -149,7 +151,32 @@ describe("NetWorthOverview", () => {
     expect(screen.queryByText("Depuis le début de l'année")).toBeNull();
   });
 
-  it("paginates yearly gains by 10 years", async () => {
+  it("shows every year on desktop, without pagination", async () => {
+    const data = [netWorth(2010, 11, 1000)];
+    for (let year = 2011; year <= 2026; year++) {
+      data.push(netWorth(year, 11, 1000 * (year - 2009)));
+    }
+    vi.mocked(getNetWorthesApi).mockResolvedValue(data);
+    renderPage();
+
+    const bars = await screen.findByTestId("bar-chart");
+    await waitFor(() => expect(barsText(bars)).toHaveLength(16));
+    expect(
+      screen.queryByRole("button", { name: "Afficher les années précédentes" }),
+    ).toBeNull();
+  });
+
+  it("paginates yearly gains by 10 years on mobile", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query: string) =>
+        ({
+          matches: true,
+          media: query,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        }) as unknown as MediaQueryList,
+    );
+
     const data = [netWorth(2010, 11, 1000)];
     for (let year = 2011; year <= 2026; year++) {
       data.push(netWorth(year, 11, 1000 * (year - 2009)));

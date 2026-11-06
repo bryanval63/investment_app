@@ -61,7 +61,9 @@ export const DatePicker = ({
 
   return (
     <div ref={containerRef} className="relative">
-      <span className="mb-1 block text-sm">{label}</span>
+      <span className="mb-2 block text-sm font-medium leading-none">
+        {label}
+      </span>
       <div className="flex gap-1">
         <Input
           value={inputValue}
@@ -104,7 +106,7 @@ export const DatePicker = ({
         )}
       </div>
       {open && (
-        <div className="absolute z-20 mt-2 w-72 rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg">
+        <div className="absolute z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg">
           <div className="mb-3 flex items-center gap-1">
             <Button
               type="button"

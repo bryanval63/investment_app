@@ -1,5 +1,8 @@
-import type { CustomBarChartAxis } from "@/components/custom/charts/CustomBarChart/custom-bar-chart.type";
-import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
+import { getSeriesColor } from "@/components/custom/charts/chart-theme";
+import {
+  RankedBarList,
+  type RankedBarItem,
+} from "@/components/custom/charts/RankedBarList/RankedBarList";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { getStatsGroupedByTypeIncomesApi } from "@/services/incomes/incomes-stats.service";
 import { formatToEuro } from "@/utils/format.utils";
@@ -11,26 +14,23 @@ export const IncomesByTypeChart = () => {
     queryFn: () => getStatsGroupedByTypeIncomesApi(),
   });
 
-  const chartData =
+  const items: RankedBarItem[] =
     incomesGroupBy
       ?.filter((incomes) => incomes.code !== "SALARY")
-      .map(({ amount, label }) => {
-        return {
-          yAxis: label,
-          xAxis: amount,
-        };
-      }) ?? [];
-
-  const tickFormatterXAxis = (value: string) => formatToEuro(Number(value));
+      .map(({ code, amount, label }, index) => ({
+        key: code,
+        label,
+        value: amount,
+        formatted: formatToEuro(amount, { maximumFractionDigits: 0 }),
+        color: getSeriesColor(index),
+      })) ?? [];
 
   return (
-    <CardContainer title="Total des revenus par catégorie">
-      <CustomBarChart<CustomBarChartAxis>
-        chartData={chartData}
-        barLayout="vertical"
-        tickFormatterXAxis={tickFormatterXAxis}
-        displayLabels={true}
-      />
+    <CardContainer
+      title="Total des revenus par catégorie"
+      description="Hors salaire"
+    >
+      <RankedBarList items={items} variant="amount" />
     </CardContainer>
   );
 };

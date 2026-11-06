@@ -14,6 +14,8 @@ type InvestmentsAreaChartCategoryProps = {
   chartType: ChartType;
   title: string;
   unit?: CustomChartUnit;
+  /** `auto` : vert ou rouge selon le signe (performances, plus-values). */
+  tone?: "accent" | "auto";
 };
 
 export const InvestmentsAreaChartCategory = ({
@@ -22,6 +24,7 @@ export const InvestmentsAreaChartCategory = ({
   chartType,
   title,
   unit = "eur",
+  tone = "accent",
 }: InvestmentsAreaChartCategoryProps) => {
   const { chartData } = useInvestmentsTotalChartCategory({
     category,
@@ -31,7 +34,7 @@ export const InvestmentsAreaChartCategory = ({
 
   return (
     <CardContainer title={title}>
-      <CustomAreaChart chartData={chartData} unit={unit} />
+      <CustomAreaChart chartData={chartData} unit={unit} tone={tone} />
     </CardContainer>
   );
 };

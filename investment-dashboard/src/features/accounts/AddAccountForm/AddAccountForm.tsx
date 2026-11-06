@@ -1,10 +1,15 @@
 import { FormProvider } from "react-hook-form";
-import { Card, CardContent } from "@/components/ui/card";
+import { Landmark } from "lucide-react";
 import { FormSelect } from "@/components/custom/form/FormSelect";
 import { SelectItem } from "@/components/ui/select";
 import { FormInput } from "@/components/custom/form/FormInput";
 import { DatePicker } from "@/components/custom/form/DatePicker";
-import { Button } from "@/components/ui/button";
+import {
+  FormFooter,
+  FormSubmitError,
+  SubmitButton,
+} from "@/components/custom/form/FormActions";
+import { SectionCard } from "@/components/custom/containers/SectionCard";
 import { useAddAccountForm } from "./useAddAccountForm";
 
 export const AddAccountForm = () => {
@@ -19,73 +24,68 @@ export const AddAccountForm = () => {
   } = useAddAccountForm();
 
   return (
-    <div className="max-w-5xl m-auto flex flex-col justify-between h-full gap-8">
+    <div className="max-w-5xl m-auto flex flex-col gap-4 lg:gap-6">
       <FormProvider {...form}>
         <form
           id="add-account-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-8"
+          className="flex flex-col gap-4 lg:gap-6"
         >
-          <Card>
-            <CardContent className="flex flex-col gap-6 pt-6">
-              <FormInput
-                name="name"
-                required
-                label="Nom du compte"
-                placeholder="Ex: Mon PEA"
-              />
-              <FormInput
-                name="defaultTransactionAmount"
-                type="number"
-                min="0"
-                step="any"
-                required
-                label="Montant de transaction par défaut"
-              />
-              <DatePicker
-                label="Date d'ouverture du compte"
-                value={form.watch("openingDate")}
-                onChange={(value) => form.setValue("openingDate", value ?? "")}
-              />
+          <SectionCard
+            icon={Landmark}
+            title="Nouveau compte"
+            contentClassName="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5"
+          >
+            <FormInput
+              name="name"
+              required
+              label="Nom du compte"
+              placeholder="Ex: Mon PEA"
+            />
+            <FormInput
+              name="defaultTransactionAmount"
+              type="number"
+              min="0"
+              step="any"
+              required
+              label="Montant de transaction par défaut"
+              suffix="€"
+            />
+            <DatePicker
+              label="Date d'ouverture du compte"
+              value={form.watch("openingDate")}
+              onChange={(value) => form.setValue("openingDate", value ?? "")}
+            />
 
-              <FormSelect name="type" label="Type de compte">
-                {investmentTypes?.map(({ id, code, label }) => (
-                  <SelectItem key={id} value={code}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </FormSelect>
+            <FormSelect name="type" label="Type de compte">
+              {investmentTypes?.map(({ id, code, label }) => (
+                <SelectItem key={id} value={code}>
+                  {label}
+                </SelectItem>
+              ))}
+            </FormSelect>
 
-              <FormSelect name="category" label="Catégorie">
-                {investmentCategories.map(({ code, label }) => (
-                  <SelectItem key={code} value={code}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </FormSelect>
-            </CardContent>
-          </Card>
+            <FormSelect name="category" label="Catégorie">
+              {investmentCategories.map(({ code, label }) => (
+                <SelectItem key={code} value={code}>
+                  {label}
+                </SelectItem>
+              ))}
+            </FormSelect>
+          </SectionCard>
 
-          {error && (
-            <div className="text-red-500 text-sm">
-              Erreur:{" "}
-              {error instanceof Error
-                ? error.message
-                : "Une erreur est survenue"}
-            </div>
-          )}
+          <FormSubmitError error={error} />
         </form>
       </FormProvider>
 
-      <div className="flex justify-end gap-4">
-        <Button
-          type="submit"
+      <FormFooter>
+        <SubmitButton
           form="add-account-form"
           disabled={isSubmitting || isLoadingTypes}
         >
           {isSubmitting ? "Création..." : "Créer le compte"}
-        </Button>
-      </div>
+        </SubmitButton>
+      </FormFooter>
     </div>
   );
 };

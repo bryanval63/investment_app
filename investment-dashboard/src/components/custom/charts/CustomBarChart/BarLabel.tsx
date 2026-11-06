@@ -1,72 +1,53 @@
-import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
 import type { LabelProps } from "recharts";
 import type { CustomChartUnit } from "../custom-chart.type";
+import { formatChartLabel } from "../custom-chart.utils";
+import { getValueColor } from "../chart-theme";
 
 type CustomLabelProps = Omit<LabelProps, "value"> & {
   value?: string | number;
   unit: CustomChartUnit;
-  barLayout: "horizontal" | "vertical";
   labelFormatter?: (value: number) => string;
 };
+
+/** En dessous de cette largeur de barre, les libellés se chevaucheraient. */
+export const MIN_LABEL_BAR_WIDTH = 26;
 
 const toNumber = (value: string | number | undefined): number =>
   Number(value ?? 0);
 
-export const BarLabel = (props: CustomLabelProps) => {
-  const { x, y, width, height, value } = props;
-
+/**
+ * Libellé au bout de la barre : au-dessus si positive, en dessous si négative,
+ * dans la couleur de la barre.
+ */
+export const BarLabel = ({
+  x,
+  y,
+  width,
+  height,
+  value,
+  unit,
+  labelFormatter,
+}: CustomLabelProps) => {
   const numericValue = toNumber(value);
-  const xPos = toNumber(x);
-  const yPos = toNumber(y);
   const barWidth = toNumber(width);
-  const barHeight = toNumber(height);
 
-  const isVertical = props.barLayout === "horizontal";
-  const barSize = Math.abs(isVertical ? barHeight : barWidth);
-  const hasEnoughSpace = isVertical
-    ? barSize >= 50 && Math.abs(barWidth) >= 44
-    : barSize >= 50 && Math.abs(barHeight) >= 16;
+  if (barWidth < MIN_LABEL_BAR_WIDTH) return null;
 
-  const label =
-    props.labelFormatter?.(numericValue) ??
-    (props.unit === "eur"
-      ? formatToEuro(numericValue)
-      : formatToPercentage(numericValue));
-  const shouldBeInside = hasEnoughSpace;
-
-  const fill = shouldBeInside ? "#fff" : "#000";
-  const posX = isVertical
-    ? xPos + barWidth / 2
-    : shouldBeInside
-      ? xPos + barWidth / 2
-      : numericValue < 0
-        ? xPos - 8
-        : xPos + barWidth + 8;
-  const posY = isVertical
-    ? shouldBeInside
-      ? yPos + barHeight / 2
-      : numericValue < 0
-        ? yPos + barHeight + 12
-        : yPos - 8
-    : yPos + barHeight / 2;
-  const anchor: "start" | "middle" | "end" = isVertical
-    ? "middle"
-    : shouldBeInside
-      ? "middle"
-      : numericValue < 0
-        ? "end"
-        : "start";
+  const top = Math.min(toNumber(y), toNumber(y) + toNumber(height));
+  const bottom = Math.max(toNumber(y), toNumber(y) + toNumber(height));
+  const posY = numericValue < 0 ? bottom + 14 : top - 6;
 
   return (
     <text
-      x={posX}
+      x={toNumber(x) + barWidth / 2}
       y={posY}
-      dy={4}
-      textAnchor={anchor}
-      fill={fill}
-      fontSize={12}
+      textAnchor="middle"
+      fill={getValueColor(numericValue)}
+      fontSize={11}
+      fontWeight={600}
+      style={{ fontVariantNumeric: "tabular-nums" }}
     >
-      {label}
+      {labelFormatter?.(numericValue) ?? formatChartLabel(numericValue, unit)}
     </text>
   );
 };

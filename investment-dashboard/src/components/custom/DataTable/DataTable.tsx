@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 
 import { Table } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 import { useState } from "react";
 import { safeSort } from "./data-table.utils";
@@ -23,6 +24,8 @@ interface DataTableProps<TData, TValue> {
   meta?: TableMeta<TData>;
   /** Sous `lg`, affiche une carte par ligne au lieu du tableau. */
   mobileCards?: boolean;
+  /** Fige la première colonne quand le tableau défile horizontalement. */
+  stickyFirstColumn?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -30,6 +33,7 @@ export function DataTable<TData, TValue>({
   data,
   meta,
   mobileCards = false,
+  stickyFirstColumn = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -51,14 +55,21 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div>
+    <div className="min-w-0">
       <div
-        className={`rounded-md border dark:bg-slate-900 ${mobileCards ? "hidden lg:block" : ""}`}
+        className={cn(
+          "overflow-hidden rounded-xl border bg-card shadow-xs",
+          mobileCards && "hidden lg:block",
+        )}
       >
         <Table>
-          <DataTableHeader table={table} />
-          <DataTableBody table={table} columns={columns} />
-          <DataTableFooter table={table} />
+          <DataTableHeader table={table} sticky={stickyFirstColumn} />
+          <DataTableBody
+            table={table}
+            columns={columns}
+            sticky={stickyFirstColumn}
+          />
+          <DataTableFooter table={table} sticky={stickyFirstColumn} />
         </Table>
       </div>
       {mobileCards && (

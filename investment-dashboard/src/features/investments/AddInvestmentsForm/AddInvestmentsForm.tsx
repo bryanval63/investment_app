@@ -1,16 +1,20 @@
 import { FormProvider } from "react-hook-form";
 
 import { QueryBoundary } from "@/components/custom/QueryBoundary/QueryBoundary";
-import { Card, CardContent } from "@/components/ui/card";
 import { FormSelect } from "@/components/custom/form/FormSelect";
 import { SelectItem } from "@/components/ui/select";
 import { FormInput } from "@/components/custom/form/FormInput";
-import { Fragment } from "react/jsx-runtime";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { FormMonthYear } from "@/components/custom/form/FormMonthYear";
+import {
+  AddRowButton,
+  FormFooter,
+  FormSubmitError,
+  RemoveRowButton,
+  SubmitButton,
+} from "@/components/custom/form/FormActions";
+import { SectionCard } from "@/components/custom/containers/SectionCard";
 import { useAddInvestmentsForm } from "./useAddInvestmentsForm";
-import { Plus, Trash } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 export const AddInvestmentsForm = () => {
   const {
@@ -27,110 +31,103 @@ export const AddInvestmentsForm = () => {
     submitError,
   } = useAddInvestmentsForm();
 
+  const hasAccounts = (accounts?.length ?? 0) > 0;
+
   return (
     <QueryBoundary query={{ data: accounts, error, fetchStatus }}>
-      <div className="max-w-5xl m-auto flex flex-col justify-between h-full gap-3 lg:gap-8">
+      <div className="max-w-5xl m-auto flex flex-col gap-4 lg:gap-6">
         <FormProvider {...form}>
           <form
             id="add-investments-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-3 lg:gap-8"
+            className="flex flex-col gap-4 lg:gap-6"
           >
             <FormMonthYear />
 
-            {accounts?.length === 0 && (
-              <p className="text-muted-foreground">
-                Aucun compte ouvert n'est disponible pour ajouter un
-                investissement.
-              </p>
-            )}
+            <SectionCard icon={TrendingUp} title="Investissements">
+              {!hasAccounts && (
+                <p className="text-sm text-muted-foreground">
+                  Aucun compte ouvert n'est disponible pour ajouter un
+                  investissement.
+                </p>
+              )}
 
-            {fields.length > 0 && (accounts?.length ?? 0) > 0 && (
-              <Card>
-                <CardContent className="flex flex-col gap-4">
-                  {fields.map((field, index) => (
-                    <Fragment key={field.id}>
-                      <div className="flex gap-3 lg:gap-8 items-center flex-wrap lg:flex-nowrap">
-                        <FormSelect
-                          name={`investments.${index}.accountId`}
-                          label="Compte"
-                          onSelectChange={(value) =>
-                            handleAccountChange(value, index)
-                          }
-                        >
-                          {accounts?.map(({ id, name }) => (
-                            <SelectItem key={id} value={id.toString()}>
-                              {name}
-                            </SelectItem>
-                          ))}
-                        </FormSelect>
+              {hasAccounts &&
+                fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50/50 p-3 lg:p-4"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Ligne {index + 1}
+                      </span>
+                      <RemoveRowButton
+                        className="-my-1.5 -mr-1.5"
+                        onClick={() => remove(index)}
+                      />
+                    </div>
 
-                        <FormInput
-                          name={`investments.${index}.totalAmount`}
-                          required
-                          label="Montant total"
-                        />
+                    {/* items-end : garde les champs alignés quand un libellé passe sur deux lignes. */}
+                    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+                      <FormSelect
+                        name={`investments.${index}.accountId`}
+                        label="Compte"
+                        onSelectChange={(value) =>
+                          handleAccountChange(value, index)
+                        }
+                      >
+                        {accounts?.map(({ id, name }) => (
+                          <SelectItem key={id} value={id.toString()}>
+                            {name}
+                          </SelectItem>
+                        ))}
+                      </FormSelect>
 
-                        <FormInput
-                          name={`investments.${index}.capitalGain`}
-                          required
-                          label="Plus value"
-                        />
+                      <FormInput
+                        name={`investments.${index}.totalAmount`}
+                        required
+                        label="Montant total"
+                        inputMode="decimal"
+                        suffix="€"
+                      />
 
-                        <FormInput
-                          name={`investments.${index}.transactionAmount`}
-                          required
-                          label="Montant de la transaction"
-                        />
+                      <FormInput
+                        name={`investments.${index}.capitalGain`}
+                        required
+                        label="Plus value"
+                        inputMode="decimal"
+                        suffix="€"
+                      />
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => remove(index)}
-                          className="w-full lg:w-auto"
-                        >
-                          <Trash />
-                          Supprimer
-                        </Button>
-                      </div>
+                      <FormInput
+                        name={`investments.${index}.transactionAmount`}
+                        required
+                        label="Montant de la transaction"
+                        inputMode="decimal"
+                        suffix="€"
+                      />
+                    </div>
+                  </div>
+                ))}
 
-                      {index !== fields.length - 1 && <Separator />}
-                    </Fragment>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={append}
-              disabled={!accounts?.length}
-            >
-              <Plus />
-              Ajouter un investissement
-            </Button>
+              <AddRowButton onClick={append} disabled={!accounts?.length}>
+                Ajouter un investissement
+              </AddRowButton>
+            </SectionCard>
           </form>
         </FormProvider>
 
-        {submitError && (
-          <div className="text-red-500 text-sm">
-            Erreur:{" "}
-            {submitError instanceof Error
-              ? submitError.message
-              : "Une erreur est survenue"}
-          </div>
-        )}
+        <FormSubmitError error={submitError} />
 
-        <div className="flex lg:justify-end gap-4">
-          <Button
-            type="submit"
+        <FormFooter>
+          <SubmitButton
             form="add-investments-form"
-            className="w-full lg:w-auto"
             disabled={isSubmitting || !accounts?.length}
           >
             {isSubmitting ? "Création..." : "Valider"}
-          </Button>
-        </div>
+          </SubmitButton>
+        </FormFooter>
       </div>
     </QueryBoundary>
   );

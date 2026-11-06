@@ -1,7 +1,8 @@
-import type { CustomBarChartAxis } from "@/components/custom/charts/CustomBarChart/custom-bar-chart.type";
-import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/CustomBarChart";
+import {
+  RankedBarList,
+  type RankedBarItem,
+} from "@/components/custom/charts/RankedBarList/RankedBarList";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatToPercentage } from "@/utils/format.utils";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
 import type { InvestmentOverviewResponseDto } from "@investments/shared";
@@ -14,38 +15,28 @@ type PerfByCategoriesChartProps = {
 export const PerfByCategoriesChart = ({
   perfByCategories,
 }: PerfByCategoriesChartProps) => {
-  const isMobile = useIsMobile();
   const { data: investmentCategories = [] } = useSuspenseQuery({
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });
-  const chartData =
+  const items: RankedBarItem[] =
     perfByCategories
       ?.filter((category) => category.code !== "ALL")
-      .map(({ code, value }) => {
-        return {
-          yAxis:
-            code === "CRYPTO" && isMobile
-              ? "Cryptos"
-              : investmentCategories.find(
-                  (category) => category.code === code,
-                )?.label || "",
-          xAxis: value,
-        };
-      }) ?? [];
-
-  const tickFormatterXAxis = (value: string) =>
-    formatToPercentage(Number(value));
+      .map(({ code, value }) => ({
+        key: code,
+        label:
+          investmentCategories.find((category) => category.code === code)
+            ?.label ?? code,
+        value,
+        formatted: formatToPercentage(value),
+      })) ?? [];
 
   return (
-    <CardContainer title="Performances annualisées par catégories">
-      <CustomBarChart<CustomBarChartAxis>
-        chartData={chartData}
-        barLayout="vertical"
-        tickFormatterXAxis={tickFormatterXAxis}
-        unit="per"
-        displayLabels={true}
-      />
+    <CardContainer
+      title="Performances annualisées par catégories"
+      description="Classées de la meilleure à la moins bonne"
+    >
+      <RankedBarList items={items} />
     </CardContainer>
   );
 };

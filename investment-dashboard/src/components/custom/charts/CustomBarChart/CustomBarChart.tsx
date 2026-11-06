@@ -3,130 +3,114 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
+  Rectangle,
+  LabelList,
+  ReferenceLine,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Cell,
-  LabelList,
 } from "recharts";
+import type { RectangleProps } from "recharts";
 import { CustomTooltip } from "../CustomTooltip/CustomTooltip";
 import type { CustomBarChartAxis } from "./custom-bar-chart.type";
 import type { CustomChartUnit } from "../custom-chart.type";
-import { getTickFormatterYAxis } from "../custom-chart.utils";
+import { crossesZero, getTickFormatterYAxis } from "../custom-chart.utils";
+import {
+  axisProps,
+  CHART_COLORS,
+  getValueColor,
+  gridProps,
+  zeroLineProps,
+} from "../chart-theme";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { BarLabel } from "./BarLabel";
-import { useEffect, useState } from "react";
 
 type CustomBarChartProps<T> = {
   chartData: T[];
-  barLayout?: "horizontal" | "vertical";
   tickFormatterXAxis?: (value: string, index: number) => string;
   unit?: CustomChartUnit;
+  /** Libellés au bout des barres (masqués automatiquement si trop serrés). */
   displayLabels?: boolean;
-  labelsLandscapeOnly?: boolean;
   labelFormatter?: (value: number) => string;
   isAnimationActive?: boolean;
 };
 
 const chartConfig = {} satisfies ChartConfig;
 
+/** Histogramme vertical, barres vertes (positives) ou rouges (négatives). */
 export function CustomBarChart<T>({
   chartData,
-  barLayout = "horizontal",
   tickFormatterXAxis,
   unit = "eur",
   displayLabels = false,
-  labelsLandscapeOnly = false,
   labelFormatter,
   isAnimationActive = true,
 }: CustomBarChartProps<T>) {
   const isMobile = useIsMobile();
-  const [isLandscape, setIsLandscape] = useState(
-    () => window.matchMedia("(orientation: landscape)").matches,
+  const values = chartData.map((entry) =>
+    Number((entry as CustomBarChartAxis).yAxis),
   );
-
-  useEffect(() => {
-    const orientationQuery = window.matchMedia("(orientation: landscape)");
-    const updateOrientation = () => setIsLandscape(orientationQuery.matches);
-
-    orientationQuery.addEventListener("change", updateOrientation);
-    return () =>
-      orientationQuery.removeEventListener("change", updateOrientation);
-  }, []);
-
-  const isVertical = barLayout === "vertical";
-
-  const typeXAxis = isVertical ? "number" : "category";
-  const typeYAxis = isVertical ? "category" : "number";
-  const dataKeyYAxis = isVertical ? "yAxis" : undefined;
-  const dataKeyBar = isVertical ? "xAxis" : "yAxis";
-
-  const tickFormatterYAxis = isVertical
-    ? undefined
-    : getTickFormatterYAxis(unit, isMobile);
-
-  const getBarColor = (value: number) => {
-    return value < 0 ? "var(--destructive)" : "var(--chart-2)";
-  };
-
-  const labelsVisible = displayLabels && (!labelsLandscapeOnly || isLandscape);
-  const width = isMobile && isVertical ? 70 : !isMobile && isVertical ? 60 : 50;
 
   return (
     <ChartContainer config={chartConfig} className="h-70 w-full">
       <BarChart
         accessibilityLayer
         data={chartData}
-        layout={barLayout}
         margin={{
-          left: isMobile ? 0 : isVertical ? 40 : 12,
-          right: isMobile ? 0 : 12,
-          top: labelsVisible && !isVertical ? 16 : 0,
-          bottom: labelsVisible && !isVertical ? 16 : 0,
+          left: 0,
+          right: isMobile ? 4 : 12,
+          top: displayLabels ? 20 : 8,
+          bottom: displayLabels ? 12 : 0,
         }}
       >
-        <CartesianGrid vertical={false} />
+        <CartesianGrid {...gridProps} />
         <XAxis
           dataKey="xAxis"
-          tickLine={false}
+          {...axisProps}
           tickFormatter={tickFormatterXAxis}
-          type={typeXAxis}
-          axisLine={false}
+          minTickGap={16}
         />
         <YAxis
-          type={typeYAxis}
-          dataKey={dataKeyYAxis}
-          tickLine={false}
-          tickCount={6}
-          axisLine={false}
-          tickFormatter={tickFormatterYAxis}
-          width={width}
+          {...axisProps}
+          tickCount={5}
+          tickFormatter={getTickFormatterYAxis(unit)}
+          width={52}
         />
+        {/* Avant les barres : Recharts dessine le fond de survol à la position
+            du Tooltip, il passerait sinon par-dessus la barre survolée. */}
+        <Tooltip
+          cursor={{ fill: CHART_COLORS.cursor, radius: 6 }}
+          content={<CustomTooltip unit={unit} signed />}
+        />
+        {crossesZero(values) && <ReferenceLine {...zeroLineProps} />}
         <Bar
-          dataKey={dataKeyBar}
-          radius={4}
+          dataKey="yAxis"
+          // Arrondi côté extrémité. Recharts passe ici une hauteur négative
+          // (y = extrémité) pour les barres négatives : le même rayon
+          // arrondit donc le haut des positives et le bas des négatives.
+          shape={(props: unknown) => (
+            <Rectangle {...(props as RectangleProps)} radius={[6, 6, 0, 0]} />
+          )}
+          maxBarSize={44}
           isAnimationActive={isAnimationActive}
         >
-          {chartData.map((entry, index) => {
-            const value = (entry as CustomBarChartAxis)[dataKeyBar];
-
-            return (
-              <Cell key={`cell-${index}`} fill={getBarColor(Number(value))} />
-            );
-          })}
-          {labelsVisible && (
+          {values.map((value, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={getValueColor(value)}
+              fillOpacity={0.85}
+            />
+          ))}
+          {displayLabels && (
             <LabelList
+              dataKey="yAxis"
               content={
-                <BarLabel
-                  unit={unit}
-                  barLayout={barLayout}
-                  labelFormatter={labelFormatter}
-                />
+                <BarLabel unit={unit} labelFormatter={labelFormatter} />
               }
             />
           )}
         </Bar>
-        <Tooltip content={<CustomTooltip unit={unit} />} />
       </BarChart>
     </ChartContainer>
   );

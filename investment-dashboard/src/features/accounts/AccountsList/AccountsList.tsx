@@ -2,7 +2,8 @@ import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { DataTable } from "@/components/custom/DataTable/DataTable";
 import { CustomCheckbox } from "@/components/custom/fields/CustomCheckbox/CustomCheckbox";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
-import { Button } from "@/components/ui/button";
+import { formatAmount } from "@/components/custom/DataTable/data-table.utils";
+import { IconActionButton } from "@/components/custom/DataTable/IconActionButton";
 import { Input } from "@/components/ui/input";
 import { getInvestmentTypesRefApi } from "@/services/investments/investment-types-ref.service";
 import { getInvestmentCategoriesRefApi } from "@/services/investments/investment-categories-ref.service";
@@ -22,9 +23,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { ColumnDef, RowData } from "@tanstack/react-table";
-import { Check, Edit, X } from "lucide-react";
+import { Check, Pencil, X } from "lucide-react";
 import { useState } from "react";
 import { DatePicker } from "@/components/custom/form/DatePicker";
+import { cn } from "@/lib/utils";
 
 type AccountForm = UpdateAccountRequestDto;
 type EditableAccountCategory = Exclude<AccountForm["category"], "ALL">;
@@ -49,6 +51,27 @@ declare module "@tanstack/react-table" {
     accountEditor?: AccountEditorMeta<TData>;
   }
 }
+
+// Statut du compte en pastille : emerald si ouvert, slate si fermé.
+const AccountStatusBadge = ({ isClosed }: { isClosed: boolean }) => (
+  <span
+    className={cn(
+      "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+      isClosed
+        ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+        : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    )}
+  >
+    <span
+      aria-hidden
+      className={cn(
+        "size-1.5 rounded-full",
+        isClosed ? "bg-slate-400" : "bg-emerald-500",
+      )}
+    />
+    {isClosed ? "Fermé" : "Ouvert"}
+  </span>
+);
 
 const ACCOUNT_COLUMNS: ColumnDef<AccountResponseDto>[] = [
   {
@@ -138,6 +161,7 @@ const ACCOUNT_COLUMNS: ColumnDef<AccountResponseDto>[] = [
   {
     accessorKey: "defaultTransactionAmount",
     header: "Montant par défaut",
+    meta: { align: "right" },
     cell: ({ row, table }) => {
       const editor = table.options.meta?.accountEditor;
       return editor?.editingId === row.original.id ? (
@@ -155,7 +179,7 @@ const ACCOUNT_COLUMNS: ColumnDef<AccountResponseDto>[] = [
           aria-label="Montant de transaction par défaut"
         />
       ) : (
-        row.original.defaultTransactionAmount
+        formatAmount(row.original.defaultTransactionAmount)
       );
     },
   },
@@ -170,49 +194,40 @@ const ACCOUNT_COLUMNS: ColumnDef<AccountResponseDto>[] = [
           checked={editor.form.isClosed ?? false}
           setChecked={(checked) => editor.updateForm("isClosed", checked)}
         />
-      ) : row.original.isClosed ? (
-        "Fermé"
       ) : (
-        "Ouvert"
+        <AccountStatusBadge isClosed={row.original.isClosed} />
       );
     },
   },
   {
     id: "actions",
     header: "Actions",
+    meta: { align: "right" },
     cell: ({ row, table }) => {
       const editor = table.options.meta?.accountEditor;
       return editor?.editingId === row.original.id ? (
-        <div className="flex gap-2">
-          <Button
-            aria-label="Sauvegarder"
-            size="sm"
+        <div className="flex justify-end gap-1">
+          <IconActionButton
+            icon={Check}
+            label="Sauvegarder"
+            tone="primary"
             onClick={() => editor.save(row.original.id)}
             disabled={editor.isSaving}
-          >
-            <Check size={16} />
-            <span className="hidden 2xl:inline">Sauvegarder</span>
-          </Button>
-          <Button
-            aria-label="Annuler"
-            size="sm"
-            variant="ghost"
+          />
+          <IconActionButton
+            icon={X}
+            label="Annuler"
             onClick={() => editor.cancelEdit()}
-          >
-            <X size={16} />
-            <span className="hidden 2xl:inline">Annuler</span>
-          </Button>
+          />
         </div>
       ) : (
-        <Button
-          aria-label="Éditer"
-          size="sm"
-          variant="outline"
-          onClick={() => editor?.startEdit(row.original)}
-        >
-          <Edit size={16} />
-          <span className="hidden 2xl:inline">Éditer</span>
-        </Button>
+        <div className="flex justify-end">
+          <IconActionButton
+            icon={Pencil}
+            label="Éditer"
+            onClick={() => editor?.startEdit(row.original)}
+          />
+        </div>
       );
     },
   },
@@ -283,7 +298,7 @@ export const AccountsList = () => {
     <MainContainer columns={1}>
       <>
         {patchMutation.error && (
-          <div className="text-red-500 text-sm">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             Erreur:{" "}
             {patchMutation.error instanceof Error
               ? patchMutation.error.message
@@ -294,6 +309,7 @@ export const AccountsList = () => {
           columns={ACCOUNT_COLUMNS}
           data={accounts ?? []}
           mobileCards
+          stickyFirstColumn
           meta={{
             accountEditor: {
               editingId,
