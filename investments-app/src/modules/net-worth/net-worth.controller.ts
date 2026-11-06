@@ -8,8 +8,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { NetWorthService } from './net-worth.service';
+import { parseOptionalInt } from '../investment/investment-list.utils';
 import {
   type NetWorthRequestDto,
   NetWorthResponseDto,
@@ -20,8 +22,8 @@ export class NetWorthController {
   constructor(private readonly netWorthService: NetWorthService) {}
 
   @Get()
-  findAll(): Promise<NetWorthResponseDto[]> {
-    return this.netWorthService.findAll();
+  findAll(@Query('year') year?: string): Promise<NetWorthResponseDto[]> {
+    return this.netWorthService.findAll(parseOptionalInt(year));
   }
 
   @Post()

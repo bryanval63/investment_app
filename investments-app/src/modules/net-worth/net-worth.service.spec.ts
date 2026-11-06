@@ -34,6 +34,23 @@ describe('NetWorthService', () => {
         { id: 1, amount: 1000.5, date },
       ]);
       expect(prisma.netWorth.findMany).toHaveBeenCalledWith({
+        where: {},
+        orderBy: { date: 'asc' },
+      });
+    });
+
+    it('filters on a calendar year', async () => {
+      prisma.netWorth.findMany.mockResolvedValue([]);
+
+      await service.findAll(2026);
+
+      expect(prisma.netWorth.findMany).toHaveBeenCalledWith({
+        where: {
+          date: {
+            gte: new Date(Date.UTC(2026, 0, 1)),
+            lt: new Date(Date.UTC(2027, 0, 1)),
+          },
+        },
         orderBy: { date: 'asc' },
       });
     });

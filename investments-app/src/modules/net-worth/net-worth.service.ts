@@ -17,8 +17,18 @@ const mapNetWorthToDto = ({
 export class NetWorthService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<NetWorthResponseDto[]> {
+  /** Toutes les saisies, ou celles d'une année civile si `year` est fourni. */
+  async findAll(year?: number): Promise<NetWorthResponseDto[]> {
     const netWorthes = await this.prisma.netWorth.findMany({
+      where:
+        year === undefined
+          ? {}
+          : {
+              date: {
+                gte: new Date(Date.UTC(year, 0, 1)),
+                lt: new Date(Date.UTC(year + 1, 0, 1)),
+              },
+            },
       orderBy: { date: 'asc' },
     });
 

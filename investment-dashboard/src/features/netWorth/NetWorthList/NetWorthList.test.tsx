@@ -21,10 +21,11 @@ const netWorth = (
   id: number,
   amount: number,
   month: number,
+  year = 2026,
 ): NetWorthResponseDto => ({
   id,
   amount,
-  date: new Date(Date.UTC(2026, month, 1)),
+  date: new Date(Date.UTC(year, month, 1)),
 });
 
 const renderList = () => {
@@ -32,7 +33,7 @@ const renderList = () => {
   return render(
     <Wrapper>
       <Suspense fallback={<p>Chargement</p>}>
-        <NetWorthList />
+        <NetWorthList year={2026} />
       </Suspense>
     </Wrapper>,
   );
@@ -43,10 +44,11 @@ const desktopTable = async () => within(await screen.findByRole("table"));
 
 describe("NetWorthList", () => {
   beforeEach(() => {
-    vi.mocked(getNetWorthesApi).mockResolvedValue([
-      netWorth(1, 100000, 0),
-      netWorth(2, 110000, 1),
-    ]);
+    vi.mocked(getNetWorthesApi).mockImplementation(async (year) =>
+      year === 2026
+        ? [netWorth(1, 100000, 0), netWorth(2, 110000, 1)]
+        : [netWorth(9, 95000, 11, 2025)],
+    );
   });
 
   afterEach(() => {
@@ -63,6 +65,17 @@ describe("NetWorthList", () => {
     expect(latest).toContain("110 000,00 €");
     expect(latest).toContain("+10 000,00 €");
     expect(normalizeSpaces(rows[1].textContent)).toContain("01/2026");
+    expect(getNetWorthesApi).toHaveBeenCalledWith(2026);
+  });
+
+  it("calcule la variation de janvier par rapport à l'année précédente", async () => {
+    renderList();
+    const table = await desktopTable();
+
+    const rows = table.getAllByRole("row").slice(1);
+    expect(rows).toHaveLength(2);
+    expect(normalizeSpaces(rows[1].textContent)).toContain("+5 000,00 €");
+    expect(getNetWorthesApi).toHaveBeenCalledWith(2025);
   });
 
   it("modifie le montant d'un mois", async () => {

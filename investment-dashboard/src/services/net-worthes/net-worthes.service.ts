@@ -6,8 +6,12 @@ import type {
 
 const NET_WORTHES_URL = "net-worthes";
 
-export const getNetWorthesApi = () =>
-  api<NetWorthResponseDto[]>("GET", NET_WORTHES_URL);
+/** Toutes les saisies, ou celles d'une année civile. */
+export const getNetWorthesApi = (year?: number) =>
+  api<NetWorthResponseDto[]>(
+    "GET",
+    year === undefined ? NET_WORTHES_URL : `${NET_WORTHES_URL}?year=${year}`,
+  );
 
 export const postNetWorthApi = (netWorth: NetWorthRequestDto) =>
   api<NetWorthRequestDto>("POST", NET_WORTHES_URL, netWorth);

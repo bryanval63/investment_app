@@ -28,7 +28,7 @@ import type {
 import {
   useMutation,
   useQueryClient,
-  useSuspenseQuery,
+  useSuspenseQueries,
 } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
@@ -51,15 +51,31 @@ const toPayload = (form: NetWorthEditForm): NetWorthRequestDto | null => {
   return { amount, date };
 };
 
-/** Lignes du plus récent au plus ancien, avec la variation mensuelle. */
-const toRows = (netWorthes: NetWorthResponseDto[]): NetWorthRow[] =>
-  [...netWorthes]
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map((netWorth, index, sorted) => ({
-      ...netWorth,
-      variation: index === 0 ? null : netWorth.amount - sorted[index - 1].amount,
-    }))
+const byDate = (a: NetWorthResponseDto, b: NetWorthResponseDto) =>
+  new Date(a.date).getTime() - new Date(b.date).getTime();
+
+/**
+ * Lignes de l'année, de la plus récente à la plus ancienne, avec l'écart par
+ * rapport à la saisie précédente (la dernière de l'année d'avant pour la
+ * première de l'année).
+ */
+const toRows = (
+  netWorthes: NetWorthResponseDto[],
+  previousYear: NetWorthResponseDto[],
+): NetWorthRow[] => {
+  const lastOfPreviousYear = [...previousYear].sort(byDate).at(-1);
+
+  return [...netWorthes]
+    .sort(byDate)
+    .map((netWorth, index, sorted) => {
+      const previous = index === 0 ? lastOfPreviousYear : sorted[index - 1];
+      return {
+        ...netWorth,
+        variation: previous ? netWorth.amount - previous.amount : null,
+      };
+    })
     .reverse();
+};
 
 // Colonnes constantes (cf. row-editor) : l'état d'édition passe par `meta`.
 const NET_WORTH_COLUMNS: ColumnDef<NetWorthRow>[] = [
@@ -143,12 +159,19 @@ const NET_WORTH_COLUMNS: ColumnDef<NetWorthRow>[] = [
   },
 ];
 
-/** Historique des montants de patrimoine, modifiables et supprimables. */
-export const NetWorthList = () => {
+type NetWorthListProps = {
+  year: number;
+};
+
+/** Historique d'une année de patrimoine, modifiable et supprimable. */
+export const NetWorthList = ({ year }: NetWorthListProps) => {
   const queryClient = useQueryClient();
-  const { data: netWorthes } = useSuspenseQuery({
-    queryKey: ["net-worthes"],
-    queryFn: () => getNetWorthesApi(),
+  // Année précédente : uniquement pour la variation du premier mois affiché.
+  const [{ data: netWorthes }, { data: previousYear }] = useSuspenseQueries({
+    queries: [year, year - 1].map((queryYear) => ({
+      queryKey: ["net-worthes", queryYear],
+      queryFn: () => getNetWorthesApi(queryYear),
+    })),
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -179,7 +202,7 @@ export const NetWorthList = () => {
     >
       <DataTable
         columns={NET_WORTH_COLUMNS}
-        data={toRows(netWorthes)}
+        data={toRows(netWorthes, previousYear)}
         mobileCards
         meta={{
           rowEditor: {
