@@ -1,5 +1,6 @@
 import { api } from "@/utils/fetch.utils";
 import type {
+  InvestmentListItemResponseDto,
   InvestmentOverviewResponseDto,
   InvestmentRequestDto,
 } from "@investments/shared";
@@ -16,7 +17,7 @@ export const getInvestmentsOverviewApi = (previousMonth = false) =>
   );
 
 export const getInvestmentsApi = (accountId?: number) =>
-  api<any>(
+  api<InvestmentListItemResponseDto[]>(
     "GET",
     `${INVESTMENTS_URL}${accountId ? `?accountId=${accountId}` : ""}`,
   );

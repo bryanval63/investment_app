@@ -19,33 +19,25 @@ import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
-import type { InvestmentRequestDto } from "@investments/shared";
+import type {
+  InvestmentListItemResponseDto,
+  InvestmentRequestDto,
+} from "@investments/shared";
 
-// Ligne renvoyée par GET /investments (montants éventuellement sérialisés en chaîne).
-type InvestmentRow = {
-  id: number;
+// Valeurs du formulaire d'édition en ligne (les inputs renvoient des chaînes).
+type InvestmentEditForm = {
+  totalAmount: number | string;
+  capitalGain: number | string;
+  transactionAmount: number | string;
   date: string;
   accountId: number;
-  account?: { name: string };
-  totalAmount: number | string;
-  capitalGain: number | string;
-  transactionAmount: number | string;
-};
-
-// Valeurs du formulaire d'édition en ligne (saisies brutes des champs).
-type InvestmentForm = {
-  totalAmount: number | string;
-  capitalGain: number | string;
-  transactionAmount: number | string;
-  date: string;
-  accountId?: number;
 };
 
 export const InvestmentsList = () => {
   const queryClient = useQueryClient();
   const { data: investments } = useSuspenseQuery({
     queryKey: ["investments"],
-    queryFn: () => getInvestmentsApi() as Promise<InvestmentRow[]>,
+    queryFn: () => getInvestmentsApi(),
   });
   const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
@@ -73,14 +65,12 @@ export const InvestmentsList = () => {
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState<InvestmentForm>({
-    totalAmount: 0,
-    capitalGain: 0,
-    transactionAmount: 0,
-    date: "",
-  });
+  const [form, setForm] = useState<InvestmentEditForm | null>(null);
 
-  const startEdit = (inv: InvestmentRow) => {
+  const updateForm = (patch: Partial<InvestmentEditForm>) =>
+    setForm((prev) => (prev ? { ...prev, ...patch } : prev));
+
+  const startEdit = (inv: InvestmentListItemResponseDto) => {
     setEditingId(inv.id);
     setForm({
       totalAmount: Number(inv.totalAmount),
@@ -92,7 +82,7 @@ export const InvestmentsList = () => {
   };
 
   const save = (id: number) => {
-    if (form.accountId === undefined) return;
+    if (!form) return;
     const payload: InvestmentRequestDto = {
       accountId: form.accountId,
       totalAmount: Number(form.totalAmount),
@@ -109,16 +99,16 @@ export const InvestmentsList = () => {
     deleteMutation.mutate(id);
   };
 
-  const columns: ColumnDef<InvestmentRow>[] = [
+  const columns: ColumnDef<InvestmentListItemResponseDto>[] = [
     {
       accessorKey: "date",
       header: "Date",
       cell: ({ row }) =>
-        editingId === row.original.id ? (
+        editingId === row.original.id && form ? (
           <Input
             type="date"
             value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            onChange={(e) => updateForm({ date: e.target.value })}
             aria-label="Date de l’investissement"
           />
         ) : (
@@ -132,9 +122,9 @@ export const InvestmentsList = () => {
       id: "account",
       header: "Compte",
       cell: ({ row }) =>
-        editingId === row.original.id ? (
+        editingId === row.original.id && form ? (
           <CustomSelect
-            value={form.accountId?.toString() ?? ""}
+            value={form.accountId.toString()}
             options={
               accounts?.map(({ id, name }) => ({
                 code: id.toString(),
@@ -142,7 +132,7 @@ export const InvestmentsList = () => {
               })) ?? []
             }
             onValueChange={(value) =>
-              setForm({ ...form, accountId: Number(value) })
+              updateForm({ accountId: Number(value) })
             }
           />
         ) : (
@@ -154,11 +144,11 @@ export const InvestmentsList = () => {
       header: "Montant total",
       meta: { align: "right" },
       cell: ({ row }) =>
-        editingId === row.original.id ? (
+        editingId === row.original.id && form ? (
           <Input
             type="number"
             value={form.totalAmount}
-            onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
+            onChange={(e) => updateForm({ totalAmount: e.target.value })}
             aria-label="Montant total"
           />
         ) : (
@@ -170,11 +160,11 @@ export const InvestmentsList = () => {
       header: "Plus-value",
       meta: { align: "right" },
       cell: ({ row }) =>
-        editingId === row.original.id ? (
+        editingId === row.original.id && form ? (
           <Input
             type="number"
             value={form.capitalGain}
-            onChange={(e) => setForm({ ...form, capitalGain: e.target.value })}
+            onChange={(e) => updateForm({ capitalGain: e.target.value })}
             aria-label="Plus-value"
           />
         ) : (
@@ -189,12 +179,12 @@ export const InvestmentsList = () => {
       header: "Transaction",
       meta: { align: "right" },
       cell: ({ row }) =>
-        editingId === row.original.id ? (
+        editingId === row.original.id && form ? (
           <Input
             type="number"
             value={form.transactionAmount}
             onChange={(e) =>
-              setForm({ ...form, transactionAmount: e.target.value })
+              updateForm({ transactionAmount: e.target.value })
             }
             aria-label="Montant de la transaction"
           />

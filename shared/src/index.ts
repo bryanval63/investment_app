@@ -4,6 +4,7 @@ export * from "./dtos/income/income-type-ref.response.dto";
 export * from "./dtos/income/income-request.dto";
 export * from "./dtos/investment/investment-response.dto";
 export * from "./dtos/investment/investment-request.dto";
+export * from "./dtos/investment/investment-list-item.response.dto";
 export * from "./dtos/investment/investment-type-ref.response.dto";
 export * from "./dtos/investment/investment-category-ref.response.dto";
 export * from "./dtos/reference/update-reference-label.request.dto";

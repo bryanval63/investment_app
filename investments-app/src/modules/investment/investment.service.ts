@@ -12,6 +12,8 @@ import {
   InvestmentTotalByYearGroupByCategoryResponseDto,
 } from '@investments/shared';
 import { COLUMN_MAP } from './investment.constant';
+import { investmentListItemSelect } from './investment.select';
+import { mapInvestmentListItemToDto } from './investment.mapper';
 import {
   computeCAGR,
   findInvestmentByDate,
@@ -256,7 +258,7 @@ export class InvestmentService {
         .sort((a, b) => b.value - a.value),
       perfByCategory: Object.entries(perfByCategory)
         .map(([key, value]) => ({
-          code: key as InvestmentCategory,
+          code: key,
           value,
         }))
         .sort((a, b) => b.value - a.value),
@@ -842,15 +844,27 @@ export class InvestmentService {
 
   async findAll(accountId?: number) {
     const where = accountId ? { accountId } : {};
-    return this.prisma.investment.findMany({
+    const investments = await this.prisma.investment.findMany({
       where,
       orderBy: { date: 'desc' },
-      include: { account: true },
+      select: investmentListItemSelect,
     });
+    return investments.map(mapInvestmentListItemToDto);
   }
 
   async update(id: number, dto: InvestmentRequestDto) {
-    return this.prisma.investment.update({ where: { id }, data: dto as any });
+    const { accountId, totalAmount, capitalGain, transactionAmount, date } =
+      dto;
+    return this.prisma.investment.update({
+      where: { id },
+      data: {
+        account: { connect: { id: accountId } },
+        totalAmount,
+        capitalGain,
+        transactionAmount,
+        date: new Date(date),
+      },
+    });
   }
 
   async remove(id: number) {

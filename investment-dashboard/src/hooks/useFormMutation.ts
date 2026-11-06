@@ -1,20 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-type Options = {
+type Options<TData> = {
   redirectTo?: string;
-  onSuccess?: (data: unknown) => void;
+  onSuccess?: (data: TData) => void;
 };
 
-export const useFormMutation = (
-  mutationFn: (...args: any[]) => any,
-  options?: Options,
+export const useFormMutation = <TData, TVariables>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: Options<TData>,
 ) => {
   const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn,
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: TData) => {
       options?.onSuccess?.(data);
       if (options?.redirectTo) navigate(options.redirectTo);
     },

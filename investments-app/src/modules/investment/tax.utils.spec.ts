@@ -1,7 +1,4 @@
-import {
-  calculateInvestmentTax,
-  calculateLifeInsuranceTax,
-} from './tax.utils';
+import { calculateInvestmentTax, calculateLifeInsuranceTax } from './tax.utils';
 
 describe('calculateInvestmentTax', () => {
   it('applies the configured social contributions rate to PEE gains', () => {
