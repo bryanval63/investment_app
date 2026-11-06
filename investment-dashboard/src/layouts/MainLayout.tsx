@@ -1,6 +1,6 @@
 import { Header } from "./Header/Header";
 import { Suspense } from "react";
-import { Outlet, useMatches } from "react-router-dom";
+import { Outlet, useLocation, useMatches } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AppMatch } from "./layouts.type";
 
@@ -26,6 +26,7 @@ const PageLoader = () => (
 );
 
 export const MainLayout = () => {
+  const { pathname } = useLocation();
   const matches = useMatches() as AppMatch[];
   const routeWithHandle = [...matches].reverse().find((m) => m.handle);
 
@@ -48,8 +49,12 @@ export const MainLayout = () => {
           <Card className="h-full lg:p-4 xl:p-8 futuristic-card futuristic-border lg:overflow-hidden">
             {/* lg : le padding bas (compensé par la marge négative) évite que l'overflow rogne l'ombre des dernières cards. */}
             <CardContent className="flex-1 relative lg:px-4 xl:px-8 lg:overflow-auto lg:pb-4 lg:-mb-4">
-              <Suspense fallback={<PageLoader />}>
-                <Outlet />
+              {/* Une Suspense neuve par page : React Router navigue dans une transition, qui
+                  garderait l'ancienne page figée ; une frontière neuve affiche le squelette tout de suite. */}
+              <Suspense key={pathname} fallback={<PageLoader />}>
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out motion-reduce:animate-none">
+                  <Outlet />
+                </div>
               </Suspense>
             </CardContent>
           </Card>
