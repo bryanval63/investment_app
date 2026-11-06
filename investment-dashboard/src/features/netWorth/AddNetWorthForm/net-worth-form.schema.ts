@@ -1,10 +1,11 @@
 import { getCurrentYear, MONTHS_CODE } from "@investments/shared";
 import z from "zod";
+import { decimalNumber } from "@/utils/zod.utils";
 
 export const NetWorthFormSchema = z.object({
   month: z.enum(MONTHS_CODE),
   year: z.coerce.number().min(2000).max(2100).int(),
-  amount: z.coerce.number().positive(),
+  amount: decimalNumber(z.coerce.number().positive()),
 });
 
 export const DEFAULT_NET_WORTH: NetWorthFormInput = {

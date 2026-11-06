@@ -1,5 +1,6 @@
 import { INVESTMENT_CATEGORIES } from "@investments/shared";
 import { z } from "zod";
+import { decimalNumber } from "@/utils/zod.utils";
 
 export const AccountFormSchema = z.object({
   name: z.string().min(1, "Le nom du compte est requis"),
@@ -11,9 +12,9 @@ export const AccountFormSchema = z.object({
     },
   ),
   openingDate: z.string().optional(),
-  defaultTransactionAmount: z.coerce
-    .number()
-    .min(0, "Le montant doit être positif ou nul"),
+  defaultTransactionAmount: decimalNumber(
+    z.coerce.number().min(0, "Le montant doit être positif ou nul"),
+  ),
 });
 
 export const DEFAULT_ACCOUNT: AccountFormInput = {

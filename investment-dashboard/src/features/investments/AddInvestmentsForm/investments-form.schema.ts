@@ -1,11 +1,12 @@
 import { MONTHS_CODE } from "@investments/shared/constants/date.constant";
 import z from "zod";
+import { decimalNumber } from "@/utils/zod.utils";
 
 export const InvestmentSchema = z.object({
   accountId: z.coerce.number().positive(),
-  capitalGain: z.coerce.number(),
-  totalAmount: z.coerce.number(),
-  transactionAmount: z.coerce.number(),
+  capitalGain: decimalNumber(),
+  totalAmount: decimalNumber(),
+  transactionAmount: decimalNumber(),
 });
 
 export const InvestmentsFormSchema = z.object({

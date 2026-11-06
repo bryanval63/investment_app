@@ -1,9 +1,10 @@
 import { getCurrentYear } from "@investments/shared";
 import z from "zod";
+import { decimalNumber } from "@/utils/zod.utils";
 
 export const TaxFormSchema = z.object({
   year: z.coerce.number().min(2000).max(2100).int(),
-  amount: z.coerce.number().positive(),
+  amount: decimalNumber(z.coerce.number().positive()),
 });
 
 export const DEFAULT_TAX: TaxFormInput = {
