@@ -1,7 +1,6 @@
 import { PageToolbar, ToolbarField } from "@/components/custom/containers/PageToolbar";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
 import { IncomesDataTable } from "@/features/incomes/IncomesDataTable/IncomesDataTable";
-import { IncomesList } from "@/features/incomes/IncomesList/IncomesList";
 import {
   buildYearsUntilCurrent,
   getCurrentYear,
@@ -34,7 +33,6 @@ export const IncomesData = () => {
       </PageToolbar>
 
       <IncomesDataTable year={selectedYear} />
-      <IncomesList year={selectedYear} />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { InvestmentsSidebar } from "./layouts/Sidebars/InvestmentsSidebar";
 import { IncomesAdd } from "./pages/incomes/IncomesAdd";
 import { IncomesOverview } from "./pages/incomes/IncomesOverview";
 import { IncomesData } from "./pages/incomes/IncomesData";
+import { IncomesEntries } from "./pages/incomes/IncomesEntries";
 import { InvestmentsOverview } from "./pages/investments/InvestmentsOverview";
 import { InvestmentsAdd } from "./pages/investments/InvestmentsAdd";
 import { InvestmentsAddAccount } from "./pages/investments/InvestmentsAddAccount";
@@ -54,6 +55,10 @@ export const router = createBrowserRouter([
           {
             Component: IncomesData,
             path: "data",
+          },
+          {
+            Component: IncomesEntries,
+            path: "entries",
           },
           {
             Component: IncomesAdd,

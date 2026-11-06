@@ -1,6 +1,6 @@
 import { Sidebar } from "./Sidebar";
 import type { SidebarConfig } from "./sidebar.type";
-import { Plus, LayoutDashboard, Table } from "lucide-react";
+import { Plus, LayoutDashboard, ListChecks, Table } from "lucide-react";
 
 export const IncomesSidebar = () => {
   const INCOMES_MENU: SidebarConfig = [
@@ -15,6 +15,12 @@ export const IncomesSidebar = () => {
       shortTitle: "Données",
       link: "/incomes/data",
       icon: <Table />,
+    },
+    {
+      title: "Détail des saisies",
+      shortTitle: "Saisies",
+      link: "/incomes/entries",
+      icon: <ListChecks />,
     },
     {
       title: "Ajouter un revenu",
