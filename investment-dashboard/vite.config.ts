@@ -12,10 +12,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "InvestTrack",
-        short_name: "Investments",
+        short_name: "InvestTrack",
         description: "Mon application de suivi d'investissements",
         theme_color: "#ffffff", // Adapte selon ton thème Tailwind
         background_color: "#ffffff",
@@ -34,10 +34,11 @@ export default defineConfig({
             type: "image/png",
           },
           {
-            src: "icon_512.png",
+            // Fond plein bord : le lanceur Android le découpe à sa forme (cercle, squircle…).
+            src: "icon_maskable_512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "maskable",
           },
         ],
       },
