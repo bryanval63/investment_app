@@ -3,7 +3,9 @@ import { CustomBarChart } from "@/components/custom/charts/CustomBarChart/Custom
 import { Button } from "@/components/ui/button";
 import { CardContainer } from "@/components/custom/containers/CardContainer";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
-import { StatValue } from "@/components/custom/StatsValue/StatsValue";
+import { KpiTile, KpiValue } from "@/components/custom/summary/KpiTile";
+import { SummaryHero } from "@/components/custom/summary/SummaryHero";
+import { SummarySection } from "@/components/custom/summary/SummarySection";
 import { getNetWorthesApi } from "@/services/net-worthes/net-worthes.service";
 import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
 import {
@@ -20,7 +22,15 @@ import {
   type InvestmentOverviewResponseDto,
 } from "@investments/shared";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getColorAndBgColor } from "@/utils/style.utils";
+import {
+  CalendarDays,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Receipt,
+  Trophy,
+} from "lucide-react";
 import { useState } from "react";
 
 type NetWorthYearlyGain = {
@@ -30,6 +40,8 @@ type NetWorthYearlyGain = {
 
 const NET_WORTH_GAINS_PER_PAGE = 10;
 
+const textColor = (value: number) => getColorAndBgColor(value, false);
+
 export const NetWorthOverview = () => {
   const [yearOffset, setYearOffset] = useState(0);
   const { data: netWorthes } = useSuspenseQuery<NetWorthResponseDto[]>({
@@ -38,9 +50,9 @@ export const NetWorthOverview = () => {
   });
   const { data: investmentsOverview } =
     useSuspenseQuery<InvestmentOverviewResponseDto>({
-    queryKey: ["investmentsOverview"],
-    queryFn: () => getInvestmentsOverviewApi(),
-  });
+      queryKey: ["investmentsOverview"],
+      queryFn: () => getInvestmentsOverviewApi(),
+    });
 
   const lastNetWorth = netWorthes
     ? findLastItemByDate(netWorthes)?.amount || 0
@@ -53,15 +65,10 @@ export const NetWorthOverview = () => {
   const performance =
     secondLastNetWorth !== 0 ? difference / secondLastNetWorth : 0;
 
-  const formattedDifference = formatToEuro(difference);
-  const formattedLastNetWorth = formatToEuro(lastNetWorth);
   const taxDifference =
     (investmentsOverview?.totalAmount ?? 0) -
     (investmentsOverview?.totalNetAmount ?? 0);
   const netInvestedCapital = lastNetWorth - taxDifference;
-  const formattedNetInvestedCapital = formatToEuro(netInvestedCapital);
-  const formattedTaxesAndFees = formatToEuro(taxDifference);
-  const formattedPerformance = formatToPercentage(performance);
   const currentYear = getCurrentYear();
   const netWorthGainsByYear: NetWorthYearlyGain[] = [
     ...new Set(
@@ -98,7 +105,10 @@ export const NetWorthOverview = () => {
     });
   const currentYearCapitalGain =
     netWorthGainsByYear.find(({ xAxis }) => xAxis === currentYear)?.yAxis ?? 0;
-  const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
+  const bestYear = netWorthGainsByYear.reduce<NetWorthYearlyGain | undefined>(
+    (best, gain) => (!best || gain.yAxis > best.yAxis ? gain : best),
+    undefined,
+  );
   const maxYearOffset = Math.max(
     0,
     netWorthGainsByYear.length - NET_WORTH_GAINS_PER_PAGE,
@@ -106,9 +116,7 @@ export const NetWorthOverview = () => {
   const activeYearOffset = Math.min(yearOffset, maxYearOffset);
   const visibleYearsStart = Math.max(
     0,
-    netWorthGainsByYear.length -
-      NET_WORTH_GAINS_PER_PAGE -
-      activeYearOffset,
+    netWorthGainsByYear.length - NET_WORTH_GAINS_PER_PAGE - activeYearOffset,
   );
   const visibleNetWorthGains = netWorthGainsByYear.slice(
     visibleYearsStart,
@@ -128,65 +136,63 @@ export const NetWorthOverview = () => {
 
   return (
     <MainContainer columns={3}>
-      <CardContainer
-        title="Synthèse du patrimoine financier"
-        cardStyle="w-full col-span-3"
+      <SummarySection
+        className="col-span-3"
+        hero={
+          <SummaryHero
+            title="Patrimoine financier total"
+            amount={lastNetWorth}
+            capitalGain={difference}
+            perf={performance}
+            secondaryLabel="Capital investi net après impôts"
+            secondaryAmount={netInvestedCapital}
+            chartData={chartData}
+          />
+        }
       >
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-slate-500">
-              Patrimoine financier total
-            </span>
-            <StatValue
-              value={lastNetWorth}
-              formatted={formattedLastNetWorth}
-              style="text-2xl"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-slate-500">
-              Capital investi net après impôts
-            </span>
-            <StatValue
-              value={netInvestedCapital}
-              formatted={formattedNetInvestedCapital}
-              style="text-2xl"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-slate-500">
-              Total des impôts et frais
-            </span>
-            <StatValue
-              value={taxDifference}
-              formatted={formattedTaxesAndFees}
-              style="text-2xl"
-            />
-          </div>
-        </div>
-      </CardContainer>
-      <CardContainer title="Gain par rapport au mois précédent">
-        <StatValue
-          value={difference}
-          formatted={formattedDifference}
-          style="text-xl"
-        />
-      </CardContainer>
-      <CardContainer title="Gain depuis le début de l'année">
-        <StatValue
-          value={currentYearCapitalGain}
-          formatted={formattedCurrentYearCapitalGain}
-          style="text-xl"
-        />
-      </CardContainer>
-      <CardContainer title="Performance par rapport au mois précédent">
-        <StatValue
-          value={performance}
-          formatted={formattedPerformance}
-          style="text-xl"
-        />
-      </CardContainer>
-      
+        <KpiTile icon={CalendarDays} label="Gain du mois">
+          <KpiValue
+            formatted={formatToEuro(difference, { signDisplay: "always" })}
+            colorClass={textColor(difference)}
+          />
+          <KpiValue
+            size="md"
+            formatted={formatToPercentage(performance)}
+            colorClass="text-muted-foreground"
+          />
+        </KpiTile>
+        <KpiTile icon={CalendarRange} label="Depuis le début de l'année">
+          <KpiValue
+            formatted={formatToEuro(currentYearCapitalGain, {
+              signDisplay: "always",
+            })}
+            colorClass={textColor(currentYearCapitalGain)}
+          />
+        </KpiTile>
+        <KpiTile icon={Receipt} label="Impôts et frais">
+          <KpiValue formatted={formatToEuro(taxDifference)} />
+        </KpiTile>
+        <KpiTile icon={Trophy} label="Meilleure année">
+          {bestYear ? (
+            <>
+              <KpiValue
+                formatted={formatToEuro(bestYear.yAxis, {
+                  signDisplay: "always",
+                })}
+                colorClass={textColor(bestYear.yAxis)}
+              />
+              <KpiValue
+                size="md"
+                formatted={String(bestYear.xAxis)}
+                colorClass="text-muted-foreground"
+              />
+            </>
+          ) : (
+            <KpiValue formatted="—" colorClass="text-muted-foreground" />
+          )}
+        </KpiTile>
+      </SummarySection>
+
       <div className="col-span-3">
         <CardContainer title="Evolution du patrimoine financier">
           <CustomAreaChart chartData={chartData} />

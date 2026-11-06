@@ -1,23 +1,27 @@
-import { CardContainer } from "@/components/custom/containers/CardContainer";
-import { StatValue } from "@/components/custom/StatsValue/StatsValue";
-import { SummaryCard } from "@/components/custom/SummaryCard/SummaryCard";
+import { KpiTile, KpiValue } from "@/components/custom/summary/KpiTile";
+import { SummaryHero } from "@/components/custom/summary/SummaryHero";
+import { SummarySection } from "@/components/custom/summary/SummarySection";
 import {
   getInvestmentsTotalGroupedByAccountMonthlyApi,
   getInvestmentsTotalGroupedByAccountYearlyApi,
 } from "@/services/investments/investments-total.service";
 import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
+import { getColorAndBgColor } from "@/utils/style.utils";
 import {
   findLastItemByDate,
   getCurrentYear,
   type InvestmentColumnKey,
 } from "@investments/shared";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import chartImg from "@/assets/img/chart_v2.png";
+import { CalendarDays, CalendarRange, Coins } from "lucide-react";
+import { useInvestmentsTotalChartAccount } from "../charts/accounts/useInvestmentsTotalChartAccount";
 
 type InvestmentsAccountsCardsProps = {
   type: InvestmentColumnKey;
   accountId: number;
 };
+
+const textColor = (value: number) => getColorAndBgColor(value, false);
 
 export const InvestmentsAccountsCards = ({
   type,
@@ -41,6 +45,12 @@ export const InvestmentsAccountsCards = ({
           Number(investment.year) === getCurrentYear(),
       ),
   });
+  // Même queryKey que le graphique « Total » de la page : pas de requête en plus.
+  const { chartData } = useInvestmentsTotalChartAccount({
+    accountId,
+    type,
+    chartType: "sum",
+  });
 
   const amount = latestInvestment?.amount || 0;
   const amountDiff = latestInvestment?.amountDiff || 0;
@@ -50,47 +60,39 @@ export const InvestmentsAccountsCards = ({
   const netAmount = latestInvestment?.netAmount ?? amount;
   const currentYearPerformance = currentYearInvestment?.performance || 0;
 
-  const formattedAmountDiff = formatToEuro(amountDiff);
-  const formattedPerformance = formatToPercentage(performance);
-  const formattedCurrentYearPerformance =
-    formatToPercentage(currentYearPerformance);
-
   return (
-    <div className="flex flex-col lg:flex-row gap-3 lg:gap-8 lg:justify-center lg:items-center">
-      <SummaryCard
-        totalAmount={amount}
-        totalNetAmount={netAmount}
-        totalCapitalGain={capitalGain}
-        totalPerf={cumulativePerformance}
-        img={chartImg}
-        title="Valeur totale du compte"
-      />
+    <SummarySection
+      hero={
+        <SummaryHero
+          title="Valeur totale du compte"
+          amount={amount}
+          capitalGain={capitalGain}
+          perf={cumulativePerformance}
+          secondaryAmount={netAmount}
+          chartData={chartData}
+        />
+      }
+    >
+      <KpiTile icon={CalendarDays} label="Performance du mois">
+        <KpiValue
+          formatted={formatToPercentage(performance)}
+          colorClass={textColor(performance)}
+        />
+      </KpiTile>
 
-      <div className="flex flex-col lg:flex-row gap-3 lg:gap-8">
-        <CardContainer title="Performance du mois">
-          <div className="flex flex-col flex-wrap">
-            <StatValue
-              value={performance}
-              formatted={formattedPerformance}
-              style="text-xl"
-            />
-          </div>
-        </CardContainer>
-        <CardContainer title="Performance de l'année en cours">
-          <StatValue
-            value={currentYearPerformance}
-            formatted={formattedCurrentYearPerformance}
-            style="text-xl"
-          />
-        </CardContainer>
-        <CardContainer title="Montant total du mois">
-          <StatValue
-            value={amountDiff}
-            formatted={formattedAmountDiff}
-            style="text-xl"
-          />
-        </CardContainer>
-      </div>
-    </div>
+      <KpiTile icon={CalendarRange} label="Année en cours">
+        <KpiValue
+          formatted={formatToPercentage(currentYearPerformance)}
+          colorClass={textColor(currentYearPerformance)}
+        />
+      </KpiTile>
+
+      <KpiTile icon={Coins} label="Variation du mois" className="col-span-2">
+        <KpiValue
+          formatted={formatToEuro(amountDiff, { signDisplay: "always" })}
+          colorClass={textColor(amountDiff)}
+        />
+      </KpiTile>
+    </SummarySection>
   );
 };

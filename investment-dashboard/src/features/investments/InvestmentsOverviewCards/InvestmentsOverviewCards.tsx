@@ -1,28 +1,80 @@
-import { CardContainer } from "@/components/custom/containers/CardContainer";
-import { StatValue } from "@/components/custom/StatsValue/StatsValue";
 import {
   formatToEuro,
   formatToPercentage,
   formatToReadableDate,
 } from "@/utils/format.utils";
+import { getColorAndBgColor } from "@/utils/style.utils";
 import { type InvestmentOverviewResponseDto } from "@investments/shared";
-import chartImg from "@/assets/img/chart_v2.png";
-import { SummaryCard } from "@/components/custom/SummaryCard/SummaryCard";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { getInvestmentsOverviewApi } from "@/services/investments/investments.service";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CalendarDays,
+  CalendarRange,
+  Coins,
+  Percent,
+} from "lucide-react";
+import { KpiTile, KpiValue } from "@/components/custom/summary/KpiTile";
+import { SummaryHero } from "@/components/custom/summary/SummaryHero";
+import { SummarySection } from "@/components/custom/summary/SummarySection";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useInvestmentsTotalChartCategory } from "../charts/categories/useInvestmentsTotalChartCategory";
 
 type InvestmentsOverviewCardsProps = {
   investmentsOverview: InvestmentOverviewResponseDto | undefined;
+};
+
+const textColor = (value: number) => getColorAndBgColor(value, false);
+
+type ExtremeMonthRowProps = {
+  label: string;
+  date: Date | undefined;
+  perf: number;
+  amount: number;
+};
+
+const ExtremeMonthRow = ({
+  label,
+  date,
+  perf,
+  amount,
+}: ExtremeMonthRowProps) => {
+  const Icon = perf >= 0 ? ArrowUpRight : ArrowDownRight;
+
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className={`size-4 shrink-0 ${textColor(perf)}`} />
+      <div className="flex min-w-0 flex-col">
+        <span className="text-xs text-muted-foreground">
+          {label}
+          {date && (
+            <span className="capitalize"> · {formatToReadableDate(date)}</span>
+          )}
+        </span>
+        <span className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold tabular-nums">
+          <span className={textColor(perf)}>{formatToPercentage(perf)}</span>
+          <span className="font-normal text-muted-foreground">
+            {formatToEuro(amount, { signDisplay: "always" })}
+          </span>
+        </span>
+      </div>
+    </div>
+  );
 };
 
 export const InvestmentsOverviewCards = ({
   investmentsOverview,
 }: InvestmentsOverviewCardsProps) => {
   const [showPreviousMonth, setShowPreviousMonth] = useState(false);
+  // Même queryKey que le graphique « Total des investissements » : pas de requête en plus.
+  const { chartData } = useInvestmentsTotalChartCategory({
+    category: "ALL",
+    type: "totalAmount",
+    chartType: "sum",
+  });
   const { data: previousMonthOverview } = useQuery({
     queryKey: [
       "investmentsOverview",
@@ -45,147 +97,84 @@ export const InvestmentsOverviewCards = ({
   const avgYearlyPerf = overview?.avgYearlyPerf || 0;
   const currentYearCapitalGain = overview?.currentYearCapitalGain || 0;
   const currentYearPerf = overview?.currentYearPerf || 0;
-  const worstMonthPerf = overview?.worstMonth?.perf || 0;
-  const bestMonthPerf = overview?.bestMonth?.perf || 0;
-  const worstMonthAmount = overview?.worstMonth?.amount || 0;
-  const bestMonthAmount = overview?.bestMonth?.amount || 0;
-  const worstMonthDate = overview?.worstMonth?.date
-    ? new Date(overview.worstMonth.date)
-    : new Date();
-  const bestMonthDate = overview?.bestMonth?.date
-    ? new Date(overview.bestMonth.date)
-    : new Date();
-
-  const formattedTotalMonthAvg = formatToEuro(totalMonthAvg);
-  const formattedAvgYearlyPerf = formatToPercentage(avgYearlyPerf);
-  const formattedCurrentYearCapitalGain = formatToEuro(currentYearCapitalGain);
-  const formattedCurrentYearPerf = formatToPercentage(currentYearPerf);
-  const formattedWorstMonthPerf = formatToPercentage(worstMonthPerf);
-  const formattedBestMonthPerf = formatToPercentage(bestMonthPerf);
-  const formattedWorstMonthAmount = formatToEuro(worstMonthAmount);
-  const formattedBestMonthAmount = formatToEuro(bestMonthAmount);
-
-  const formattedWorstMonthDate = formatToReadableDate(
-    worstMonthDate || new Date(),
-  );
-
-  const formattedBestMonthDate = formatToReadableDate(
-    bestMonthDate || new Date(),
-  );
-
-  const cardContainerStyle = "justify-between lg:justify-evenly";
-  const statStyle = "text-base sm:text-xl";
+  const bestMonth = overview?.bestMonth;
+  const worstMonth = overview?.worstMonth;
 
   return (
-    <div className="flex flex-col gap-3 lg:gap-8">
-      <Field orientation="horizontal" className="w-fit">
-        <Label htmlFor="previous-month">Mois précédent</Label>
-        <Switch
-          id="previous-month"
-          name="previous-month"
-          checked={showPreviousMonth}
-          onCheckedChange={(checked) => setShowPreviousMonth(checked === true)}
+    <SummarySection
+      hero={
+        <SummaryHero
+          title="Valeur totale du portefeuille"
+          amount={totalAmount}
+          capitalGain={totalCapitalGain}
+          perf={totalPerf}
+          secondaryAmount={totalNetAmount}
+          chartData={chartData}
+          headerAction={
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="previous-month"
+                className="text-xs text-muted-foreground"
+              >
+                Mois précédent
+              </Label>
+              <Switch
+                id="previous-month"
+                name="previous-month"
+                checked={showPreviousMonth}
+                onCheckedChange={(checked) =>
+                  setShowPreviousMonth(checked === true)
+                }
+              />
+            </div>
+          }
         />
-      </Field>
+      }
+    >
+      <KpiTile icon={Percent} label="Perf. annuelle moy.">
+        <KpiValue
+          formatted={formatToPercentage(avgYearlyPerf)}
+          colorClass={textColor(avgYearlyPerf)}
+        />
+      </KpiTile>
 
-      {/* Côte à côte uniquement sur très grand écran : en dessous, les cartes seraient trop étroites. */}
-      <div className="flex flex-col 2xl:flex-row items-center gap-3 lg:gap-4 xl:gap-8">
-        <div className="w-full 2xl:w-1/2">
-          <SummaryCard
-            totalAmount={totalAmount}
-            totalNetAmount={totalNetAmount}
-            totalCapitalGain={totalCapitalGain}
-            totalPerf={totalPerf}
-            img={chartImg}
-            cardStyle="w-full 2xl:w-fit 2xl:m-auto"
-            title="Valeur totale du portefeuille"
+      <KpiTile icon={CalendarDays} label="Année en cours">
+        <KpiValue
+          formatted={formatToPercentage(currentYearPerf)}
+          colorClass={textColor(currentYearPerf)}
+        />
+        <KpiValue
+          size="md"
+          formatted={formatToEuro(currentYearCapitalGain, {
+            signDisplay: "always",
+          })}
+          colorClass="text-muted-foreground"
+        />
+      </KpiTile>
+
+      <KpiTile icon={Coins} label="Revenus / mois">
+        <KpiValue
+          formatted={formatToEuro(totalMonthAvg)}
+          colorClass={textColor(totalMonthAvg)}
+        />
+      </KpiTile>
+
+      <KpiTile icon={CalendarRange} label="Mois extrêmes">
+        <div className="flex flex-col gap-2">
+          <ExtremeMonthRow
+            label="Meilleur"
+            date={bestMonth?.date ? new Date(bestMonth.date) : undefined}
+            perf={bestMonth?.perf || 0}
+            amount={bestMonth?.amount || 0}
+          />
+          <ExtremeMonthRow
+            label="Pire"
+            date={worstMonth?.date ? new Date(worstMonth.date) : undefined}
+            perf={worstMonth?.perf || 0}
+            amount={worstMonth?.amount || 0}
           />
         </div>
-
-        <div className="w-full 2xl:w-1/2 grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4 xl:gap-8">
-          <CardContainer
-            title="Moyenne annuelle des performances"
-            cardStyle={cardContainerStyle}
-          >
-            <StatValue
-              value={avgYearlyPerf}
-              formatted={formattedAvgYearlyPerf}
-              style={statStyle}
-            />
-          </CardContainer>
-          <CardContainer
-            title="Performance de l'année en cours"
-            cardStyle={cardContainerStyle}
-          >
-            <StatValue
-              value={currentYearPerf}
-              formatted={formattedCurrentYearPerf}
-              style={statStyle}
-            />
-          </CardContainer>
-          <CardContainer
-            title="Meilleure performance mensuelle"
-            cardStyle={`${cardContainerStyle} order-5 md:order-none`}
-          >
-            <div className="flex flex-col gap-4 items-center capitalize">
-              {formattedBestMonthDate}
-              <div className="flex flex-col gap-4 w-full">
-                <StatValue
-                  value={bestMonthPerf}
-                  formatted={formattedBestMonthPerf}
-                  style={statStyle}
-                />
-                <StatValue
-                  value={bestMonthAmount}
-                  formatted={formattedBestMonthAmount}
-                  style={statStyle}
-                />
-              </div>
-            </div>
-          </CardContainer>
-          <CardContainer
-            title="Moyenne mensuelle des revenus"
-            cardStyle={cardContainerStyle}
-          >
-            <StatValue
-              value={totalMonthAvg}
-              formatted={formattedTotalMonthAvg}
-              style={statStyle}
-            />
-          </CardContainer>
-          <CardContainer
-            title="Gain de l'année en cours"
-            cardStyle={cardContainerStyle}
-          >
-            <StatValue
-              value={currentYearCapitalGain}
-              formatted={formattedCurrentYearCapitalGain}
-              style={statStyle}
-            />
-          </CardContainer>
-
-          <CardContainer
-            title="Pire performance mensuelle"
-            cardStyle={cardContainerStyle}
-          >
-            <div className="flex flex-col gap-4 items-center capitalize">
-              {formattedWorstMonthDate}
-              <div className="flex flex-col gap-4 w-full">
-                <StatValue
-                  value={worstMonthPerf}
-                  formatted={formattedWorstMonthPerf}
-                  style={statStyle}
-                />
-                <StatValue
-                  value={worstMonthAmount}
-                  formatted={formattedWorstMonthAmount}
-                  style={statStyle}
-                />
-              </div>
-            </div>
-          </CardContainer>
-        </div>
-      </div>
-    </div>
+      </KpiTile>
+    </SummarySection>
   );
 };

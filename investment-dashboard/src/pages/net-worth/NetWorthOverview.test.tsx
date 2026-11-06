@@ -84,22 +84,36 @@ describe("NetWorthOverview", () => {
     renderPage();
 
     await waitFor(async () =>
-      expect(await cardText("Synthèse du patrimoine financier")).toContain(
+      expect(await cardText("Patrimoine financier total")).toContain(
         "115 000,00 €",
       ),
     );
-    const synthesis = await cardText("Synthèse du patrimoine financier");
-    expect(synthesis).toContain("120 000,00 €");
-    expect(synthesis).toContain("5 000,00 €");
-    expect(await cardText("Gain par rapport au mois précédent")).toContain(
-      "10 000,00 €",
+    const hero = await cardText("Patrimoine financier total");
+    expect(hero).toContain("120 000,00 €");
+    expect(hero).toContain("+10 000,00 €");
+    expect(hero).toContain("9,09 %");
+    const monthly = await cardText("Gain du mois");
+    expect(monthly).toContain("+10 000,00 €");
+    expect(monthly).toContain("9,09 %");
+    expect(await cardText("Depuis le début de l'année")).toContain(
+      "+20 000,00 €",
     );
-    expect(await cardText("Gain depuis le début de l'année")).toContain(
-      "20 000,00 €",
+    expect(await cardText("Impôts et frais")).toContain("5 000,00 €");
+  });
+
+  it("displays the best yearly gain", async () => {
+    vi.mocked(getNetWorthesApi).mockResolvedValue([
+      netWorth(2023, 11, 50000),
+      netWorth(2024, 11, 80000),
+      netWorth(2025, 11, 100000),
+      netWorth(2026, 9, 120000),
+    ]);
+    renderPage();
+
+    await waitFor(async () =>
+      expect(await cardText("Meilleure année")).toContain("+30 000,00 €"),
     );
-    expect(
-      await cardText("Performance par rapport au mois précédent"),
-    ).toContain("9,09 %");
+    expect(await cardText("Meilleure année")).toContain("2024");
   });
 
   it("computes yearly gains against the previous December", async () => {
@@ -132,7 +146,7 @@ describe("NetWorthOverview", () => {
     vi.mocked(getNetWorthesApi).mockReturnValue(new Promise(() => {}));
     renderPage();
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(screen.queryByText("Gain depuis le début de l'année")).toBeNull();
+    expect(screen.queryByText("Depuis le début de l'année")).toBeNull();
   });
 
   it("paginates yearly gains by 10 years", async () => {
