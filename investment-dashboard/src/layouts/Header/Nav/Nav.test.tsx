@@ -17,6 +17,7 @@ describe("getActiveNavItem", () => {
     ["/", "Investissements"],
     ["/investments/performances", "Investissements"],
     ["/incomes/data", "Revenus"],
+    ["/taxes/add", "Impôts"],
     ["/net-worth", "Capital"],
     ["/accounts/manage", "Comptes"],
     ["/settings/taxes", "Paramètres"],

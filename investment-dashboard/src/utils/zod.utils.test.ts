@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InvestmentSchema } from "@/features/investments/AddInvestmentsForm/investments-form.schema";
 import { IncomeSchema } from "@/features/incomes/AddIncomesForm/incomes-form.schema";
-import { TaxFormSchema } from "@/features/incomes/AddTaxForm/tax-form.schema";
+import { TaxFormSchema } from "@/features/taxes/AddTaxForm/tax-form.schema";
 import { NetWorthFormSchema } from "@/features/netWorth/AddNetWorthForm/net-worth-form.schema";
 import { AccountFormSchema } from "@/features/accounts/AddAccountForm/account-form.schema";
 import { decimalNumber } from "./zod.utils";

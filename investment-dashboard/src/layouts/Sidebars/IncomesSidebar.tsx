@@ -28,12 +28,6 @@ export const IncomesSidebar = () => {
       link: "/incomes/add",
       icon: <Plus />,
     },
-    {
-      title: "Ajouter un impôt",
-      shortTitle: "Impôt",
-      link: "/incomes/tax/add",
-      icon: <Plus />,
-    },
   ];
 
   return <Sidebar config={INCOMES_MENU} />;

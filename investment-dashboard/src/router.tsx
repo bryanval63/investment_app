@@ -19,7 +19,9 @@ import { AccountsSidebar } from "./layouts/Sidebars/AccountsSidebar";
 import { NetWorthOverview } from "./pages/net-worth/NetWorthOverview";
 import { NetWorthAdd } from "./pages/net-worth/NetWorthAdd";
 import { NetWorthData } from "./pages/net-worth/NetWorthData";
-import { TaxAdd } from "./pages/incomes/TaxAdd";
+import { TaxAdd } from "./pages/taxes/TaxAdd";
+import { TaxesData } from "./pages/taxes/TaxesData";
+import { TaxesSidebar } from "./layouts/Sidebars/TaxesSidebar";
 import { Settings } from "./pages/settings/Settings";
 import { SettingsReferences } from "./pages/settings/SettingsReferences";
 import { SettingsSidebar } from "./layouts/Sidebars/SettingsSidebar";
@@ -65,8 +67,25 @@ export const router = createBrowserRouter([
             path: "add",
           },
           {
-            Component: TaxAdd,
+            // Ancienne adresse : les impôts ont maintenant leur propre section.
+            Component: () => <Navigate to="/taxes/add" replace />,
             path: "tax/add",
+          },
+        ],
+      },
+      {
+        path: "taxes",
+        handle: {
+          sidebar: TaxesSidebar,
+        },
+        children: [
+          {
+            index: true,
+            Component: TaxesData,
+          },
+          {
+            Component: TaxAdd,
+            path: "add",
           },
         ],
       },

@@ -13,7 +13,7 @@ export const IncomesMonthlyAverageChart = ({
   hasTaxes,
 }: IncomesMonthlyAverageChartProps) => {
   const { data: incomesGroupedByDate } = useSuspenseQuery({
-    queryKey: ["incomesGroupedByDate", hasTaxes],
+    queryKey: ["incomesGroupedByDate", "year", hasTaxes],
     queryFn: () => getStatsGroupedByDateIncomesApi("year", hasTaxes),
   });
 

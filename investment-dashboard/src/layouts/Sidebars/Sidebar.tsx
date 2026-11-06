@@ -8,7 +8,7 @@ type SidebarProps = {
 };
 
 // Liens exacts : sinon « Overview » resterait actif sur toutes les sous-pages.
-const END_LINKS = ["/incomes", "/investments", "/net-worth"];
+const END_LINKS = ["/incomes", "/investments", "/net-worth", "/taxes"];
 
 // Les liens d'ajout sont présentés comme des actions, séparées de la navigation.
 const isActionLink = (link: string) => /\/add$/.test(link);
