@@ -19,6 +19,7 @@ export * from "./dtos/account/account.response.dto";
 export * from "./dtos/account/create-account.request.dto";
 export * from "./dtos/account/update-account.request.dto";
 export * from "./dtos/tax/tax-request.dto";
+export * from "./dtos/tax/tax-response.dto";
 export * from "./dtos/net-worth/net-worth-response.dto";
 export * from "./dtos/net-worth/net-worth-request.dto";
 export * from "./dtos/settings/setting-response.dto";

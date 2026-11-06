@@ -23,6 +23,7 @@ export const AddTaxForm = () => {
           <SectionCard
             icon={Landmark}
             title="Impôt sur le revenu"
+            description="Montant négatif pour un impôt payé, positif pour un remboursement. Une nouvelle saisie remplace celle de la même année."
             contentClassName="grid grid-cols-1 gap-4 sm:grid-cols-2"
           >
             <FormInput
