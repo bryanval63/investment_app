@@ -11,6 +11,7 @@ export const SettingsSidebar = () => {
     },
     {
       title: "Types & catégories",
+      shortTitle: "Catégories",
       link: "/settings/references",
       icon: <BookOpen />,
     },

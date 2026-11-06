@@ -13,16 +13,19 @@ export const InvestmentsSidebar = () => {
   const INVESTMENTS_MENU: SidebarConfig = [
     {
       title: "Overview",
+      shortTitle: "Aperçu",
       link: "/investments",
       icon: <LayoutDashboard />,
     },
     {
       title: "Performances",
+      shortTitle: "Perfs",
       link: "/investments/performances",
       icon: <Percent />,
     },
     {
       title: "Plus values",
+      shortTitle: "Gains",
       link: "/investments/total-gains",
       icon: <Euro />,
     },
@@ -38,6 +41,7 @@ export const InvestmentsSidebar = () => {
     },
     {
       title: "Ajouter un investissement",
+      shortTitle: "Ajouter",
       link: "/investments/add",
       icon: <Plus />,
     },

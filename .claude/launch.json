@@ -8,6 +8,12 @@
       "port": 5173
     },
     {
+      "name": "investments-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:dev", "-w", "investments-app"],
+      "port": 3000
+    },
+    {
       "name": "investment-dashboard-5174",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "-w", "investment-dashboard", "--", "--port", "5174", "--strictPort"],
