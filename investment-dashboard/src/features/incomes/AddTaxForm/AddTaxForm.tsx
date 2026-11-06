@@ -1,44 +1,55 @@
 import { FormProvider } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Landmark } from "lucide-react";
 import { FormInput } from "@/components/custom/form/FormInput";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  FormFooter,
+  FormSubmitError,
+  SubmitButton,
+} from "@/components/custom/form/FormActions";
+import { SectionCard } from "@/components/custom/containers/SectionCard";
 import { useAddTaxForm } from "./useAddTaxForm";
 
 export const AddTaxForm = () => {
   const { form, onSubmit, isSubmitting, error } = useAddTaxForm();
 
   return (
-    <div className="max-w-5xl m-auto flex flex-col justify-between h-full">
+    <div className="max-w-5xl m-auto flex flex-col gap-4 lg:gap-6">
       <FormProvider {...form}>
         <form
           id="add-tax-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-8"
+          className="flex flex-col gap-4 lg:gap-6"
         >
-          <Card>
-            <CardContent className="flex gap-8">
-              <FormInput name="year" required label="Année" />
+          <SectionCard
+            icon={Landmark}
+            title="Impôt sur le revenu"
+            contentClassName="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <FormInput
+              name="year"
+              required
+              label="Année"
+              inputMode="numeric"
+            />
 
-              <FormInput name="amount" required label="Montant" />
-            </CardContent>
-          </Card>
+            <FormInput
+              name="amount"
+              required
+              label="Montant"
+              inputMode="decimal"
+              suffix="€"
+            />
+          </SectionCard>
 
-          {error && (
-            <div className="text-red-500 text-sm">
-              Erreur:{" "}
-              {error instanceof Error
-                ? error.message
-                : "Une erreur est survenue"}
-            </div>
-          )}
+          <FormSubmitError error={error} />
         </form>
       </FormProvider>
 
-      <div className="flex justify-end gap-4">
-        <Button type="submit" form="add-tax-form" disabled={isSubmitting}>
+      <FormFooter>
+        <SubmitButton form="add-tax-form" disabled={isSubmitting}>
           {isSubmitting ? "Création..." : "Valider"}
-        </Button>
-      </div>
+        </SubmitButton>
+      </FormFooter>
     </div>
   );
 };

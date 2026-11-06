@@ -1,45 +1,51 @@
 import { FormProvider } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { PiggyBank } from "lucide-react";
 import { FormInput } from "@/components/custom/form/FormInput";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAddNetWorthForm } from "./useAddNetWorthForm";
 import { FormMonthYear } from "@/components/custom/form/FormMonthYear";
+import {
+  FormFooter,
+  FormSubmitError,
+  SubmitButton,
+} from "@/components/custom/form/FormActions";
+import { SectionCard } from "@/components/custom/containers/SectionCard";
+import { useAddNetWorthForm } from "./useAddNetWorthForm";
 
 export const AddNetWorthForm = () => {
   const { form, onSubmit, isSubmitting, error } = useAddNetWorthForm();
 
   return (
-    <div className="max-w-5xl m-auto flex flex-col justify-between h-full">
+    <div className="max-w-5xl m-auto flex flex-col gap-4 lg:gap-6">
       <FormProvider {...form}>
         <form
           id="add-net-worth-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-8"
+          className="flex flex-col gap-4 lg:gap-6"
         >
           <FormMonthYear />
 
-          <Card>
-            <CardContent className="flex gap-8">
-              <FormInput name="amount" required label="Montant" />
-            </CardContent>
-          </Card>
+          <SectionCard
+            icon={PiggyBank}
+            title="Capital"
+            contentClassName="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <FormInput
+              name="amount"
+              required
+              label="Montant"
+              inputMode="decimal"
+              suffix="€"
+            />
+          </SectionCard>
 
-          {error && (
-            <div className="text-red-500 text-sm">
-              Erreur:{" "}
-              {error instanceof Error
-                ? error.message
-                : "Une erreur est survenue"}
-            </div>
-          )}
+          <FormSubmitError error={error} />
         </form>
       </FormProvider>
 
-      <div className="flex justify-end gap-4">
-        <Button type="submit" form="add-net-worth-form" disabled={isSubmitting}>
+      <FormFooter>
+        <SubmitButton form="add-net-worth-form" disabled={isSubmitting}>
           {isSubmitting ? "Création..." : "Valider"}
-        </Button>
-      </div>
+        </SubmitButton>
+      </FormFooter>
     </div>
   );
 };

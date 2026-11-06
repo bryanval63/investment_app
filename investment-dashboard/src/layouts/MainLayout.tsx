@@ -6,8 +6,22 @@ import type { AppMatch } from "./layouts.type";
 
 // Affiché pendant que les données d'une page sont en cours de chargement.
 const PageLoader = () => (
-  <div className="flex h-64 items-center justify-center text-sm text-slate-500">
-    Chargement...
+  <div
+    role="status"
+    aria-busy="true"
+    className="flex flex-col gap-3 lg:gap-4 xl:gap-8"
+  >
+    <span className="sr-only">Chargement...</span>
+    <div className="h-36 animate-pulse rounded-xl bg-slate-100 lg:h-44" />
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="h-24 animate-pulse rounded-xl bg-slate-100"
+        />
+      ))}
+    </div>
+    <div className="h-64 animate-pulse rounded-xl bg-slate-100" />
   </div>
 );
 

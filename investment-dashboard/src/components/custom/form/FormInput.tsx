@@ -1,13 +1,15 @@
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { useController, useFormContext } from "react-hook-form";
+import { InputWithSuffix } from "./InputWithSuffix";
 
 type FormInputProps = {
   name: string;
   label: string;
+  /** Unité affichée à droite dans le champ (%, €, ans…). */
+  suffix?: string;
 } & React.ComponentProps<"input">;
 
-export function FormInput({ name, label, ...props }: FormInputProps) {
+export function FormInput({ name, label, suffix, ...props }: FormInputProps) {
   const { control } = useFormContext();
 
   const { field, fieldState } = useController({
@@ -16,12 +18,16 @@ export function FormInput({ name, label, ...props }: FormInputProps) {
   });
 
   return (
-    <Field>
+    <Field className="gap-2" data-invalid={fieldState.invalid}>
       <FieldLabel htmlFor={name}>{label}</FieldLabel>
-      <Input {...field} {...props} aria-invalid={fieldState.invalid} />
-      {fieldState.invalid && (
-        <FieldError errors={[fieldState.error]} className="min-h-9" />
-      )}
+      <InputWithSuffix
+        id={name}
+        suffix={suffix}
+        {...field}
+        {...props}
+        aria-invalid={fieldState.invalid}
+      />
+      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

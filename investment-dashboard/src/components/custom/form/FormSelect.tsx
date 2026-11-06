@@ -1,4 +1,4 @@
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -34,18 +34,20 @@ export const FormSelect = ({
   };
 
   return (
-    <Field orientation="responsive" data-invalid={fieldState.invalid}>
+    <Field className="gap-2" data-invalid={fieldState.invalid}>
       <FieldLabel htmlFor={name}>{label}</FieldLabel>
       <Select value={field.value} onValueChange={handleSelectChange}>
-        <SelectTrigger aria-invalid={fieldState.invalid}>
+        <SelectTrigger
+          id={name}
+          className="w-full"
+          aria-invalid={fieldState.invalid}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>{children}</SelectContent>
       </Select>
 
-      {fieldState.error && (
-        <p className="text-red-500">{fieldState.error.message}</p>
-      )}
+      {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 };

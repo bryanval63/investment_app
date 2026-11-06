@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Bitcoin, Building2, ChartLine, Scale, ShieldCheck } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { SectionCard } from "@/components/custom/containers/SectionCard";
+import { InputWithSuffix } from "@/components/custom/form/InputWithSuffix";
+import {
+  FormFooter,
+  SubmitButton,
+} from "@/components/custom/form/FormActions";
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
 import {
@@ -148,94 +153,94 @@ export const Settings = () => {
 
   const scpiAccounts = accounts.filter((account) => account.type === "SCPI");
 
+  const globalInput = (key: string, label: string, suffix?: string) => (
+    <SettingInput
+      key={key}
+      label={label}
+      suffix={suffix}
+      value={inputValue(GLOBAL_SCOPE, key)}
+      onChange={(value) => changeValue(GLOBAL_SCOPE, key, value)}
+      disabled={updateMutation.isPending}
+    />
+  );
+
   return (
     <MainContainer columns={1}>
-      <form onSubmit={saveAll} className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Impôts par type de compte</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6 md:grid-cols-2">
-          <section className="rounded-lg border p-4">
-            <h3 className="mb-4 font-semibold">Règles communes</h3>
-            <div className="grid gap-4">
-              {[
-                [SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
-                [INCOME_TAX_RATE, "Impôt sur le revenu (%)"],
-              ].map(([key, label]) => (
-                <SettingInput
-                  key={key}
-                  label={label}
-                  value={inputValue(GLOBAL_SCOPE, key)}
-                  onChange={(value) => changeValue(GLOBAL_SCOPE, key, value)}
-                  disabled={updateMutation.isPending}
-                />
-              ))}
+      <form onSubmit={saveAll} className="flex flex-col gap-4 lg:gap-6">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Impôts par type de compte
+        </h2>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
+          <SectionCard
+            icon={Scale}
+            title="Règles communes"
+            className="md:col-span-2"
+            contentClassName="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {globalInput(SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux", "%")}
+            {globalInput(INCOME_TAX_RATE, "Impôt sur le revenu", "%")}
+          </SectionCard>
+
+          <SectionCard
+            icon={ShieldCheck}
+            title="Assurance-vie"
+            className="md:col-span-2"
+          >
+            <div className="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {globalInput(
+                LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE,
+                "Prélèvements sociaux",
+                "%",
+              )}
+              {globalInput(LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE, "Taux réduit", "%")}
+              {globalInput(LIFE_INSURANCE_ALLOWANCE, "Abattement", "€")}
+              {globalInput(
+                LIFE_INSURANCE_CONTRIBUTION_THRESHOLD,
+                "Seuil de versements",
+                "€",
+              )}
+              {globalInput(
+                LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS,
+                "Durée avant abattement",
+                "ans",
+              )}
+              {globalInput(
+                LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER,
+                "Multiplicateur couple",
+                "×",
+              )}
             </div>
-          </section>
+          </SectionCard>
 
-          <section className="rounded-lg border p-4">
-            <h3 className="mb-4 font-semibold">Assurance-vie</h3>
-            <div className="grid gap-4">
-              {[
-                [LIFE_INSURANCE_SOCIAL_CONTRIBUTIONS_RATE, "Prélèvements sociaux (%)"],
-                [LIFE_INSURANCE_REDUCED_INCOME_TAX_RATE, "Taux réduit (%)"],
-                [LIFE_INSURANCE_ALLOWANCE, "Abattement (€)"],
-                [LIFE_INSURANCE_CONTRIBUTION_THRESHOLD, "Seuil de versements (€)"],
-                [LIFE_INSURANCE_ALLOWANCE_DURATION_YEARS, "Durée avant abattement (années)"],
-                [LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER, "Multiplicateur couple"],
-              ].map(([key, label]) => (
-                <SettingInput
-                  key={key}
-                  label={label}
-                  value={inputValue(GLOBAL_SCOPE, key)}
-                  onChange={(value) => changeValue(GLOBAL_SCOPE, key, value)}
-                  disabled={updateMutation.isPending}
-                />
-              ))}
-            </div>
-          </section>
+          <SectionCard icon={ChartLine} title="PEA">
+            {globalInput(
+              PEA_ALLOWANCE_DURATION_YEARS,
+              "Durée minimale avant exonération",
+              "ans",
+            )}
+          </SectionCard>
 
-          <section className="rounded-lg border p-4">
-            <h3 className="mb-4 font-semibold">PEA</h3>
-            <SettingInput
-              label="Durée minimale avant exonération (années)"
-              value={inputValue(GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS)}
-              onChange={(value) =>
-                changeValue(GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS, value)
-              }
-              disabled={updateMutation.isPending}
-            />
-          </section>
+          <SectionCard icon={Bitcoin} title="Crypto-actifs">
+            {globalInput(CRYPTO_CESSION_THRESHOLD, "Seuil d'exonération", "€")}
+          </SectionCard>
+        </div>
 
-          <section className="rounded-lg border p-4">
-            <h3 className="mb-4 font-semibold">Crypto-actifs</h3>
-            <SettingInput
-              label="Seuil d'exonération (€)"
-              value={inputValue(GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD)}
-              onChange={(value) =>
-                changeValue(GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD, value)
-              }
-              disabled={updateMutation.isPending}
-            />
-          </section>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Frais d&apos;entrée SCPI</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+        <SectionCard
+          icon={Building2}
+          title="Frais d'entrée SCPI"
+          contentClassName="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {scpiAccounts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
               Ajoutez un compte de type SCPI pour configurer ses frais.
             </p>
           ) : (
             scpiAccounts.map((account) => (
               <SettingInput
                 key={account.id}
-                label={`${account.name} (%)`}
+                label={account.name}
+                suffix="%"
                 value={inputValue(account.name, ENTRY_FEE_RATE)}
                 onChange={(value) =>
                   changeValue(account.name, ENTRY_FEE_RATE, value)
@@ -244,18 +249,24 @@ export const Settings = () => {
               />
             ))
           )}
-        </CardContent>
-      </Card>
-      {updateMutation.error && (
-        <p className="text-sm text-destructive">
-          Impossible d&apos;enregistrer les paramètres.
-        </p>
-      )}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={updateMutation.isPending}>
-          {updateMutation.isPending ? "Enregistrement..." : "Enregistrer les paramètres"}
-        </Button>
-      </div>
+        </SectionCard>
+
+        {updateMutation.error && (
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            Impossible d&apos;enregistrer les paramètres.
+          </p>
+        )}
+
+        <FormFooter>
+          <SubmitButton disabled={updateMutation.isPending}>
+            {updateMutation.isPending
+              ? "Enregistrement..."
+              : "Enregistrer les paramètres"}
+          </SubmitButton>
+        </FormFooter>
       </form>
     </MainContainer>
   );
@@ -263,28 +274,33 @@ export const Settings = () => {
 
 const SettingInput = ({
   label,
+  suffix,
   value,
   onChange,
   disabled,
 }: {
   label: string;
+  suffix?: string;
   value: string;
   onChange: (value: string) => void;
   disabled: boolean;
-}) => (
-  <div>
-    <label className="block w-full max-w-sm text-sm">
-      {label}
-      <Input
+}) => {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <InputWithSuffix
+        id={id}
         type="number"
         min="0"
         step="0.001"
+        suffix={suffix}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         disabled={disabled}
       />
-    </label>
-  </div>
-);
+    </div>
+  );
+};
 
 export default Settings;
