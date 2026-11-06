@@ -6,7 +6,6 @@ import { NetWorthService } from './net-worth.service';
 const createPrismaMock = () => ({
   netWorth: {
     findMany: jest.fn(),
-    findFirst: jest.fn(),
     findUnique: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -24,55 +23,56 @@ describe('NetWorthService', () => {
     service = new NetWorthService(prisma as unknown as PrismaService);
   });
 
+  // Les anciennes saisies sont stockées en texte « 2016-01-01 » : SQLite
+  // compare les dates comme du texte, d'où un filtrage par année/mois en JS.
+  const row = (id: number, iso: string, amount = 1000) => ({
+    id,
+    amount: new Prisma.Decimal(amount),
+    date: new Date(iso),
+  });
+
   describe('findAll', () => {
     it('returns amounts as numbers, ordered by date', async () => {
       prisma.netWorth.findMany.mockResolvedValue([
-        { id: 1, amount: new Prisma.Decimal(1000.5), date },
+        row(1, '2026-03-01', 1000.5),
       ]);
 
       await expect(service.findAll()).resolves.toEqual([
         { id: 1, amount: 1000.5, date },
       ]);
       expect(prisma.netWorth.findMany).toHaveBeenCalledWith({
-        where: {},
         orderBy: { date: 'asc' },
       });
     });
 
-    it('filters on a calendar year', async () => {
-      prisma.netWorth.findMany.mockResolvedValue([]);
+    it('keeps only the entries of the requested calendar year', async () => {
+      prisma.netWorth.findMany.mockResolvedValue([
+        row(1, '2015-12-01'),
+        row(2, '2016-01-01'),
+        row(3, '2016-12-01'),
+        row(4, '2017-01-01'),
+      ]);
 
-      await service.findAll(2026);
+      const result = await service.findAll(2016);
 
-      expect(prisma.netWorth.findMany).toHaveBeenCalledWith({
-        where: {
-          date: {
-            gte: new Date(Date.UTC(2026, 0, 1)),
-            lt: new Date(Date.UTC(2027, 0, 1)),
-          },
-        },
-        orderBy: { date: 'asc' },
-      });
+      expect(result.map(({ id }) => id)).toEqual([2, 3]);
     });
   });
 
   describe('create', () => {
     it('creates the month when it does not exist yet', async () => {
-      prisma.netWorth.findFirst.mockResolvedValue(null);
+      prisma.netWorth.findMany.mockResolvedValue([row(1, '2026-02-01')]);
 
       await service.create({ date, amount: 1000 });
 
-      expect(prisma.netWorth.findFirst).toHaveBeenCalledWith({
-        where: { date },
-      });
       expect(prisma.netWorth.create).toHaveBeenCalledWith({
         data: { date, amount: 1000 },
       });
       expect(prisma.netWorth.update).not.toHaveBeenCalled();
     });
 
-    it('replaces the amount of a month already entered', async () => {
-      prisma.netWorth.findFirst.mockResolvedValue({ id: 7 });
+    it('replaces the amount of a month already entered, whatever its storage format', async () => {
+      prisma.netWorth.findMany.mockResolvedValue([row(7, '2026-03-01')]);
 
       await service.create({ date, amount: 1200 });
 
