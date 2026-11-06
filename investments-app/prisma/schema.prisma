@@ -13,19 +13,9 @@ datasource db {
   provider = "sqlite"
 }
 
-enum IncomeType {
-  SALARY
-  PEE
-  RESTAURANT_TICKETS
-  BONUS
-  APL
-  PARKING_RENT
-  SCPI
-}
-
 model IncomeTypeRef {
   id Int @default(autoincrement()) @id
-  code IncomeType @unique
+  code String @unique
   label String 
   incomes Income[]
 }

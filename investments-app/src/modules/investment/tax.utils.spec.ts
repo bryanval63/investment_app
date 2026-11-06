@@ -1,4 +1,9 @@
-import { calculateInvestmentTax, calculateLifeInsuranceTax } from './tax.utils';
+import {
+  calculateInvestmentEntryFee,
+  calculateInvestmentTax,
+  calculateLifeInsuranceTax,
+  findAccountEntryFeeRate,
+} from './tax.utils';
 
 describe('calculateInvestmentTax', () => {
   it('applies the configured social contributions rate to PEE gains', () => {
@@ -65,5 +70,47 @@ describe('calculateLifeInsuranceTax', () => {
 
     expect(result.incomeTax).toBeGreaterThan(1500);
     expect(result.incomeTax).toBeLessThan(2560);
+  });
+});
+
+describe('calculateInvestmentEntryFee', () => {
+  it('applies the configured rate to SCPI accounts', () => {
+    expect(
+      calculateInvestmentEntryFee({
+        type: 'SCPI',
+        amount: 1000,
+        entryFeeRate: 0.12,
+      }),
+    ).toBeCloseTo(120);
+  });
+
+  it('charges nothing without a configured rate, whatever the account name', () => {
+    expect(calculateInvestmentEntryFee({ type: 'SCPI', amount: 1000 })).toBe(0);
+  });
+
+  it('charges nothing on other account types', () => {
+    expect(
+      calculateInvestmentEntryFee({
+        type: 'PEA',
+        amount: 1000,
+        entryFeeRate: 0.12,
+      }),
+    ).toBe(0);
+  });
+});
+
+describe('findAccountEntryFeeRate', () => {
+  const settings = [
+    { key: 'ENTRY_FEE_RATE', scope: 'ACCOUNT:7', value: 0.11966 },
+    { key: 'ENTRY_FEE_RATE', scope: 'Corum XL', value: 0.12 },
+    { key: 'INCOME_TAX_RATE', scope: 'ACCOUNT:8', value: 0.3 },
+  ];
+
+  it('finds the rate of the account by its id', () => {
+    expect(findAccountEntryFeeRate(settings, 7)).toBe(0.11966);
+  });
+
+  it('ignores rates scoped by account name or under another key', () => {
+    expect(findAccountEntryFeeRate(settings, 8)).toBeUndefined();
   });
 });

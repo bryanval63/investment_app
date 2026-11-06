@@ -101,6 +101,10 @@ export class IncomeService {
     const types = await this.incomeTypeRefService.findAll();
 
     const typeMap = Object.fromEntries(types.map((t) => [t.code, t.id]));
+    const unknownType = incomes.find(({ type }) => !(type in typeMap));
+    if (unknownType) {
+      throw new BadRequestException(`Unknown income type ${unknownType.type}`);
+    }
 
     await this.prisma.income.createMany({
       data: incomes.map(({ amount, date, type }) => ({
@@ -117,11 +121,9 @@ export class IncomeService {
   ): Promise<IncomeResponseDto> {
     await this.findExistingOrThrow(id);
 
-    // `code` est un enum Prisma : une valeur inconnue dans un `where` lèverait
-    // une erreur de validation (500) au lieu d'une 400.
-    const typeRef = (await this.prisma.incomeTypeRef.findMany()).find(
-      ({ code }) => code === type,
-    );
+    const typeRef = await this.prisma.incomeTypeRef.findUnique({
+      where: { code: type },
+    });
     if (!typeRef) {
       throw new BadRequestException(`Unknown income type ${type}`);
     }

@@ -12,7 +12,7 @@ const createPrismaMock = () => ({
     delete: jest.fn(),
   },
   incomeTypeRef: {
-    findMany: jest.fn(),
+    findUnique: jest.fn(),
   },
 });
 
@@ -34,10 +34,10 @@ describe('IncomeService', () => {
 
     it('updates amount, date and type, and returns the dto', async () => {
       prisma.income.findUnique.mockResolvedValue({ id: 4 });
-      prisma.incomeTypeRef.findMany.mockResolvedValue([
-        { id: 1, code: 'SALARY' },
-        { id: 2, code: 'BONUS' },
-      ]);
+      prisma.incomeTypeRef.findUnique.mockResolvedValue({
+        id: 2,
+        code: 'BONUS',
+      });
       prisma.income.update.mockResolvedValue({
         id: 4,
         amount: new Prisma.Decimal(2500.5),
@@ -73,18 +73,31 @@ describe('IncomeService', () => {
 
     it('rejects an unknown income type', async () => {
       prisma.income.findUnique.mockResolvedValue({ id: 4 });
-      prisma.incomeTypeRef.findMany.mockResolvedValue([
-        { id: 1, code: 'SALARY' },
-      ]);
+      prisma.incomeTypeRef.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.update(4, {
-          amount: 1,
-          date,
-          type: 'NOPE' as unknown as 'SALARY',
-        }),
+        service.update(4, { amount: 1, date, type: 'NOPE' }),
       ).rejects.toThrow(new BadRequestException('Unknown income type NOPE'));
       expect(prisma.income.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createAll', () => {
+    it('rejects an unknown income type', async () => {
+      const incomeTypeRefService = {
+        findAll: jest.fn().mockResolvedValue([{ id: 1, code: 'SALARY' }]),
+      };
+      const incomeService = new IncomeService(
+        { income: { createMany: jest.fn() } } as unknown as PrismaService,
+        incomeTypeRefService as unknown as IncomeTypeRefService,
+        {} as TaxService,
+      );
+
+      await expect(
+        incomeService.createAll([
+          { amount: 1, date: new Date(), type: 'NOPE' },
+        ]),
+      ).rejects.toThrow(new BadRequestException('Unknown income type NOPE'));
     });
   });
 

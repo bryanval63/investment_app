@@ -14,11 +14,15 @@ import {
   getSettingsApi,
   updateSettingApi,
 } from "@/services/settings/settings.service";
-import type { SettingResponseDto } from "@investments/shared";
+import {
+  accountSettingScope,
+  ENTRY_FEE_RATE_SETTING_KEY,
+  type SettingResponseDto,
+} from "@investments/shared";
 import type { UpdateSettingRequestDto } from "@investments/shared";
 
 const GLOBAL_SCOPE = "GLOBAL";
-const ENTRY_FEE_RATE = "ENTRY_FEE_RATE";
+const ENTRY_FEE_RATE = ENTRY_FEE_RATE_SETTING_KEY;
 const SOCIAL_CONTRIBUTIONS_RATE = "SOCIAL_CONTRIBUTIONS_RATE";
 const INCOME_TAX_RATE = "INCOME_TAX_RATE";
 const LIFE_INSURANCE_ALLOWANCE = "LIFE_INSURANCE_ALLOWANCE";
@@ -83,25 +87,11 @@ export const Settings = () => {
     settings.find((setting) => setting.scope === scope && setting.key === key)
       ?.value ?? DEFAULT_VALUES[`${scope}:${key}`];
 
-  const entryFeeValue = (accountName: string) => {
-    const configuredValue = settingValue(accountName, ENTRY_FEE_RATE);
-    if (configuredValue !== undefined) return configuredValue;
-
-    const normalizedName = accountName.toLocaleLowerCase("fr-FR");
-    return normalizedName.includes("corum origin")
-      ? 0.11966
-      : normalizedName.includes("corum xl")
-        ? 0.12
-        : undefined;
-  };
-
   const inputValue = (scope: string, key: string) => {
     const rawValue = inputValues[`${scope}:${key}`];
     if (rawValue !== undefined) return rawValue;
 
-    const value = key === ENTRY_FEE_RATE
-      ? entryFeeValue(scope)
-      : settingValue(scope, key);
+    const value = settingValue(scope, key);
     return value === undefined
       ? ""
       : percentKeys.has(key)
@@ -129,7 +119,10 @@ export const Settings = () => {
       [GLOBAL_SCOPE, LIFE_INSURANCE_COUPLE_ALLOWANCE_MULTIPLIER],
       [GLOBAL_SCOPE, PEA_ALLOWANCE_DURATION_YEARS],
       [GLOBAL_SCOPE, CRYPTO_CESSION_THRESHOLD],
-      ...scpiAccounts.map((account) => [account.name, ENTRY_FEE_RATE]),
+      ...scpiAccounts.map((account) => [
+        accountSettingScope(account.id),
+        ENTRY_FEE_RATE,
+      ]),
     ];
     const updatedSettings = settingKeys.map(([scope, key]) => {
       const rawValue = inputValues[`${scope}:${key}`] ?? inputValue(scope, key);
@@ -241,9 +234,13 @@ export const Settings = () => {
                 key={account.id}
                 label={account.name}
                 suffix="%"
-                value={inputValue(account.name, ENTRY_FEE_RATE)}
+                value={inputValue(accountSettingScope(account.id), ENTRY_FEE_RATE)}
                 onChange={(value) =>
-                  changeValue(account.name, ENTRY_FEE_RATE, value)
+                  changeValue(
+                    accountSettingScope(account.id),
+                    ENTRY_FEE_RATE,
+                    value,
+                  )
                 }
                 disabled={updateMutation.isPending}
               />

@@ -1,10 +1,10 @@
 import { MONTHS_CODE } from "@investments/shared/constants/date.constant";
-import { IncomeType } from "@investments/shared";
 import z from "zod";
 import { decimalNumber } from "@/utils/zod.utils";
 
 export const IncomeSchema = z.object({
-  type: z.enum(IncomeType),
+  // Référentiel modifiable : les choix viennent de la liste déroulante.
+  type: z.string().min(1, "Le type de revenu est requis"),
   amount: decimalNumber(z.coerce.number().positive()),
 });
 
