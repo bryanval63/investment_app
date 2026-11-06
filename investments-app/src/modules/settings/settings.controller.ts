@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Put } from '@nestjs/common';
 import {
-  SettingResponseDto,
-  UpdateSettingRequestDto,
+  type SettingResponseDto,
+  type UpdateSettingRequestDto,
 } from '@investments/shared';
 import { SettingsService } from './settings.service';
 
