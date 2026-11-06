@@ -1,7 +1,9 @@
 import { MainContainer } from "@/components/custom/containers/MainContainer";
 import { DataTable } from "@/components/custom/DataTable/DataTable";
 import { CustomSelect } from "@/components/custom/fields/CustomSelect/CustomSelect";
-import { Button } from "@/components/ui/button";
+import { formatAmount } from "@/components/custom/DataTable/data-table.utils";
+import { IconActionButton } from "@/components/custom/DataTable/IconActionButton";
+import { getColorAndBgColor } from "@/utils/style.utils";
 import { Input } from "@/components/ui/input";
 import {
   useMutation,
@@ -15,14 +17,35 @@ import {
 } from "@/services/investments/investments.service";
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Edit, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X } from "lucide-react";
 import { getAccountsApi } from "@/services/accounts/accounts.service";
+import type { InvestmentRequestDto } from "@investments/shared";
+
+// Ligne renvoyée par GET /investments (montants éventuellement sérialisés en chaîne).
+type InvestmentRow = {
+  id: number;
+  date: string;
+  accountId: number;
+  account?: { name: string };
+  totalAmount: number | string;
+  capitalGain: number | string;
+  transactionAmount: number | string;
+};
+
+// Valeurs du formulaire d'édition en ligne (saisies brutes des champs).
+type InvestmentForm = {
+  totalAmount: number | string;
+  capitalGain: number | string;
+  transactionAmount: number | string;
+  date: string;
+  accountId?: number;
+};
 
 export const InvestmentsList = () => {
   const queryClient = useQueryClient();
   const { data: investments } = useSuspenseQuery({
     queryKey: ["investments"],
-    queryFn: () => getInvestmentsApi(),
+    queryFn: () => getInvestmentsApi() as Promise<InvestmentRow[]>,
   });
   const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
@@ -30,7 +53,13 @@ export const InvestmentsList = () => {
   });
 
   const patchMutation = useMutation({
-    mutationFn: ({ id, payload }: any) => patchInvestmentApi(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: InvestmentRequestDto;
+    }) => patchInvestmentApi(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["investments"] });
       queryClient.invalidateQueries({ queryKey: ["investmentsOverview"] });
@@ -44,9 +73,14 @@ export const InvestmentsList = () => {
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<InvestmentForm>({
+    totalAmount: 0,
+    capitalGain: 0,
+    transactionAmount: 0,
+    date: "",
+  });
 
-  const startEdit = (inv: any) => {
+  const startEdit = (inv: InvestmentRow) => {
     setEditingId(inv.id);
     setForm({
       totalAmount: Number(inv.totalAmount),
@@ -58,8 +92,12 @@ export const InvestmentsList = () => {
   };
 
   const save = (id: number) => {
-    const payload = {
-      ...form,
+    if (form.accountId === undefined) return;
+    const payload: InvestmentRequestDto = {
+      accountId: form.accountId,
+      totalAmount: Number(form.totalAmount),
+      capitalGain: Number(form.capitalGain),
+      transactionAmount: Number(form.transactionAmount),
       date: new Date(form.date),
     };
     patchMutation.mutate({ id, payload });
@@ -71,7 +109,7 @@ export const InvestmentsList = () => {
     deleteMutation.mutate(id);
   };
 
-  const columns: ColumnDef<any, any>[] = [
+  const columns: ColumnDef<InvestmentRow>[] = [
     {
       accessorKey: "date",
       header: "Date",
@@ -84,7 +122,9 @@ export const InvestmentsList = () => {
             aria-label="Date de l’investissement"
           />
         ) : (
-          new Date(row.original.date).toLocaleDateString()
+          <span className="tabular-nums">
+            {new Date(row.original.date).toLocaleDateString("fr-FR")}
+          </span>
         ),
     },
     {
@@ -112,6 +152,7 @@ export const InvestmentsList = () => {
     {
       accessorKey: "totalAmount",
       header: "Montant total",
+      meta: { align: "right" },
       cell: ({ row }) =>
         editingId === row.original.id ? (
           <Input
@@ -121,12 +162,13 @@ export const InvestmentsList = () => {
             aria-label="Montant total"
           />
         ) : (
-          Number(row.original.totalAmount).toFixed(2)
+          formatAmount(Number(row.original.totalAmount))
         ),
     },
     {
       accessorKey: "capitalGain",
       header: "Plus-value",
+      meta: { align: "right" },
       cell: ({ row }) =>
         editingId === row.original.id ? (
           <Input
@@ -136,12 +178,16 @@ export const InvestmentsList = () => {
             aria-label="Plus-value"
           />
         ) : (
-          Number(row.original.capitalGain).toFixed(2)
+          formatAmount(
+            Number(row.original.capitalGain),
+            getColorAndBgColor(Number(row.original.capitalGain), false),
+          )
         ),
     },
     {
       accessorKey: "transactionAmount",
       header: "Transaction",
+      meta: { align: "right" },
       cell: ({ row }) =>
         editingId === row.original.id ? (
           <Input
@@ -153,54 +199,41 @@ export const InvestmentsList = () => {
             aria-label="Montant de la transaction"
           />
         ) : (
-          Number(row.original.transactionAmount).toFixed(2)
+          formatAmount(Number(row.original.transactionAmount))
         ),
     },
     {
       id: "actions",
       header: "Actions",
+      meta: { align: "right" },
       cell: ({ row }) =>
         editingId === row.original.id ? (
-          <div className="flex gap-2">
-            <Button
-              aria-label="Sauvegarder"
-              size="sm"
-              variant="default"
+          <div className="flex justify-end gap-1">
+            <IconActionButton
+              icon={Check}
+              label="Sauvegarder"
+              tone="primary"
               onClick={() => save(row.original.id)}
-            >
-              <Check size={16} />
-              <span className="hidden 2xl:inline">Sauvegarder</span>
-            </Button>
-            <Button
-              aria-label="Annuler"
-              size="sm"
-              variant="ghost"
+            />
+            <IconActionButton
+              icon={X}
+              label="Annuler"
               onClick={() => setEditingId(null)}
-            >
-              <X size={16} />
-              <span className="hidden 2xl:inline">Annuler</span>
-            </Button>
+            />
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Button
-              aria-label="Éditer"
-              size="sm"
-              variant="outline"
+          <div className="flex justify-end gap-1">
+            <IconActionButton
+              icon={Pencil}
+              label="Éditer"
               onClick={() => startEdit(row.original)}
-            >
-              <Edit size={16} />
-              <span className="hidden 2xl:inline">Éditer</span>
-            </Button>
-            <Button
-              aria-label="Supprimer"
-              size="sm"
-              variant="destructive"
+            />
+            <IconActionButton
+              icon={Trash2}
+              label="Supprimer"
+              tone="danger"
               onClick={() => remove(row.original.id)}
-            >
-              <Trash2 size={16} />
-              <span className="hidden 2xl:inline">Supprimer</span>
-            </Button>
+            />
           </div>
         ),
     },

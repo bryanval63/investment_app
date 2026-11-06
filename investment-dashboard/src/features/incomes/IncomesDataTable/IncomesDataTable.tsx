@@ -5,6 +5,12 @@ import { INCOMES_DATA_TABLE_COLUMNS } from "./income-columns";
 import { pivotIncomes } from "./incomes-data-table.utils";
 import { MONTHS } from "@investments/shared/constants/date.constant";
 import { formatToEuro } from "@/utils/format.utils";
+import { cn } from "@/lib/utils";
+
+// Abréviations fr-FR sans ambiguïté (« juin » / « juil. »).
+const SHORT_MONTH_LABELS = MONTHS.map((_, index) =>
+  new Date(2000, index, 1).toLocaleDateString("fr-FR", { month: "short" }),
+);
 
 type IncomesDataTableProps = {
   year: number;
@@ -21,48 +27,66 @@ export const IncomesDataTable = ({ year }: IncomesDataTableProps) => {
     // w-full + min-w-0 : contraint le tableau à la largeur disponible pour que
     // seul le tableau défile horizontalement (parent en flex-wrap).
     <div className="w-full min-w-0">
-      {/* Desktop / large screens: full DataTable */}
+      {/* Desktop / grands écrans : tableau complet, colonne « Type » figée */}
       <div className="hidden lg:block">
-        <DataTable columns={INCOMES_DATA_TABLE_COLUMNS} data={pivot} />
+        <DataTable
+          columns={INCOMES_DATA_TABLE_COLUMNS}
+          data={pivot}
+          stickyFirstColumn
+        />
       </div>
 
-      {/* Mobile: compact cards */}
-      <div className="block lg:hidden space-y-3">
+      {/* Mobile : cartes compactes, le type de revenu sert de titre */}
+      <ul className="flex flex-col gap-3 lg:hidden">
+        {pivot.length === 0 && (
+          <li className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
+            Aucun résultat trouvé.
+          </li>
+        )}
         {pivot.map((row) => (
-          <div
+          <li
             key={row.type}
-            className="rounded-md border bg-background p-3 shadow-sm"
+            className="rounded-xl border bg-card p-4 shadow-xs"
           >
-            <div className="flex flex-wrap items-center justify-between gap-x-2 mb-2">
-              <div className="font-medium">{row.type}</div>
-              <div className="text-sm text-muted-foreground">
-                Total :{" "}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <span className="font-semibold text-foreground">{row.type}</span>
+              <span className="text-sm font-semibold tabular-nums text-foreground">
+                <span className="mr-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Total
+                </span>
                 {formatToEuro(
-                  Object.values(MONTHS).reduce(
-                    (sum, m) => sum + (Number((row as any)[m.code]) || 0),
+                  MONTHS.reduce(
+                    (sum, m) => sum + (Number(row[m.code]) || 0),
                     0,
                   ),
                 )}
-              </div>
+              </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              {MONTHS.map(({ code, label }) => (
-                <div key={code} className="flex flex-col items-start">
-                  <div className="text-xs text-muted-foreground">
-                    {label.slice(0, 3)}
+            <dl className="mt-3 grid grid-cols-3 gap-x-3 gap-y-2.5 border-t pt-3 min-[420px]:grid-cols-4">
+              {MONTHS.map(({ code }, monthIndex) => {
+                const amount = Number(row[code]) || 0;
+
+                return (
+                  <div key={code} className="flex min-w-0 flex-col">
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {SHORT_MONTH_LABELS[monthIndex]}
+                    </dt>
+                    <dd
+                      className={cn(
+                        "whitespace-nowrap text-sm font-medium tabular-nums",
+                        amount === 0 && "text-muted-foreground/60",
+                      )}
+                    >
+                      {formatToEuro(amount, { maximumFractionDigits: 0 })}
+                    </dd>
                   </div>
-                  <div className="text-sm font-medium whitespace-nowrap">
-                    {formatToEuro(Number((row as any)[code] || 0), {
-                      maximumFractionDigits: 0,
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                );
+              })}
+            </dl>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };

@@ -10,10 +10,12 @@ export const INCOMES_DATA_TABLE_COLUMNS: ColumnDef<PivotIncome>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    footer: "Total",
   },
   ...MONTHS.map(({ code, label }) => ({
     accessorKey: code,
     header: label,
+    meta: { align: "right" as const },
     cell: ({ row }: { row: Row<PivotIncome> }) =>
       formatAmountCell<PivotIncome>(row, code),
     footer: ({ table }: { table: Table<PivotIncome> }) =>
