@@ -1,7 +1,10 @@
-import { api } from "@/utils/fetch.utils";
 import type { IncomeTypeRefResponseDto } from "@investments/shared";
+import { createReferenceApi } from "../reference/reference-api.factory";
 
-const INCOME_TYPES_REF_URL = "income-types-ref";
+const incomeTypesRefApi =
+  createReferenceApi<IncomeTypeRefResponseDto>("income-types-ref");
 
-export const getIncomeTypesRefApi = () =>
-  api<IncomeTypeRefResponseDto[]>("GET", INCOME_TYPES_REF_URL);
+export const getIncomeTypesRefApi = incomeTypesRefApi.getAll;
+export const createIncomeTypeRefApi = incomeTypesRefApi.create;
+export const patchIncomeTypeRefApi = incomeTypesRefApi.update;
+export const deleteIncomeTypeRefApi = incomeTypesRefApi.remove;

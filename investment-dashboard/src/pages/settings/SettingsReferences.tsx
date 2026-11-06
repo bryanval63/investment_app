@@ -7,6 +7,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  Wallet,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -26,12 +27,22 @@ import {
   createInvestmentCategoryRefApi,
   deleteInvestmentCategoryRefApi,
 } from "@/services/investments/investment-categories-ref.service";
+import {
+  createIncomeTypeRefApi,
+  deleteIncomeTypeRefApi,
+  getIncomeTypesRefApi,
+  patchIncomeTypeRefApi,
+} from "@/services/incomes/income-types-ref.service";
 import type {
+  IncomeTypeRefResponseDto,
   InvestmentCategoryRefResponseDto,
   InvestmentTypeRefResponseDto,
 } from "@investments/shared";
 
-type Reference = InvestmentTypeRefResponseDto | InvestmentCategoryRefResponseDto;
+type Reference =
+  | InvestmentTypeRefResponseDto
+  | InvestmentCategoryRefResponseDto
+  | IncomeTypeRefResponseDto;
 
 const ReferenceList = ({
   title,
@@ -173,6 +184,33 @@ const ReferenceList = ({
   );
 };
 
+type ReferenceKind = "type" | "category" | "incomeType";
+
+/** API et clé de cache de chaque référentiel. */
+const REFERENCE_APIS = {
+  type: {
+    queryKey: "investment-types-ref",
+    create: createInvestmentTypeRefApi,
+    update: patchInvestmentTypeRefApi,
+    remove: deleteInvestmentTypeRefApi,
+  },
+  category: {
+    queryKey: "investment-categories-ref",
+    create: createInvestmentCategoryRefApi,
+    update: patchInvestmentCategoryRefApi,
+    remove: deleteInvestmentCategoryRefApi,
+  },
+  incomeType: {
+    queryKey: "incomeTypes",
+    create: createIncomeTypeRefApi,
+    update: patchIncomeTypeRefApi,
+    remove: deleteIncomeTypeRefApi,
+  },
+} satisfies Record<ReferenceKind, unknown>;
+
+/** Requêtes affichant les libellés de types de revenus. */
+const INCOME_LABEL_QUERY_KEYS = ["incomes", "incomesGroupedByType"];
+
 export const SettingsReferences = () => {
   const queryClient = useQueryClient();
   const { data: types = [] } = useSuspenseQuery({
@@ -183,47 +221,76 @@ export const SettingsReferences = () => {
     queryKey: ["investment-categories-ref"],
     queryFn: getInvestmentCategoriesRefApi,
   });
+  const { data: incomeTypes = [] } = useSuspenseQuery({
+    queryKey: ["incomeTypes"],
+    queryFn: getIncomeTypesRefApi,
+  });
   const referenceMutation = useMutation({
     mutationFn: async (action: {
-      kind: "type" | "category";
+      kind: ReferenceKind;
       operation: "save" | "add" | "delete";
       id?: number;
       label?: string;
     }) => {
-      if (action.kind === "type") {
-        if (action.operation === "save") return patchInvestmentTypeRefApi(action.id!, { label: action.label! });
-        if (action.operation === "add") return createInvestmentTypeRefApi({ label: action.label! });
-        return deleteInvestmentTypeRefApi(action.id!);
-      }
-      if (action.operation === "save") return patchInvestmentCategoryRefApi(action.id!, { label: action.label! });
-      if (action.operation === "add") return createInvestmentCategoryRefApi({ label: action.label! });
-      return deleteInvestmentCategoryRefApi(action.id!);
+      const api = REFERENCE_APIS[action.kind];
+      if (action.operation === "save")
+        return api.update(action.id!, { label: action.label! });
+      if (action.operation === "add")
+        return api.create({ label: action.label! });
+      return api.remove(action.id!);
     },
     onSuccess: (_, action) => {
       queryClient.invalidateQueries({
-        queryKey: [action.kind === "type" ? "investment-types-ref" : "investment-categories-ref"],
+        queryKey: [REFERENCE_APIS[action.kind].queryKey],
       });
+      if (action.kind === "incomeType") {
+        INCOME_LABEL_QUERY_KEYS.forEach((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        );
+      }
     },
+  });
+
+  const handlers = (kind: ReferenceKind) => ({
+    onSave: (id: number, label: string) =>
+      referenceMutation.mutate({ kind, operation: "save", id, label }),
+    onAdd: (label: string) =>
+      referenceMutation.mutate({ kind, operation: "add", label }),
+    onDelete: (id: number) =>
+      referenceMutation.mutate({ kind, operation: "delete", id }),
   });
 
   return (
     <MainContainer columns={1}>
-      <ReferenceList
-        title="Types de comptes"
-        icon={Landmark}
-        references={types}
-        onSave={(id, label) => referenceMutation.mutate({ kind: "type", operation: "save", id, label })}
-        onAdd={(label) => referenceMutation.mutate({ kind: "type", operation: "add", label })}
-        onDelete={(id) => referenceMutation.mutate({ kind: "type", operation: "delete", id })}
-      />
-      <ReferenceList
-        title="Catégories"
-        icon={FolderTree}
-        references={categories.filter(({ code }) => code !== "ALL")}
-        onSave={(id, label) => referenceMutation.mutate({ kind: "category", operation: "save", id, label })}
-        onAdd={(label) => referenceMutation.mutate({ kind: "category", operation: "add", label })}
-        onDelete={(id) => referenceMutation.mutate({ kind: "category", operation: "delete", id })}
-      />
+      <>
+        {referenceMutation.error && (
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            Opération impossible : un élément utilisé ne peut pas être supprimé,
+            et un libellé doit être unique.
+          </p>
+        )}
+        <ReferenceList
+          title="Types de comptes"
+          icon={Landmark}
+          references={types}
+          {...handlers("type")}
+        />
+        <ReferenceList
+          title="Catégories"
+          icon={FolderTree}
+          references={categories.filter(({ code }) => code !== "ALL")}
+          {...handlers("category")}
+        />
+        <ReferenceList
+          title="Types de revenus"
+          icon={Wallet}
+          references={incomeTypes}
+          {...handlers("incomeType")}
+        />
+      </>
     </MainContainer>
   );
 };

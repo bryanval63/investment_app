@@ -1,7 +1,7 @@
-import type { IncomeType } from "../../types/income.type";
+import type { IncomeTypeCode } from "../../types/income.type";
 
 export interface IncomeTypeRefResponseDto {
   id: number;
-  code: keyof typeof IncomeType;
+  code: IncomeTypeCode;
   label: string;
 }
