@@ -1,18 +1,10 @@
 import { cn } from "@/lib/utils";
 import { NavLink, useLocation } from "react-router-dom";
+import { getActiveNavItem } from "../Header/Nav/nav.config";
 import type { SidebarConfig } from "./sidebar.type";
 
 type SidebarProps = {
   config: SidebarConfig;
-};
-
-// Libellé de section affiché en tête du menu, selon le premier segment de l'URL.
-const SECTION_LABELS: Record<string, string> = {
-  incomes: "Revenus",
-  investments: "Investissements",
-  "net-worth": "Capital",
-  accounts: "Comptes",
-  settings: "Paramètres",
 };
 
 // Liens exacts : sinon « Overview » resterait actif sur toutes les sous-pages.
@@ -75,7 +67,8 @@ const SidebarItem = ({ item }: SidebarItemProps) => {
 
 export const Sidebar = ({ config }: SidebarProps) => {
   const { pathname } = useLocation();
-  const sectionLabel = SECTION_LABELS[pathname.split("/")[1] ?? ""] ?? "Menu";
+  // Libellé de section affiché en tête du menu (même source que la navigation principale).
+  const sectionLabel = getActiveNavItem(pathname)?.label ?? "Menu";
 
   const navItems = config.filter((item) => !isActionLink(item.link));
   const actionItems = config.filter((item) => isActionLink(item.link));

@@ -1,61 +1,8 @@
 import { cn } from "@/lib/utils";
-import {
-  CreditCard,
-  Landmark,
-  Menu,
-  Settings,
-  TrendingUp,
-  Wallet,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, Menu, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-
-type NavItem = {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  isActive: (pathname: string) => boolean;
-};
-
-const startsWith = (prefix: string) => (pathname: string) =>
-  pathname.startsWith(prefix);
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    to: "/incomes",
-    label: "Revenus",
-    icon: Wallet,
-    isActive: startsWith("/incomes"),
-  },
-  {
-    to: "/investments",
-    label: "Investissements",
-    icon: TrendingUp,
-    isActive: (pathname) =>
-      pathname === "/" || pathname.startsWith("/investments"),
-  },
-  {
-    to: "/net-worth",
-    label: "Capital",
-    icon: Landmark,
-    isActive: startsWith("/net-worth"),
-  },
-  {
-    to: "/accounts",
-    label: "Comptes",
-    icon: CreditCard,
-    isActive: startsWith("/accounts"),
-  },
-];
-
-const SETTINGS_ITEM: NavItem = {
-  to: "/settings",
-  label: "Paramètres",
-  icon: Settings,
-  isActive: startsWith("/settings"),
-};
+import { getActiveNavItem, NAV_ITEMS, SETTINGS_ITEM } from "./nav.config";
 
 /** Navigation principale en « segmented control » (grand écran). */
 export const Nav = () => {
@@ -142,16 +89,34 @@ export const MobileNav = () => {
     };
   }, [isOpen]);
 
+  const activeItem = getActiveNavItem(pathname);
+  const ActiveIcon = activeItem?.icon ?? Menu;
+  const sectionLabel = activeItem?.label ?? "Menu";
+
   return (
-    <nav ref={navRef} aria-label="Navigation principale" className="lg:hidden">
+    <nav
+      ref={navRef}
+      aria-label="Navigation principale"
+      className="min-w-0 lg:hidden"
+    >
+      {/* Pastille de section : indique où l'on se trouve et ouvre le menu des sections. */}
       <button
         type="button"
-        aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+        aria-label={`Section ${sectionLabel}, ${isOpen ? "fermer" : "ouvrir"} le menu`}
         aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        className="flex h-10 min-w-0 max-w-full items-center gap-2 rounded-full bg-white py-1 pr-3 pl-1 text-sm font-medium text-slate-900 shadow-sm ring-1 ring-slate-200/80 transition-colors hover:bg-slate-50"
       >
-        {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-500">
+          <ActiveIcon className="size-4" />
+        </span>
+        <span className="truncate">{sectionLabel}</span>
+        <ChevronDown
+          className={cn(
+            "size-4 shrink-0 text-slate-400 transition-transform duration-200",
+            isOpen && "rotate-180",
+          )}
+        />
       </button>
 
       {isOpen && (
