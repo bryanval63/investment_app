@@ -16,11 +16,25 @@ export const getInvestmentsOverviewApi = (previousMonth = false) =>
     `${INVESTMENTS_URL}/overview${previousMonth ? "?period=previous-month" : ""}`,
   );
 
-export const getInvestmentsApi = (accountId?: number) =>
-  api<InvestmentListItemResponseDto[]>(
+export type InvestmentsListFilters = {
+  accountId?: number;
+  year?: number;
+};
+
+export const getInvestmentsApi = ({
+  accountId,
+  year,
+}: InvestmentsListFilters = {}) => {
+  const params = new URLSearchParams();
+  if (accountId !== undefined) params.set("accountId", accountId.toString());
+  if (year !== undefined) params.set("year", year.toString());
+  const query = params.toString();
+
+  return api<InvestmentListItemResponseDto[]>(
     "GET",
-    `${INVESTMENTS_URL}${accountId ? `?accountId=${accountId}` : ""}`,
+    `${INVESTMENTS_URL}${query ? `?${query}` : ""}`,
   );
+};
 
 export const patchInvestmentApi = (
   id: number,

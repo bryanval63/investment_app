@@ -33,11 +33,15 @@ type InvestmentEditForm = {
   accountId: number;
 };
 
-export const InvestmentsList = () => {
+type InvestmentsListProps = {
+  year: number;
+};
+
+export const InvestmentsList = ({ year }: InvestmentsListProps) => {
   const queryClient = useQueryClient();
   const { data: investments } = useSuspenseQuery({
-    queryKey: ["investments"],
-    queryFn: () => getInvestmentsApi(),
+    queryKey: ["investments", year],
+    queryFn: () => getInvestmentsApi({ year }),
   });
   const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],

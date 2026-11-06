@@ -9,6 +9,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { InvestmentService } from './investment.service';
+import { parseOptionalInt } from './investment-list.utils';
 import {
   type InvestmentColumnKey,
   InvestmentOverviewResponseDto,
@@ -67,9 +68,14 @@ export class InvestmentController {
   }
 
   @Get()
-  findAll(@Query('accountId') accountId?: string) {
-    const accId = accountId ? Number(accountId) : undefined;
-    return this.investmentService.findAll(accId);
+  findAll(
+    @Query('accountId') accountId?: string,
+    @Query('year') year?: string,
+  ) {
+    return this.investmentService.findAll({
+      accountId: parseOptionalInt(accountId),
+      year: parseOptionalInt(year),
+    });
   }
 
   @Patch('/:id')

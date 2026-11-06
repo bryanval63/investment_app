@@ -15,6 +15,10 @@ import { COLUMN_MAP } from './investment.constant';
 import { investmentListItemSelect } from './investment.select';
 import { mapInvestmentListItemToDto } from './investment.mapper';
 import {
+  buildInvestmentListWhere,
+  InvestmentListFilters,
+} from './investment-list.utils';
+import {
   computeCAGR,
   findInvestmentByDate,
   getFirstInvestmentCategory,
@@ -842,10 +846,9 @@ export class InvestmentService {
     }
   }
 
-  async findAll(accountId?: number) {
-    const where = accountId ? { accountId } : {};
+  async findAll(filters: InvestmentListFilters = {}) {
     const investments = await this.prisma.investment.findMany({
-      where,
+      where: buildInvestmentListWhere(filters),
       orderBy: { date: 'desc' },
       select: investmentListItemSelect,
     });
