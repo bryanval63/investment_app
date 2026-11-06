@@ -12,7 +12,7 @@ const PageLoader = () => (
     className="flex flex-col gap-3 lg:gap-4 xl:gap-8"
   >
     <span className="sr-only">Chargement...</span>
-    <div className="h-36 animate-pulse rounded-xl bg-slate-100 lg:h-44" />
+    <div className="h-36 animate-pulse rounded-2xl bg-slate-800/90 lg:h-44" />
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
       {Array.from({ length: 4 }, (_, index) => (
         <div

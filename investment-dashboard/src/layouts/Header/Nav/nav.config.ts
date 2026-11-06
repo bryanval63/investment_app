@@ -26,12 +26,6 @@ export const NAV_ITEMS: NavItem[] = [
     isActive: startsWith("/incomes"),
   },
   {
-    to: "/taxes",
-    label: "Impôts",
-    icon: Receipt,
-    isActive: startsWith("/taxes"),
-  },
-  {
     to: "/investments",
     label: "Investissements",
     icon: TrendingUp,
@@ -43,6 +37,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Capital",
     icon: Landmark,
     isActive: startsWith("/net-worth"),
+  },
+  {
+    to: "/taxes",
+    label: "Impôts",
+    icon: Receipt,
+    isActive: startsWith("/taxes"),
   },
   {
     to: "/accounts",

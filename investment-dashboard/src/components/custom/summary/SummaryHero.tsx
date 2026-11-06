@@ -1,5 +1,4 @@
 import { StatValue } from "@/components/custom/StatsValue/StatsValue";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatToEuro, formatToPercentage } from "@/utils/format.utils";
 import { getColorAndBgColor } from "@/utils/style.utils";
@@ -42,22 +41,20 @@ export const SummaryHero = ({
   const trendValue = trend ?? perf ?? capitalGain ?? 0;
 
   return (
-    <Card
-      className={cn(
-        "min-w-0 gap-0 lg:gap-0 overflow-hidden border bg-gradient-to-br from-slate-50 to-white px-0 py-0 lg:py-0",
-        className,
-      )}
+    <div
+      data-slot="summary-hero"
+      className={cn("flex min-w-0 flex-col", className)}
     >
-      <div className="flex flex-col gap-5 px-5 pt-5 lg:px-8 lg:pt-7">
+      <div className="flex flex-col gap-5 px-2 pt-2 lg:px-3 lg:pt-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-300">
             {title}
           </span>
           {headerAction}
         </div>
 
         <div className="flex flex-col gap-3">
-          <span className="text-4xl lg:text-5xl font-semibold tracking-tight tabular-nums text-slate-900">
+          <span className="text-4xl lg:text-5xl font-semibold tracking-tight tabular-nums text-white">
             {formatToEuro(amount)}
           </span>
 
@@ -81,7 +78,7 @@ export const SummaryHero = ({
                 />
               )}
               {comparisonLabel && (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-slate-300">
                   {comparisonLabel}
                 </span>
               )}
@@ -89,9 +86,9 @@ export const SummaryHero = ({
           )}
 
           {secondaryAmount !== undefined && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-slate-300">
               {secondaryLabel} :{" "}
-              <span className="font-semibold tabular-nums text-slate-700">
+              <span className="font-semibold tabular-nums text-slate-100">
                 {formatToEuro(secondaryAmount)}
               </span>
             </span>
@@ -102,6 +99,6 @@ export const SummaryHero = ({
       <div className="mt-auto pt-4">
         <Sparkline chartData={chartData} positive={trendValue >= 0} />
       </div>
-    </Card>
+    </div>
   );
 };

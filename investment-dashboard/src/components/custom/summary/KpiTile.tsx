@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -17,22 +16,24 @@ export const KpiTile = ({
   className,
 }: KpiTileProps) => {
   return (
-    <Card
+    // Tuile « verre » posée sur le bandeau sombre de SummarySection.
+    <div
+      data-slot="kpi-tile"
       className={cn(
-        "gap-3 lg:gap-3 border px-4 py-4 lg:px-5 lg:py-5 transition-shadow duration-300 hover:shadow-md",
+        "flex flex-col gap-3 rounded-xl bg-white/5 px-4 py-4 ring-1 ring-white/10 backdrop-blur-sm transition-colors duration-300 hover:bg-white/10 lg:px-5 lg:py-5",
         className,
       )}
     >
       <div className="flex items-center gap-2">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-indigo-200">
           <Icon className="size-4" />
         </span>
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground leading-tight">
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-300 leading-tight">
           {label}
         </span>
       </div>
       <div className="flex flex-col gap-1">{children}</div>
-    </Card>
+    </div>
   );
 };
 
@@ -44,7 +45,7 @@ type KpiValueProps = {
 
 export const KpiValue = ({
   formatted,
-  colorClass = "text-slate-900",
+  colorClass = "text-white",
   size = "lg",
 }: KpiValueProps) => (
   <span

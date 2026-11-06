@@ -53,7 +53,9 @@ const renderPage = () =>
 /** Texte de la carte contenant le titre donné. */
 const cardText = async (title: string) => {
   const titleElement = await screen.findByText(title);
-  const card = titleElement.closest("[data-slot='card']");
+  const card = titleElement.closest(
+    "[data-slot='card'], [data-slot='kpi-tile'], [data-slot='summary-hero']",
+  );
   return normalizeSpaces(card?.textContent);
 };
 

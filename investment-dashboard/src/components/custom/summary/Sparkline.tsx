@@ -14,7 +14,8 @@ type SparklineProps = {
 export const Sparkline = ({ chartData, positive }: SparklineProps) => {
   if (chartData.length < 2) return null;
 
-  const color = positive ? "#059669" : "#ef4444";
+  // Teintes claires (emerald-400 / red-400) : la courbe est posée sur le bandeau sombre.
+  const color = positive ? "#34d399" : "#f87171";
   const gradientId = `sparkline-${positive ? "up" : "down"}`;
 
   return (
@@ -26,7 +27,7 @@ export const Sparkline = ({ chartData, positive }: SparklineProps) => {
         >
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.35} />
               <stop offset="100%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
