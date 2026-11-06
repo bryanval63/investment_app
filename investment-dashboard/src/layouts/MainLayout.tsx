@@ -5,22 +5,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { AppMatch } from "./layouts.type";
 
 // Affiché pendant que les données d'une page sont en cours de chargement.
-const PageLoader = () => (
+// Le bandeau sombre n'apparaît que si la page a un résumé, pour ne pas annoncer
+// un en-tête qui n'existe pas sur les pages de formulaire ou de tableau.
+const PageLoader = ({ withSummary }: { withSummary: boolean }) => (
   <div
     role="status"
     aria-busy="true"
     className="flex flex-col gap-3 lg:gap-4 xl:gap-8"
   >
     <span className="sr-only">Chargement...</span>
-    <div className="h-36 animate-pulse rounded-2xl bg-slate-800/90 lg:h-44" />
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-      {Array.from({ length: 4 }, (_, index) => (
+    {withSummary ? (
+      <>
         <div
-          key={index}
-          className="h-24 animate-pulse rounded-xl bg-slate-100"
+          data-testid="page-loader-summary"
+          className="h-36 animate-pulse rounded-2xl bg-slate-800/90 lg:h-44"
         />
-      ))}
-    </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div
+              key={index}
+              className="h-24 animate-pulse rounded-xl bg-slate-100"
+            />
+          ))}
+        </div>
+      </>
+    ) : (
+      <div className="h-14 animate-pulse rounded-xl bg-slate-100" />
+    )}
     <div className="h-64 animate-pulse rounded-xl bg-slate-100" />
   </div>
 );
@@ -28,9 +39,9 @@ const PageLoader = () => (
 export const MainLayout = () => {
   const { pathname } = useLocation();
   const matches = useMatches() as AppMatch[];
-  const routeWithHandle = [...matches].reverse().find((m) => m.handle);
-
-  const Sidebar = routeWithHandle?.handle?.sidebar;
+  const Sidebar = [...matches].reverse().find((m) => m.handle?.sidebar)?.handle
+    ?.sidebar;
+  const withSummary = matches.at(-1)?.handle?.pageLoader === "summary";
 
   return (
     <div className="h-dvh bg-linear-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 from-slate-50 via-slate-200 to-slate-50 flex flex-col overflow-hidden">
@@ -51,7 +62,7 @@ export const MainLayout = () => {
             <CardContent className="flex-1 relative lg:px-4 xl:px-8 lg:overflow-auto lg:pb-4 lg:-mb-4">
               {/* Une Suspense neuve par page : React Router navigue dans une transition, qui
                   garderait l'ancienne page figée ; une frontière neuve affiche le squelette tout de suite. */}
-              <Suspense key={pathname} fallback={<PageLoader />}>
+              <Suspense key={pathname} fallback={<PageLoader withSummary={withSummary} />}>
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out motion-reduce:animate-none">
                   <Outlet />
                 </div>
