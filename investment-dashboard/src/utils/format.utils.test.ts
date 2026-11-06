@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { normalizeSpaces } from "@/test/test-utils";
 import {
+  formatToCompactEuro,
   formatToEuro,
   formatToPercentage,
   formatToReadableDate,
@@ -48,6 +49,23 @@ describe("format.utils", () => {
       expect(normalizeSpaces(formatToThousandsEuro(-1500000))).toBe(
         "-1 500 k€",
       );
+    });
+  });
+
+  describe("formatToCompactEuro", () => {
+    it("picks the unit from the magnitude", () => {
+      expect(normalizeSpaces(formatToCompactEuro(950))).toBe("950 €");
+      expect(normalizeSpaces(formatToCompactEuro(40000))).toBe("40 k€");
+      expect(normalizeSpaces(formatToCompactEuro(-56123))).toBe("-56 k€");
+      expect(normalizeSpaces(formatToCompactEuro(1250000))).toBe("1,3 M€");
+    });
+
+    it("accepts custom fraction digits", () => {
+      expect(
+        normalizeSpaces(
+          formatToCompactEuro(-56123, { maximumFractionDigits: 1 }),
+        ),
+      ).toBe("-56,1 k€");
     });
   });
 
