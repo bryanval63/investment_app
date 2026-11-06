@@ -10,19 +10,30 @@ import { InvestmentsYearlyBarChartAccount } from "@/features/investments/charts/
 import { InvestmentsAccountsCards } from "@/features/investments/InvestmentsAccountsCards/InvestmentsAccountsCards";
 
 export const InvestmentsAccounts = () => {
-  const [accountId, setAccountId] = useState<number>(1);
+  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(
+    null,
+  );
 
   const { data: accounts } = useSuspenseQuery({
     queryKey: ["accounts"],
     queryFn: getAccountsApi,
   });
 
-  const mappedAccounts =
-    accounts?.map(({ id, name, isClosed }) => ({
-      code: id.toString(),
-      label: name,
-      isClosed,
-    })) || [];
+  const openAccounts = accounts
+    .filter(({ isClosed }) => !isClosed)
+    .map(({ id, name }) => ({ code: id.toString(), label: name }));
+
+  // Par défaut : le premier compte ouvert (un id en dur pouvait désigner un
+  // compte fermé ou supprimé).
+  const accountId = selectedAccountId ?? Number(openAccounts[0]?.code);
+
+  if (openAccounts.length === 0) {
+    return (
+      <p className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
+        Aucun compte ouvert.
+      </p>
+    );
+  }
 
   return (
     <MainContainer columns={3}>
@@ -32,11 +43,11 @@ export const InvestmentsAccounts = () => {
             id="account"
             variant="pill"
             value={accountId.toString()}
-          // Transition : garde la page affichée pendant le chargement du compte.
-          onValueChange={(accountId) =>
-            startTransition(() => setAccountId(Number(accountId)))
-          }
-            options={mappedAccounts.filter((acc) => !acc.isClosed)}
+            // Transition : garde la page affichée pendant le chargement du compte.
+            onValueChange={(value) =>
+              startTransition(() => setSelectedAccountId(Number(value)))
+            }
+            options={openAccounts}
           />
         </ToolbarField>
       </PageToolbar>
