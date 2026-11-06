@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   IncomeGroupByDateResponseDto,
   IncomeGroupByTypeResponseDto,
@@ -7,7 +11,7 @@ import {
   IncomeResponseDto,
 } from '@investments/shared';
 import { SELECT_INCOME_WITH_TYPE } from './income.selects';
-import { mapIncomesArrayToDto } from './income.mappers';
+import { mapIncomeToDto, mapIncomesArrayToDto } from './income.mappers';
 import { IncomeTypeRefService } from '../income-type-ref/income-type-ref.service';
 import { Prisma, Tax } from '@prisma/client';
 import { TaxService } from '../tax/tax.service';
@@ -105,5 +109,42 @@ export class IncomeService {
         typeId: typeMap[type],
       })),
     });
+  }
+
+  async update(
+    id: number,
+    { amount, date, type }: IncomeRequestDto,
+  ): Promise<IncomeResponseDto> {
+    await this.findExistingOrThrow(id);
+
+    // `code` est un enum Prisma : une valeur inconnue dans un `where` lèverait
+    // une erreur de validation (500) au lieu d'une 400.
+    const typeRef = (await this.prisma.incomeTypeRef.findMany()).find(
+      ({ code }) => code === type,
+    );
+    if (!typeRef) {
+      throw new BadRequestException(`Unknown income type ${type}`);
+    }
+
+    const income = await this.prisma.income.update({
+      where: { id },
+      data: { amount, date: new Date(date), typeId: typeRef.id },
+      ...SELECT_INCOME_WITH_TYPE,
+    });
+
+    return mapIncomeToDto(income);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.findExistingOrThrow(id);
+    await this.prisma.income.delete({ where: { id } });
+  }
+
+  private async findExistingOrThrow(id: number) {
+    const income = await this.prisma.income.findUnique({ where: { id } });
+    if (!income) {
+      throw new NotFoundException(`Income ${id} not found`);
+    }
+    return income;
   }
 }

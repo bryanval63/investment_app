@@ -12,13 +12,18 @@ export const pivotIncomes = (incomes: IncomeResponseDto[]): PivotIncome[] => {
     if (!map.has(income.type.code)) {
       const emptyRow: PivotIncome = {
         type: income.type.label,
-        ...Object.fromEntries(MONTHS.map((m) => [m, 0])),
+        ...(Object.fromEntries(MONTHS.map((m) => [m.code, 0])) as Record<
+          (typeof MONTHS)[number]["code"],
+          number
+        >),
       };
 
       map.set(income.type.code, emptyRow);
     }
 
-    map.get(income.type.code)![month] = income.amount;
+    // Plusieurs saisies d'un même type sur un mois s'additionnent, comme dans
+    // les statistiques de l'API.
+    map.get(income.type.code)![month] += income.amount;
   });
 
   return Array.from(map.values());

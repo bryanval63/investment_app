@@ -4,7 +4,7 @@ import { z } from "zod";
  * Normalise une saisie décimale française : espaces de milliers retirés
  * (y compris insécables) et virgule décimale remplacée par un point.
  */
-const normalizeDecimal = (value: unknown) =>
+export const normalizeDecimal = (value: unknown) =>
   typeof value === "string"
     ? value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")
     : value;

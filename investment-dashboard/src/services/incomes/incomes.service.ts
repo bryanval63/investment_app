@@ -9,3 +9,9 @@ export const getIncomesApi = (year = getCurrentYear()) =>
 
 export const postIncomesApi = (incomes: IncomeRequestDto[]) =>
   api<IncomeRequestDto[]>("POST", INCOMES_URL, incomes);
+
+export const patchIncomeApi = (id: number, income: IncomeRequestDto) =>
+  api<IncomeResponseDto>("PATCH", `${INCOMES_URL}/${id}`, income);
+
+export const deleteIncomeApi = (id: number) =>
+  api<void>("DELETE", `${INCOMES_URL}/${id}`);

@@ -1,8 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  Param,
   ParseBoolPipe,
+  ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -47,5 +52,19 @@ export class IncomeController {
   ): Promise<{ success: boolean }> {
     await this.incomeService.createAll(incomes);
     return { success: true };
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() income: IncomeRequestDto,
+  ): Promise<IncomeResponseDto> {
+    return this.incomeService.update(id, income);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.incomeService.remove(id);
   }
 }
